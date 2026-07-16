@@ -1,0 +1,33 @@
+# Generated artifacts never enter git — outputs, not sources.
+/artifacts/
+/data/**/*.bin
+/data/**/*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Rust / C++ native core
+/native/**/target/
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.rlib
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store

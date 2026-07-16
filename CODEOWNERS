@@ -1,0 +1,34 @@
+# CODEOWNERS — file ownership for independent parallel engineering.
+# Review authority scales with proximity to the frozen contract spine.
+# Replace the placeholder @teams with real GitHub teams before enabling branch protection.
+
+# --- Frozen theory: amendment-gated ---
+/constitution/                @architecture-board
+
+# --- Contract spine: highest scrutiny after the constitution ---
+/contracts/                   @architecture-board @staff-engineers
+/tests/contracts/             @architecture-board @staff-engineers
+
+# --- Architecture decisions ---
+/docs/architecture/           @architecture-board
+/docs/adr/                    @architecture-board
+
+# --- Owned computational objects: World-Model team ---
+/src/mini_prometheus/situation_state/      @world-model-team
+/src/mini_prometheus/world_model/          @world-model-team
+/src/mini_prometheus/constraint_network/   @world-model-team
+
+# --- Orchestration + upstream integration: Runtime/Platform team ---
+/src/mini_prometheus/orchestration/        @runtime-platform-team
+/src/mini_prometheus/integrations/         @runtime-platform-team
+
+# --- Native performance core ---
+/native/                      @core-performance-team
+
+# --- Infra / tooling / deployment ---
+/tools/                       @infra-tooling-team
+/deploy/                      @infra-tooling-team
+/.github/                     @infra-tooling-team
+
+# --- Default: docs & specs reviewed by authoring team + one reviewer ---
+*                             @architecture-board

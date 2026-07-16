@@ -1,0 +1,35 @@
+# CI is the machine enforcement of the frozen Engineering Workflow verification gate.
+# Stages mirror: Specification -> Build -> Test -> Contract compliance -> Integration.
+# Placeholder stages in Phase 1; each becomes real as its milestone lands. Do not weaken gates.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Structure lint (no speculative folders; contract-direction intact)
+        run: |
+          echo "TODO: assert only milestone-open directories exist"
+          echo "TODO: import-linter — implementations depend on contracts only"
+
+      - name: Contracts are generated, not hand-edited
+        run: echo "TODO: regenerate bindings from contracts/schemas and diff — fail on drift"
+
+      - name: Build (Python + native)
+        run: echo "TODO: build wheel + native crates"
+
+      - name: Unit tests
+        run: echo "TODO: pytest tests/unit"
+
+      - name: Contract-compliance suite
+        run: echo "TODO: pytest tests/contracts against all implementations"
+
+      - name: Integration tests
+        run: echo "TODO: pytest tests/integration"
