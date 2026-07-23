@@ -4,13 +4,14 @@ version = "0.1.0"
 description = "AI Manufacturing Intelligence — runtime orchestration platform integrating MiniFlyWire, Noetica, and Velith."
 requires-python = ">=3.11"
 
-# The three upstreams are constitutionally frozen and consumed as PINNED versioned
-# package dependencies. Pin to exact frozen releases — never floating ranges.
-# Uncomment and pin exact versions as each frozen release is published.
+# Mini Prometheus consumes Velith (engineering entry point) and, transitively, Noetica
+# (platform mechanisms) as PINNED versioned package dependencies — exact frozen releases,
+# never floating ranges. MiniFlyWire is NEVER a dependency (Law 4). Uncomment and pin as
+# each frozen release is published (Velith is at M0–M1; a consumable release is a gate).
 dependencies = [
-    # "miniflywire==<frozen-version>",
-    # "noetica==<frozen-version>",
+    "jsonschema>=4.18",   # runtime contract validation at MP boundaries (verification-first)
     # "velith==<frozen-version>",
+    # "noetica==<frozen-version>",
 ]
 
 [project.optional-dependencies]
@@ -19,6 +20,7 @@ dev = [
     "ruff",
     "mypy",
     "import-linter",   # enforces contracts-only cross-boundary dependency direction
+    "datamodel-code-generator",  # regenerates contracts/python bindings from schemas
 ]
 
 [build-system]
@@ -30,12 +32,31 @@ packages = ["src/mini_prometheus"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src", ".", "tests"]
 
 [tool.ruff]
 src = ["src", "tests", "tools"]
 
 # Dependency direction is one-way: implementations -> contracts.
 # Never contracts -> implementations; never src <-> src across packages except via contracts.
-# Concrete import-linter contracts are added alongside the first implementation.
 [tool.importlinter]
 root_packages = ["mini_prometheus"]
+
+[[tool.importlinter.contracts]]
+name = "MiniFlyWire is never imported (Law 4)"
+type = "forbidden"
+source_modules = ["mini_prometheus"]
+forbidden_modules = ["miniflywire"]
+
+[[tool.importlinter.contracts]]
+name = "Content packages do not import orchestration/integrations/intake (peers; arch §14)"
+type = "forbidden"
+source_modules = [
+    "mini_prometheus.manufacturing_planning",
+    "mini_prometheus.manufacturing_constraints",
+]
+forbidden_modules = [
+    "mini_prometheus.orchestration",
+    "mini_prometheus.integrations",
+    "mini_prometheus.intake",
+]

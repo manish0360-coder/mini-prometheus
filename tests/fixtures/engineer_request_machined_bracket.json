@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "11111111-1111-1111-1111-111111111111",
+  "material": "Aluminum 6061",
+  "material_code": "AL6061",
+  "stock_form": "block",
+  "declared_operations": [
+    { "op": "cut_stock" },
+    { "op": "face_mill", "target": "top_face" },
+    { "op": "drill", "target": "mount_hole_1" },
+    { "op": "drill", "target": "mount_hole_2" },
+    { "op": "deburr" },
+    { "op": "inspect" }
+  ],
+  "quantity": 25,
+  "tolerances": { "general_tolerance_mm": 0.1 },
+  "step_artifact_ref": {
+    "media_type": "model/step",
+    "id": "99999999-9999-9999-9999-999999999999",
+    "content_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "metadata": { "author": "engineer@example.com", "created_at": "2026-07-23T00:00:00+00:00" }
+}

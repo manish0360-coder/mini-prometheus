@@ -1,6 +1,6 @@
-# CI is the machine enforcement of the frozen Engineering Workflow verification gate.
-# Stages mirror: Specification -> Build -> Test -> Contract compliance -> Integration.
-# Placeholder stages in Phase 1; each becomes real as its milestone lands. Do not weaken gates.
+# CI is the machine enforcement of the frozen Engineering Workflow verification gate (RM1).
+# Stages: structure/contract-drift -> build -> unit -> contract-compliance -> integration -> boundary.
+# Non-skippable; red blocks merge. Do not weaken gates.
 name: ci
 
 on:
@@ -14,22 +14,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Structure lint (no speculative folders; contract-direction intact)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
         run: |
-          echo "TODO: assert only milestone-open directories exist"
-          echo "TODO: import-linter — implementations depend on contracts only"
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
-      - name: Contracts are generated, not hand-edited
-        run: echo "TODO: regenerate bindings from contracts/schemas and diff — fail on drift"
+      - name: Contracts are generated, not hand-edited (drift check)
+        run: |
+          python tools/generate_contracts.py
+          git diff --exit-code -- contracts/python \
+            || (echo "contracts/python is stale — regenerate from schemas" && exit 1)
 
-      - name: Build (Python + native)
-        run: echo "TODO: build wheel + native crates"
+      - name: Lint (ruff)
+        run: ruff check src tests tools
 
-      - name: Unit tests
-        run: echo "TODO: pytest tests/unit"
+      - name: Boundary / dependency-direction (import-linter)
+        run: lint-imports
 
-      - name: Contract-compliance suite
-        run: echo "TODO: pytest tests/contracts against all implementations"
+      - name: Unit + contract-compliance + integration + boundary tests
+        run: pytest -q
 
-      - name: Integration tests
-        run: echo "TODO: pytest tests/integration"
+      - name: Boundary DAG (no MiniFlyWire import; Law 4)
+        run: pytest -q tests/boundary
