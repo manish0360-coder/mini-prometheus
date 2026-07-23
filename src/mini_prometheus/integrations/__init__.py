@@ -1,5 +1,7 @@
-"""Integrations: the ONLY layer permitted to reference the frozen upstreams.
+"""Integrations: adapters ONLY (no business logic).
 
-Owned by Mini Prometheus. Implements contracts from `contracts/`; depends on the
-contract spine only, never on sibling packages. No logic in Phase 1 scaffold.
+The single layer permitted to reference upstreams. Per the strict DAG (Law 9) and Law 4,
+Mini Prometheus imports **Velith** (engineering entry point) and consumes **Noetica**
+platform mechanisms (twin engine, provenance) through versioned interfaces (Law 14).
+It never imports MiniFlyWire (Law 4). Adapters translate upstream <-> contract types only.
 """

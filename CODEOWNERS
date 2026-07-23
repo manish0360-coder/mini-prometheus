@@ -13,12 +13,12 @@
 /docs/architecture/           @architecture-board
 /docs/adr/                    @architecture-board
 
-# --- Owned computational objects: World-Model team ---
-/src/mini_prometheus/situation_state/      @world-model-team
-/src/mini_prometheus/world_model/          @world-model-team
-/src/mini_prometheus/constraint_network/   @world-model-team
+# --- Manufacturing content packages: Manufacturing team ---
+/src/mini_prometheus/manufacturing_state/        @manufacturing-team
+/src/mini_prometheus/manufacturing_twin/         @manufacturing-team
+/src/mini_prometheus/manufacturing_constraints/  @manufacturing-team
 
-# --- Orchestration + upstream integration: Runtime/Platform team ---
+# --- Orchestration + upstream integration (Velith/Noetica only): Runtime/Platform team ---
 /src/mini_prometheus/orchestration/        @runtime-platform-team
 /src/mini_prometheus/integrations/         @runtime-platform-team
 

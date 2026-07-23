@@ -6,6 +6,21 @@
 **Owner:** Architecture Board
 **Change control:** Amendments require an ADR (see `docs/adr/`). Directories mapped to a *frozen* constitutional clause require constitutional amendment, not a routine ADR.
 
+> **⚠ Ownership correction (CAP-0001 / ADR-0004, ratified 2026-07-23).** This document's *machinery*
+> — the contract spine, five-layer hierarchy, dependency-direction rules, and governance — stands
+> unchanged and correct. But its **ownership charter** was written from a pre-Handbook charter summary
+> and is **superseded**: Mini Prometheus owns manufacturing **content**, not the state substrate,
+> world model, engineering cognition, or engineering reasoning (those are Noetica/Velith mechanisms and
+> content). The `src/` packages were renamed accordingly (`situation_state→manufacturing_state`,
+> `world_model→manufacturing_twin`, `constraint_network→manufacturing_constraints`), the
+> `integrations/miniflywire` adapter was removed (Law 4), and the M2/M3 "Engineering cognition/reasoning"
+> packages are withdrawn (Velith content). The **authoritative ownership** is
+> `constitution/responsibility-matrix.md` and `docs/governance/constitutional-evolution-report.md`.
+> Where sections below still say MP "owns Situation State / World Model / Constraint Network /
+> Engineering reasoning," read them as superseded. The authoritative package names are in §3 and §5; a
+> few later *illustrative* passages (e.g. §12.2 on expandable namespaces) may retain an old identifier
+> purely as an example — the *mechanism* they illustrate is unaffected by the rename.
+
 ---
 
 ## 1. Purpose and constraints
@@ -110,18 +125,16 @@ mini-prometheus/
 ├── src/                           [P1]  Python runtime source (implements contracts)
 │   └── mini_prometheus/
 │       ├── __init__.py
-│       ├── situation_state/       [P1]  OWNED: Situation State
-│       ├── world_model/           [P1]  OWNED: Engineering World Model (expandable namespace — see §12)
-│       ├── constraint_network/    [P1]  OWNED: Constraint Network (Python reference impl; expandable namespace — see §12)
-│       ├── orchestration/         [P1]  OWNED: Runtime orchestration (composition root — see §14)
-│       ├── integrations/          [P1]  Adapters ONLY — no business logic (see §12/§14)
-│       │   ├── miniflywire/             Adapter to MiniFlyWire package
-│       │   ├── noetica/                 Adapter to Noetica package
-│       │   └── velith/                  Adapter to Velith package
-│       ├── cognition/             [M2]  OWNED: Engineering cognition
-│       ├── reasoning/             [M2]  OWNED: Engineering reasoning
-│       ├── coordination/          [M3]  OWNED: Multi-disciplinary engineering coordination
-│       └── workflow/              [M3]  OWNED: AI Manufacturing workflow
+│       ├── manufacturing_state/         [P1]  OWNED: manufacturing situation/twin state CONTENT (on Noetica substrate)
+│       ├── manufacturing_twin/          [P1]  OWNED: manufacturing digital-twin CONTENT (on Noetica twin engine; expandable namespace — see §12)
+│       ├── manufacturing_constraints/   [P1]  OWNED: manufacturing constraint CONTENT (in Noetica knowledge store; expandable namespace — see §12)
+│       ├── orchestration/              [P1]  OWNED: manufacturing runtime orchestration (composition root — see §14)
+│       ├── integrations/               [P1]  Adapters ONLY — no business logic (see §12/§14)
+│       │   ├── velith/                       Adapter to Velith package (engineering entry point)
+│       │   └── noetica/                      Adapter to Noetica platform mechanisms (twin engine, provenance)
+│       ├── manufacturing_planning/     [M2]  OWNED: manufacturing planning & scheduling (MP's "heart")
+│       └── experience/                 [M3]  OWNED: experience collection (emits the Experience Flow, Law 21)
+│                                             (MiniFlyWire adapter removed — Law 4; engineering cognition/reasoning are Velith content)
 │
 ├── native/                        [P1]  Rust/C++ performance core (constraint-network hot paths, world-model kernels)
 │   ├── README.md                        Boundary established P1; accelerated impls land incrementally
@@ -169,7 +182,7 @@ The single cross-boundary dependency. Language-neutral `schemas/` are the source
 
 ### `src/` — Python runtime source
 Implements the objects Mini Prometheus **owns**. Its subpackages are a 1:1 image of the Constitution's ownership list (see traceability matrix §5). `integrations/` is the *only* place that talks to the three upstreams, keeping repository boundaries clean and making an upstream version bump a localized change. **Separate from `native/`** by language/build system; **separate from `contracts/`** by the contracts-vs-impl rule.
-**Traces to:** "Mini Prometheus owns: Engineering cognition, Situation State, Engineering World Model, Constraint Network, Runtime orchestration, Engineering reasoning, Multi-disciplinary coordination, AI Manufacturing workflow"; "Mini Prometheus is the runtime orchestration layer. It integrates MiniFlyWire, Noetica, Velith."
+**Traces to (corrected, CAP-0001):** HANDBOOK §2.4 — Mini Prometheus owns manufacturing **content**: manufacturing planning & scheduling, factory/robotics/supply-chain/MES adapters, manufacturing digital-twin content, Sim2Real, experience collection. It **consumes** Velith (engineering) and Noetica (mechanisms) via interfaces and never imports MiniFlyWire (Law 4). *(The pre-Handbook charter list — "owns Situation State / World Model / Constraint Network / Engineering cognition/reasoning" — is superseded; see banner.)*
 
 ### `native/` — Rust/C++ performance core
 Home for performance-critical kernels (constraint propagation, world-model updates) exposed to Python via bindings generated from `contracts/`. The boundary is established in Phase 1; individual crates open only when a Python reference implementation is *measured* to be a bottleneck (benchmark-justified, never speculative). **Separate top-level root** because it is a different language and build toolchain, but it realizes the *same* contracts as `src/`.
@@ -203,15 +216,14 @@ Every top-level directory maps to a frozen clause. Nothing exists "for convenien
 | `docs/` | Engineering Workflow → *Software Design*; long-term maintainability | P1 |
 | `specs/` | Engineering Workflow → *Specification*; Operators & Computational Objects | P1 |
 | `contracts/` | Computational Objects + Operators + Runtime Architecture; "preserve architectural contracts" | P1 |
-| `src/mini_prometheus/situation_state/` | Owns: **Situation State** | P1 |
-| `src/mini_prometheus/world_model/` | Owns: **Engineering World Model** | P1 |
-| `src/mini_prometheus/constraint_network/` | Owns: **Constraint Network** | P1 |
-| `src/mini_prometheus/orchestration/` | Owns: **Runtime orchestration** | P1 |
-| `src/mini_prometheus/integrations/` | "integrates MiniFlyWire, Noetica, Velith"; clean repository boundaries | P1 |
-| `src/mini_prometheus/cognition/` | Owns: **Engineering cognition** | M2 |
-| `src/mini_prometheus/reasoning/` | Owns: **Engineering reasoning** | M2 |
-| `src/mini_prometheus/coordination/` | Owns: **Multi-disciplinary engineering coordination** | M3 |
-| `src/mini_prometheus/workflow/` | Owns: **AI Manufacturing workflow** | M3 |
+| `src/mini_prometheus/manufacturing_state/` | Owns: **manufacturing situation/twin state content** (HANDBOOK §2.4; on Noetica substrate) | P1 |
+| `src/mini_prometheus/manufacturing_twin/` | Owns: **manufacturing digital-twin content** (HANDBOOK §2.4/§8.4) | P1 |
+| `src/mini_prometheus/manufacturing_constraints/` | Owns: **manufacturing constraint content** (HANDBOOK §6.5) | P1 |
+| `src/mini_prometheus/orchestration/` | Owns: **manufacturing runtime orchestration** | P1 |
+| `src/mini_prometheus/integrations/` | Consumes **Velith** (engineering) + **Noetica** (mechanisms) via interfaces; **not** MiniFlyWire (Law 4) | P1 |
+| `src/mini_prometheus/manufacturing_planning/` | Owns: **manufacturing planning & scheduling** (HANDBOOK §2.4) | M2 |
+| `src/mini_prometheus/experience/` | Owns: **experience collection** (Experience Flow, Law 21) | M3 |
+| *(withdrawn)* engineering cognition / reasoning | **Velith** content, not MP (CAP-0001 / ADR-0004) | — |
 | `native/` | Runtime Architecture performance requirements; production quality | P1 (boundary), M2 (crates) |
 | `tests/` | Engineering Workflow → *Testing*, *Verification*; "never skip verification" | P1 |
 | `tools/` | "reusable mechanisms," "prefer extraction over duplication" | P1 |
@@ -233,7 +245,7 @@ Ownership is enforced by `CODEOWNERS` and mapped to independent teams so enginee
 | `contracts/**` | **Architecture Board + Staff Engineers** | Contract change ⇒ SemVer bump + compliance-suite update + 2 senior approvals. Highest scrutiny after `constitution/`. |
 | `docs/adr/**` | Architecture Board | New ADR per accepted decision; ADRs are append-only (superseded, never deleted). |
 | `docs/**`, `specs/**` | Authoring team + one reviewer | Normal PR. |
-| `src/.../situation_state,world_model,constraint_network` | **World-Model team** | Package-scoped; must keep contract-compliance green. |
+| `src/.../manufacturing_state,manufacturing_twin,manufacturing_constraints` | **Manufacturing team** | Package-scoped; must keep contract-compliance green. |
 | `src/.../orchestration`, `src/.../integrations/**` | **Runtime/Platform team** | Owns integration; upstream version bumps land here only. |
 | `native/**` | **Core-Performance team** | Must pass the *same* contract-compliance suite as the Python reference. |
 | `tests/contracts/**` | Architecture Board + Staff | Compliance suite is part of the contract; changes reviewed with `contracts/`. |
@@ -247,7 +259,7 @@ Rationale for independence: because cross-module dependencies are only allowed *
 ## 7. Phase 1 vs future milestones
 
 **Phase 1 (now) — establish the spine and the load-bearing substrate.** Governance, the full contract layer, and the runtime substrate the rest depends on:
-`constitution/`, `docs/` (+ ADR-0001), `specs/`, `contracts/` (all of it), `src/` substrate (`situation_state`, `world_model`, `constraint_network`, `orchestration`, `integrations`), `native/` boundary, `tests/`, `tools/`, `deploy/`, CI. Contracts for the *future* owned modules are drafted in Phase 1 even where their implementations are not — freeze interfaces early, implement behind them later.
+`constitution/`, `docs/` (+ ADR-0001), `specs/`, `contracts/` (all of it), `src/` manufacturing-content packages (`manufacturing_state`, `manufacturing_twin`, `manufacturing_constraints`, `orchestration`, `integrations` [Velith+Noetica]), `native/` boundary, `tests/`, `tools/`, `deploy/`, CI. Contracts for the *future* owned modules are drafted in Phase 1 even where their implementations are not — freeze interfaces early, implement behind them later.
 
 **M2 — cognition & scientific loop.** `src/cognition`, `src/reasoning`, first `native/` crate (benchmark-justified), `experiments/`, `data/`, `benchmarks/`.
 
@@ -405,16 +417,16 @@ are prohibited except at the single composition root. Concretely, the Phase 1 pa
 
 | Package | May depend on | May **not** depend on |
 |---|---|---|
-| `situation_state`, `world_model`, `constraint_network` (owned objects) | `contracts/` only | each other; `orchestration`; `integrations`; upstream packages |
-| `integrations/{miniflywire,noetica,velith}` | `contracts/` + its one pinned upstream package | any owned object package; any other integration; anything with business logic |
-| `orchestration` (composition root) | `contracts/`; may import the concrete object and integration packages **solely to instantiate/wire them** | anything that would invert this direction (nothing may depend *on* `orchestration` except the entrypoint) |
+| `manufacturing_state`, `manufacturing_twin`, `manufacturing_constraints` (content packages) | `contracts/` only | each other; `orchestration`; `integrations`; upstream packages |
+| `integrations/{velith,noetica}` | `contracts/` + its one pinned upstream (Velith or Noetica) | any content package; any other integration; anything with business logic; **MiniFlyWire (Law 4)** |
+| `orchestration` (composition root) | `contracts/`; may import the concrete content and integration packages **solely to instantiate/wire them** | anything that would invert this direction (nothing may depend *on* `orchestration` except the entrypoint) |
 
 Two rules deserve emphasis:
 
-- **Owned object packages are peers, not a stack.** `world_model` does not import `constraint_network`
-  and vice-versa. Any relationship between two Computational Objects is expressed through
-  contract-typed interfaces and *wired by* `orchestration`. This prevents a hidden dependency lattice
-  from forming among the core objects.
+- **Content packages are peers, not a stack.** `manufacturing_twin` does not import
+  `manufacturing_constraints` and vice-versa. Any relationship between two content packages is expressed
+  through contract-typed interfaces and *wired by* `orchestration`. This prevents a hidden dependency
+  lattice from forming among them.
 - **`integrations/` contains adapters only — no business logic.** Each adapter's sole job is to
   translate between a frozen upstream's types and our `contracts/` types. Reasoning, orchestration,
   or domain decisions in an adapter are an architectural violation: they belong in an owned package.

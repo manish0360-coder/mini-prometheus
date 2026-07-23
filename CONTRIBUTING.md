@@ -27,11 +27,13 @@ Specification → Software Design → Implementation → Testing → Verificatio
 - **External contracts vs internal APIs.** Only `contracts/` is public across boundaries. Everything else
   a package exposes is internal, unguaranteed, and marked (`_`-prefixed or `_internal`). Cross-package
   import of a non-contract symbol fails CI. (Arch doc §13.)
-- **Owned object packages are peers.** `situation_state`, `world_model`, `constraint_network` depend on
-  `contracts/` only — never on each other, orchestration, or integrations. `orchestration` is the sole
-  composition root allowed to import concrete packages to wire them. (Arch doc §14.)
-- **`integrations/` is adapters only — no business logic.** An adapter only translates a pinned upstream's
-  types to/from contract types. Logic there is an architectural violation. (Arch doc §14.)
+- **Manufacturing-content packages are peers.** `manufacturing_state`, `manufacturing_twin`,
+  `manufacturing_constraints` depend on `contracts/` only — never on each other, orchestration, or
+  integrations. `orchestration` is the sole composition root allowed to import concrete packages to wire
+  them. (Arch doc §14.)
+- **`integrations/` is adapters only — no business logic.** Adapters consume **Velith** (engineering entry)
+  and **Noetica** (platform mechanisms) via versioned interfaces; **never MiniFlyWire** (Law 4). An adapter
+  only translates upstream ↔ contract types; logic there is an architectural violation. (Arch doc §14.)
 - **Layer hierarchy.** Constitution → Specification → Contract → Implementation → Verification; never skip
   a layer (no implementation assumption without a contract behind it). (Arch doc §12.1.)
 - **Constitution is versioned.** `constitution/VERSION` (baseline 1.0.0) bumps only on amendment, cited by
