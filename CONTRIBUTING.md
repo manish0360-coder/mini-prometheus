@@ -24,6 +24,18 @@ Specification → Software Design → Implementation → Testing → Verificatio
 ## Hard rules
 
 - **Contracts are the only cross-boundary dependency.** `implementations → contracts`, never the reverse.
+- **External contracts vs internal APIs.** Only `contracts/` is public across boundaries. Everything else
+  a package exposes is internal, unguaranteed, and marked (`_`-prefixed or `_internal`). Cross-package
+  import of a non-contract symbol fails CI. (Arch doc §13.)
+- **Owned object packages are peers.** `situation_state`, `world_model`, `constraint_network` depend on
+  `contracts/` only — never on each other, orchestration, or integrations. `orchestration` is the sole
+  composition root allowed to import concrete packages to wire them. (Arch doc §14.)
+- **`integrations/` is adapters only — no business logic.** An adapter only translates a pinned upstream's
+  types to/from contract types. Logic there is an architectural violation. (Arch doc §14.)
+- **Layer hierarchy.** Constitution → Specification → Contract → Implementation → Verification; never skip
+  a layer (no implementation assumption without a contract behind it). (Arch doc §12.1.)
+- **Constitution is versioned.** `constitution/VERSION` (baseline 1.0.0) bumps only on amendment, cited by
+  an ADR. (Arch doc §15.)
 - **Generated bindings are never hand-edited.** `contracts/python` and `contracts/native` are
   produced from `contracts/schemas` by `tools/`. Hand edits fail CI.
 - **Upstreams are pinned.** MiniFlyWire/Noetica/Velith are exact-pinned; bumps are isolated PRs

@@ -35,16 +35,20 @@ This document derives the **permanent repository architecture** under the follow
 
 The Constitution freezes **Ontology, Computational Objects, Operators, Runtime Architecture, Repository Responsibilities, and the Promotion Workflow**. Everything frozen is *interface-shaped*: it says *what* the objects and operators are, not *how* they are computed.
 
-The repository is therefore organized around one load-bearing separation:
+The repository is therefore organized around one load-bearing separation. In full, the derivation
+chain has five layers, each depending only on the layer to its left (formalized in §12):
 
 ```
-frozen theory  →  stable contracts  →  implementations
- (constitution/)     (contracts/)         (src/, native/)
+Constitution   →   Specification   →   Contract       →   Implementation    →   Verification
+(constitution/)     (specs/)            (contracts/)       (src/, native/)       (tests/, .github/)
+frozen theory       human "what"        stable interface   the "how"             proof of compliance
 ```
 
 - **`constitution/`** holds the frozen theory verbatim. It is read-mostly and amendment-gated.
-- **`contracts/`** is the machine-checkable projection of the frozen Computational Objects, Operators, and Runtime Architecture into versioned interfaces (schemas + generated bindings). It is the *only* thing implementations, tests, and integrations are allowed to depend on across module boundaries.
-- **`src/` and `native/`** implement those contracts. They may be rewritten freely as long as they keep satisfying the contracts and their compliance tests.
+- **`specs/`** is the human-authored specification: the intended *what*, derived from the frozen theory, before it is frozen into a machine-checkable interface.
+- **`contracts/`** is the machine-checkable projection of the frozen Computational Objects, Operators, and Runtime Architecture into versioned interfaces (schemas + generated bindings). It is the *only* thing implementations, tests, and integrations are allowed to depend on across module boundaries. `contracts/` holds only **external architectural contracts** — the surface guaranteed across package and repository boundaries — never internal implementation APIs (see §13).
+- **`src/` and `native/`** implement those contracts. They may be rewritten freely as long as they keep satisfying the contracts and their compliance tests. Everything they expose beyond the contract is an **internal implementation API** with no cross-boundary stability guarantee.
+- **`tests/` and CI** verify that implementations satisfy the contracts. Verification is a layer, not an afterthought.
 
 This is what makes independent engineering safe: a team owning `constraint_network` can rewrite its internals — even swap the Python reference for a Rust core — without any other team changing a line, because the contract and its compliance suite are unchanged. It is also what makes "prefer extraction over duplication" enforceable: shared behavior lives behind a contract, not copied between modules.
 
@@ -107,10 +111,10 @@ mini-prometheus/
 │   └── mini_prometheus/
 │       ├── __init__.py
 │       ├── situation_state/       [P1]  OWNED: Situation State
-│       ├── world_model/           [P1]  OWNED: Engineering World Model
-│       ├── constraint_network/    [P1]  OWNED: Constraint Network (Python reference impl)
-│       ├── orchestration/         [P1]  OWNED: Runtime orchestration (the integrating layer)
-│       ├── integrations/          [P1]  Adapters to the three frozen upstreams
+│       ├── world_model/           [P1]  OWNED: Engineering World Model (expandable namespace — see §12)
+│       ├── constraint_network/    [P1]  OWNED: Constraint Network (Python reference impl; expandable namespace — see §12)
+│       ├── orchestration/         [P1]  OWNED: Runtime orchestration (composition root — see §14)
+│       ├── integrations/          [P1]  Adapters ONLY — no business logic (see §12/§14)
 │       │   ├── miniflywire/             Adapter to MiniFlyWire package
 │       │   ├── noetica/                 Adapter to Noetica package
 │       │   └── velith/                  Adapter to Velith package
@@ -316,6 +320,137 @@ and docs/adr/0001-adopt-repository-architecture.md.
 | Speculative structure creeping in | Milestone gating (§7): future dirs live only in this doc until opened. |
 | Ownership contention across teams | Cross-package coupling only through `contracts/`; everything else is package-local and independently mergeable. |
 | Erosion of the freeze over time | `constitution/` is amendment-gated; contradictions surface as ADRs, never silent edits. |
+
+---
+
+## 12. Refinement pass (external review, ADR-0002)
+
+This section records a documentation-only refinement performed after the Phase 1 foundation was
+committed and frozen. It changes **no** frozen constitutional content and introduces **no** runtime
+code. It sharpens six points that external review found under-specified. §§13–16 give the normative
+detail; this section is the index.
+
+1. **External contracts vs internal APIs** — §13.
+2. **The Constitution → Specification → Contract → Implementation → Verification hierarchy** — formalized in §12.1 below and reflected in the §2 diagram.
+3. **`world_model/` and `constraint_network/` are expandable package namespaces** — §12.2 below.
+4. **`integrations/` is adapters-only, no business logic** — §14.
+5. **Inter-package dependency rules** — §14.
+6. **Constitution versioning** — §15.
+
+### 12.1 The five-layer hierarchy (formal)
+
+Each layer is *derived from and constrained by* the layer above it, and may not reach past its
+neighbour:
+
+| Layer | Home | Answers | Stability | Who may change it |
+|---|---|---|---|---|
+| **Constitution** | `constitution/` | The frozen theory (ontology, objects, operators, runtime arch) | Frozen; amendment-gated | Architecture Board, only on proven contradiction |
+| **Specification** | `specs/` | The intended *what*, in human terms, derived from the Constitution | Versioned, evolvable | Authoring team + review |
+| **Contract** | `contracts/` | The machine-checkable *interface* the spec is frozen into | SemVer; breaking = MAJOR | Architecture Board + Staff |
+| **Implementation** | `src/`, `native/` | The *how* — code satisfying the contract | Free to change behind the contract | Owning team |
+| **Verification** | `tests/`, `.github/` | *Proof* the implementation satisfies the contract | Tracks the contract | Owning team + Staff for `tests/contracts` |
+
+Directional rule: a specification may only realize what the Constitution permits; a contract may only
+formalize what a specification defines; an implementation may only depend on contracts; verification
+asserts the implementation against the contract. Nothing skips a layer — e.g. an implementation may
+never encode an assumption that has no contract behind it.
+
+### 12.2 Expandable package namespaces
+
+`world_model/` and `constraint_network/` (and, when they open, `cognition/`, `reasoning/`,
+`coordination/`, `workflow/`) are **expandable package namespaces**, not single modules. Their
+*external* contract is small and stable and lives in `contracts/`; their *internal* structure is
+expected to grow many submodules over time (e.g. `constraint_network/` accruing constraint families,
+propagation strategies, solvers; `world_model/` accruing model layers, stores, projections).
+
+Consequences:
+
+- Growth **inside** these packages is an internal-API change (§13): it needs no new top-level
+  directory and no contract change, so it does not violate "no speculative folders."
+- The package's public, cross-boundary surface remains *only* what `contracts/` exposes. New internal
+  submodules are private (§13) until and unless they are promoted into a contract.
+- This is exactly why these are directories, not files: the namespace is designed to expand without
+  structural churn or re-architecture.
+
+## 13. External architectural contracts vs internal implementation APIs
+
+Two kinds of interface exist in this repository and must never be conflated:
+
+**External architectural contracts** — everything in `contracts/`. These are the surfaces guaranteed
+*across package and repository boundaries*: the shapes of Computational Objects, the signatures of
+Operators, the runtime-architecture seams. They are versioned (`contracts/VERSION`, SemVer), carry a
+compliance suite (`tests/contracts/`), and change only through high-scrutiny review. Any code — a
+sibling package, a test, an integration adapter, an external consumer — may depend on them.
+
+**Internal implementation APIs** — every symbol a `src/` or `native/` package exposes that is *not*
+in `contracts/`. Helper classes, private functions, sub-package structure, native FFI details. These
+carry **no** stability guarantee and may change in any commit.
+
+Conventions that keep the line bright:
+
+- A package's cross-boundary surface is *exactly* its contract. Nothing else it defines is public.
+- Internal-only code is marked as such: underscore-prefixed names or an `_internal` submodule.
+  `tools/` ships an import-linter rule so a cross-package import of a non-contract symbol fails CI.
+- Promoting an internal API to an external contract is a deliberate act: write/extend the spec, add
+  the schema, regenerate bindings, extend the compliance suite, bump `contracts/VERSION`. There is no
+  accidental promotion.
+
+Rationale: this is what lets implementations be rewritten freely (the whole point of the spine) while
+still giving independent teams a fixed surface to build against.
+
+## 14. Runtime package dependency rules
+
+All cross-package coupling flows through `contracts/`; direct implementation-to-implementation imports
+are prohibited except at the single composition root. Concretely, the Phase 1 packages form this DAG:
+
+| Package | May depend on | May **not** depend on |
+|---|---|---|
+| `situation_state`, `world_model`, `constraint_network` (owned objects) | `contracts/` only | each other; `orchestration`; `integrations`; upstream packages |
+| `integrations/{miniflywire,noetica,velith}` | `contracts/` + its one pinned upstream package | any owned object package; any other integration; anything with business logic |
+| `orchestration` (composition root) | `contracts/`; may import the concrete object and integration packages **solely to instantiate/wire them** | anything that would invert this direction (nothing may depend *on* `orchestration` except the entrypoint) |
+
+Two rules deserve emphasis:
+
+- **Owned object packages are peers, not a stack.** `world_model` does not import `constraint_network`
+  and vice-versa. Any relationship between two Computational Objects is expressed through
+  contract-typed interfaces and *wired by* `orchestration`. This prevents a hidden dependency lattice
+  from forming among the core objects.
+- **`integrations/` contains adapters only — no business logic.** Each adapter's sole job is to
+  translate between a frozen upstream's types and our `contracts/` types. Reasoning, orchestration,
+  or domain decisions in an adapter are an architectural violation: they belong in an owned package.
+  This keeps an upstream version bump a localized, mechanical change and preserves the clean
+  repository boundary the Constitution requires.
+
+Enforcement: these rules are expressed as import-linter contracts under `[tool.importlinter]` in
+`pyproject.toml`, run in CI. The rules are documentation today and become executable when the first
+implementation lands; no runtime code is added by stating them.
+
+## 15. Constitution versioning
+
+To make the freeze auditable over many years, the Constitution carries an explicit version:
+`constitution/VERSION`, starting at **`1.0.0`** — the frozen Phase 1 baseline. This is additive
+traceability metadata; it does **not** alter any frozen document's content.
+
+Policy:
+
+- The Constitution changes **only** by amendment on a proven contradiction (unchanged from the frozen
+  rules). Every amendment bumps `constitution/VERSION` and is recorded by an ADR that cites the
+  contradiction and the affected clause.
+- Versioning semantics: **MAJOR** = a frozen clause changed or removed; **MINOR** = a clause clarified
+  or added without invalidating existing implementations; **PATCH** = editorial/transcription fixes
+  with no semantic change.
+- Downstream artifacts record the Constitution version they were derived under: `contracts/VERSION`
+  and release notes reference the `constitution/VERSION` in force. This yields an unbroken trace from
+  any shipped artifact back to the exact frozen theory it implements.
+- `constitution/VERSION` is owned by the Architecture Board and is amendment-gated like the rest of
+  `constitution/`.
+
+## 16. What this refinement did not change
+
+For the record: no frozen document under `constitution/` had its content modified; no directory was
+added or removed; no runtime code was written. The refinement is confined to `docs/`, one additive
+`constitution/VERSION` metadata file, `CONTRIBUTING.md`, and ADR-0002. The Phase 1 foundation remains
+frozen; this pass only makes its existing rules explicit.
 
 ---
 
