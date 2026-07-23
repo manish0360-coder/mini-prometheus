@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/consumed/velith/engineering_result.schema.json",
+  "title": "EngineeringResult",
+  "description": "CONSUMED STUB — owned by Velith. RM1 reads result_id, content_hash, verified, and the OPAQUE design_artifact only; it NEVER parses the artifact and NEVER re-verifies (Law 6/9). Pinned until the real Velith contract publishes; the integrations/velith adapter maps real -> this stub. The velith_verified DesignInput path requires verified == true.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["result_id", "content_hash", "verified", "verifier", "design_artifact"],
+  "properties": {
+    "result_id": { "$ref": "../../common.schema.json#/$defs/Uuid" },
+    "content_hash": { "$ref": "../../common.schema.json#/$defs/ContentHash" },
+    "verified": { "const": true },
+    "verifier": { "$ref": "../../common.schema.json#/$defs/ProducedBy" },
+    "design_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["media_type", "ref", "content_hash"],
+      "properties": {
+        "media_type": { "type": "string", "minLength": 1 },
+        "ref": { "$ref": "../../common.schema.json#/$defs/Uuid" },
+        "content_hash": { "$ref": "../../common.schema.json#/$defs/ContentHash" }
+      }
+    }
+  }
+}

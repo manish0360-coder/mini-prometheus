@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/common.schema.json",
+  "title": "Common",
+  "description": "Shared primitives for the Mini Prometheus contract package (RM1). Source of truth per contracts/RM1-contract-package.md §1. NS_MP (frozen deterministic-id namespace UUID) = 4f5b56ae-3c77-4135-9f5c-1eef0ab1b252. Instances are Canonical JSON (RFC 8785); content_hash = sha256(canonical_json(identity_view)); produced_at/timing are always excluded from hashes.",
+  "$defs": {
+    "ContentHash": {
+      "title": "ContentHash",
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "sha256(canonical_json(identity_view)), lowercase hex, 'sha256:' prefixed."
+    },
+    "Uuid": {
+      "title": "Uuid",
+      "type": "string",
+      "format": "uuid"
+    },
+    "SemVer": {
+      "title": "SemVer",
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "Rfc3339": {
+      "title": "Rfc3339",
+      "type": "string",
+      "format": "date-time"
+    },
+    "Ref": {
+      "title": "Ref",
+      "description": "Ref-by-hash: a reference is valid only if the referent's recomputed content_hash matches.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "content_hash"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Uuid" },
+        "content_hash": { "$ref": "#/$defs/ContentHash" }
+      }
+    },
+    "ProducedBy": {
+      "title": "ProducedBy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "version"],
+      "properties": {
+        "component": { "type": "string", "minLength": 1 },
+        "version": { "$ref": "#/$defs/SemVer" }
+      }
+    },
+    "Provenance": {
+      "title": "Provenance",
+      "description": "First-class derivation record (Law 18). produced_at is EXCLUDED from every content_hash.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_refs", "rule_id", "rule_version", "capability_model_version", "produced_by", "produced_at"],
+      "properties": {
+        "source_refs": { "type": "array", "items": { "$ref": "#/$defs/Ref" } },
+        "rule_id": { "type": "string", "minLength": 1 },
+        "rule_version": { "$ref": "#/$defs/SemVer" },
+        "capability_model_version": { "$ref": "#/$defs/SemVer" },
+        "produced_by": { "$ref": "#/$defs/ProducedBy" },
+        "produced_at": { "$ref": "#/$defs/Rfc3339" }
+      }
+    }
+  }
+}

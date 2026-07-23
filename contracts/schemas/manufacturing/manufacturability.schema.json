@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/manufacturability.schema.json",
+  "title": "Manufacturability",
+  "description": "MP-owned domain taxonomies filled into Noetica's Verdict envelope (Law 15; package §3.5). Both enums are CLOSED and frozen (spec §5.3): member change = MAJOR. Outcome/error split: MANUFACTURABLE, NOT_MANUFACTURABLE, PLAN_INVALID are grounded outcomes (episode written); INFRA_ERROR is the only error (no episode).",
+  "$defs": {
+    "ManufacturabilityVerdictStatus": {
+      "title": "ManufacturabilityVerdictStatus",
+      "type": "string",
+      "enum": ["MANUFACTURABLE", "NOT_MANUFACTURABLE", "PLAN_INVALID", "INFRA_ERROR"]
+    },
+    "ManufacturabilityReasonCode": {
+      "title": "ManufacturabilityReasonCode",
+      "type": "string",
+      "enum": [
+        "CAPABILITY_MISSING",
+        "PRECEDENCE_VIOLATION",
+        "RESOURCE_UNAVAILABLE",
+        "TOLERANCE_UNSUPPORTED",
+        "MATERIAL_UNSUPPORTED",
+        "PLAN_MALFORMED"
+      ]
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/design_input.schema.json",
+  "title": "DesignInput",
+  "description": "Normalized opaque design carried into planning; one contract for both intake paths (RM1 spec §7; package §3.2). schema_version 1.0.0. Identity view excludes design_input_id and provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "design_input_id", "engineering_verification_status", "source", "material", "stock_form", "declared_operations", "quantity", "provenance"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "design_input_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "engineering_verification_status": { "$ref": "#/$defs/EngineeringVerificationStatus" },
+    "source": { "$ref": "#/$defs/DesignSource" },
+    "material": { "type": "string", "minLength": 1 },
+    "material_code": { "type": "string", "minLength": 1 },
+    "stock_form": { "$ref": "manufacturing_request.schema.json#/$defs/StockForm" },
+    "declared_operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "manufacturing_request.schema.json#/$defs/DeclaredOperation" }
+    },
+    "quantity": { "type": "integer", "minimum": 1 },
+    "tolerances": { "$ref": "manufacturing_request.schema.json#/$defs/Tolerances" },
+    "design_artifact_ref": { "$ref": "#/$defs/DesignArtifactRef" },
+    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" }
+  },
+  "$defs": {
+    "EngineeringVerificationStatus": {
+      "title": "EngineeringVerificationStatus",
+      "description": "Closed enum (frozen, spec §5.8). Consistent with source.kind.",
+      "type": "string",
+      "enum": ["velith_verified", "engineer_declared"]
+    },
+    "DesignSourceKind": {
+      "title": "DesignSourceKind",
+      "type": "string",
+      "enum": ["manufacturing_request", "velith_engineering_result"]
+    },
+    "DesignSource": {
+      "title": "DesignSource",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/DesignSourceKind" },
+        "ref": { "$ref": "../common.schema.json#/$defs/Ref" }
+      }
+    },
+    "DesignArtifactRef": {
+      "title": "DesignArtifactRef",
+      "description": "OPAQUE reference (e.g. STEP or Velith artifact). Never parsed by RM1.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["media_type", "id", "content_hash"],
+      "properties": {
+        "media_type": { "type": "string", "minLength": 1 },
+        "id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+        "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" }
+      }
+    }
+  }
+}

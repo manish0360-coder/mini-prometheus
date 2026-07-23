@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/manufacturing_task.schema.json",
+  "title": "ManufacturingTask",
+  "description": "A manufacturing task bound to one DesignInput (package §3.3). schema_version 1.0.0. Identity view excludes task_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "product_intent", "design_input_ref"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "task_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "product_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "design_input_ref": { "$ref": "../common.schema.json#/$defs/Ref" }
+  }
+}

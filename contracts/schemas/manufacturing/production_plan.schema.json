@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/production_plan.schema.json",
+  "title": "ProductionPlan",
+  "description": "The tangible manufacturing artifact: an ordered, resource-assigned process routing (package §3.4). schema_version 1.0.0. plan_id is deterministic = uuid5(NS_MP, content_hash). Identity view excludes plan_id, content_hash (self), and provenance timing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_id", "task_ref", "steps", "resource_assignments", "capability_model_version", "content_hash", "provenance"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "plan_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "task_ref": { "$ref": "../common.schema.json#/$defs/Ref" },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ProcessStep" }
+    },
+    "resource_assignments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ResourceAssignment" }
+    },
+    "capability_model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
+    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" }
+  },
+  "$defs": {
+    "ProcessStep": {
+      "title": "ProcessStep",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "op", "required_capability", "inputs", "provenance_ref"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0, "description": "Contiguous 0..n-1 in array order." },
+        "op": { "$ref": "manufacturing_request.schema.json#/$defs/ProcessOp" },
+        "required_capability": { "type": "string", "minLength": 1 },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "params": { "type": "object", "additionalProperties": true },
+        "provenance_ref": { "$ref": "../common.schema.json#/$defs/Ref" }
+      }
+    },
+    "ResourceAssignment": {
+      "title": "ResourceAssignment",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step_index", "resource_id", "capability_id"],
+      "properties": {
+        "step_index": { "type": "integer", "minimum": 0 },
+        "resource_id": { "type": "string", "minLength": 1 },
+        "capability_id": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/manufacturing_episode.schema.json",
+  "title": "ManufacturingEpisode",
+  "description": "Experience-Flow DATA contract (Law 21; package §3.6). MP produces the content; Noetica owns the lifecycle framework (deferred). Serialized as append-only JSONL (one canonical-JSON object per line). episode_id is deterministic = uuid5(NS_MP, content_hash). Persisted episodes NEVER carry status INFRA_ERROR. Identity view excludes episode_id, content_hash (self), and timing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "episode_id", "task", "design_ref", "engineering_verification_status", "plan", "verdict", "capability_model_version", "content_hash", "provenance", "timing"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "episode_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "task": { "$ref": "manufacturing_task.schema.json" },
+    "design_ref": { "$ref": "../common.schema.json#/$defs/Ref" },
+    "engineering_verification_status": { "$ref": "design_input.schema.json#/$defs/EngineeringVerificationStatus" },
+    "plan": { "$ref": "production_plan.schema.json" },
+    "verdict": { "$ref": "../consumed/noetica/verdict.schema.json" },
+    "capability_model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
+    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "EXCLUDED from content_hash.",
+      "required": ["created_at", "plan_ms", "verify_ms"],
+      "properties": {
+        "created_at": { "$ref": "../common.schema.json#/$defs/Rfc3339" },
+        "plan_ms": { "type": "number", "minimum": 0 },
+        "verify_ms": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

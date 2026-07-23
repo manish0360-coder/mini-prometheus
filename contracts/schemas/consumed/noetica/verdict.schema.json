@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/consumed/noetica/verdict.schema.json",
+  "title": "Verdict",
+  "description": "CONSUMED STUB — owned by Noetica (Law 15). RM1 pins this envelope until the real Noetica contract publishes. The envelope is domain-generic; MP fills status/reason_codes from its OWN closed taxonomies (manufacturing/manufacturability.schema.json). is_error carries Noetica's outcome/error distinction: RM1 maps INFRA_ERROR -> is_error:true (no episode), all others -> is_error:false. MP must not extend this envelope (Law 6).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["grounded", "is_error", "status", "reason_codes", "produced_by"],
+  "properties": {
+    "grounded": { "type": "boolean" },
+    "is_error": { "type": "boolean" },
+    "status": { "type": "string", "minLength": 1, "description": "Domain taxonomy string; RM1 constrains it to ManufacturabilityVerdictStatus at the manufacturing boundary." },
+    "reason_codes": { "type": "array", "items": { "type": "string" } },
+    "detail": { "type": "string" },
+    "produced_by": { "$ref": "../../common.schema.json#/$defs/ProducedBy" }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/manufacturing_request.schema.json",
+  "title": "ManufacturingRequest",
+  "description": "The real engineer-facing input (RM1 spec §7; contract package §3.1). Demonstration domain: Machined Part. schema_version 1.0.0. Identity view excludes request_id and metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "material", "stock_form", "declared_operations", "quantity"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "request_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "material": { "type": "string", "minLength": 1 },
+    "material_code": { "type": "string", "minLength": 1 },
+    "stock_form": { "$ref": "#/$defs/StockForm" },
+    "declared_operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/DeclaredOperation" }
+    },
+    "quantity": { "type": "integer", "minimum": 1 },
+    "tolerances": { "$ref": "#/$defs/Tolerances" },
+    "step_artifact_ref": { "$ref": "#/$defs/StepArtifactRef" },
+    "metadata": {
+      "type": "object",
+      "description": "Excluded from identity view.",
+      "additionalProperties": true,
+      "properties": {
+        "author": { "type": "string" },
+        "created_at": { "$ref": "../common.schema.json#/$defs/Rfc3339" }
+      }
+    }
+  },
+  "$defs": {
+    "StockForm": {
+      "title": "StockForm",
+      "description": "Closed enum (machined-part domain). Member change = MAJOR.",
+      "type": "string",
+      "enum": ["bar", "plate", "sheet", "block", "tube"]
+    },
+    "ProcessOp": {
+      "title": "ProcessOp",
+      "description": "Closed enum (machined-part domain). Member change = MAJOR.",
+      "type": "string",
+      "enum": ["cut_stock", "face_mill", "drill", "pocket_mill", "turn", "deburr", "inspect"]
+    },
+    "DeclaredOperation": {
+      "title": "DeclaredOperation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op"],
+      "properties": {
+        "op": { "$ref": "#/$defs/ProcessOp" },
+        "target": { "type": "string", "description": "Engineer's declared feature label (opaque; not geometry)." },
+        "params": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "Tolerances": {
+      "title": "Tolerances",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["general_tolerance_mm"],
+      "properties": {
+        "general_tolerance_mm": { "type": "number", "minimum": 0 }
+      }
+    },
+    "StepArtifactRef": {
+      "title": "StepArtifactRef",
+      "description": "OPAQUE reference to an attached STEP file. RM1 never parses geometry (spec §7).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["media_type", "id", "content_hash"],
+      "properties": {
+        "media_type": { "const": "model/step" },
+        "id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+        "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" }
+      }
+    }
+  }
+}
