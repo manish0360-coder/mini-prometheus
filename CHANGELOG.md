@@ -7,21 +7,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
 ## [Unreleased]
 
-### Added
-- Phase 1 repository architecture: governance, contract spine, and runtime substrate skeleton.
-  Runtime `0.1.0`, contracts `0.1.0`. See `docs/adr/0001-adopt-repository-architecture.md`.
-- Constitution versioning: additive `constitution/VERSION` baseline `1.0.0` for long-term traceability.
+_RM2 in planning (wire the real pinned Velith/Noetica packages). No changes yet._
 
-### Changed
-- Architecture refinement pass (documentation only, external review): formalized the five-layer
-  hierarchy, distinguished external contracts from internal APIs, documented expandable namespaces,
-  the integrations adapters-only rule, and inter-package dependency rules. No frozen content, no
-  directories, no runtime code changed. See `docs/adr/0002-architecture-refinement-external-review.md`.
+## [0.2.0] — 2026-07-23 — RM1: "plan → verify → log" (first manufacturing capability)
 
-### Planning
-- RM1 selected as the first runtime implementation milestone (Situation State vertical slice + contract
-  pipeline). Specification drafted at `specs/interfaces/situation-state.md` (blocked on constitutional
-  transcription). Decision recorded in `docs/adr/0003-runtime-implementation-order.md`. No runtime code.
+**RM1 complete and frozen** (tag `rm1-complete`). Mini Prometheus turns a real engineer
+`ManufacturingRequest` into a verified, provenance-complete `ProductionPlan` + `ManufacturingEpisode`.
+First tagged release; runtime `0.1.0` → `0.2.0` (contracts `0.2.0`, constitution `1.1.0`).
+See `docs/milestones/RM1-completion-report.md` and `docs/ROADMAP.md`.
 
 ### RM1 — Implementation milestone (complete)
 - Implemented the plan → verify → log manufacturing loop strictly against the frozen contracts:
@@ -56,3 +49,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
   - Dependencies: removed `integrations/miniflywire/` (Law 4); `integrations/` now Velith + Noetica only.
   - Withdrawn: engineering cognition/reasoning packages (Velith content); `specs/interfaces/situation-state.md`; RM1 substrate framing (to be re-scoped to manufacturing content).
   - Recorded in `docs/adr/0004-conform-repository-to-handbook.md`. No runtime code.
+
+### Earlier work included in this first release
+- Phase 1 repository architecture: governance, contract spine, runtime substrate skeleton
+  (`docs/adr/0001-adopt-repository-architecture.md`).
+- Constitution versioning: additive `constitution/VERSION` (baseline `1.0.0`, now `1.1.0`).
+- Architecture refinement pass (documentation only): five-layer hierarchy, external-vs-internal
+  contracts, expandable namespaces, dependency rules (`docs/adr/0002-architecture-refinement-external-review.md`).
+- RM1 planning + runtime implementation order (`docs/adr/0003-runtime-implementation-order.md`); the
+  original Situation State RM1 spec was withdrawn by ADR-0004 and re-scoped to manufacturing content.

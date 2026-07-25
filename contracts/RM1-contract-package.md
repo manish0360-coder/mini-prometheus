@@ -1,5 +1,6 @@
 # RM1 Contract Package — Contract Design
 
+- **Implemented:** ✅ by **RM1** (`rm1-complete`, 2026-07-23) — bindings realized in `src/mini_prometheus/`; verified by 31 tests. See `docs/milestones/RM1-completion-report.md`.
 - **Status:** ❄ **FROZEN (2026-07-23).** Ratified decisions: demonstration domain = **Machined Part**;
   `ManufacturingRequest` is the primary engineer-facing input; STEP accepted as an **opaque attachment only**;
   `NS_MP` = **`4f5b56ae-3c77-4135-9f5c-1eef0ab1b252`** (permanent). Schemas + Python bindings generated from

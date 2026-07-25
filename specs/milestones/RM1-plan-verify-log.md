@@ -1,6 +1,8 @@
 # RM1 — Manufacturing Plan → Verify → Log (engineering specification)
 
-- **Status:** Draft — Specification stage. Specification only; **no code** in this document.
+- **Status:** ✅ **IMPLEMENTED & COMPLETE (RM1, `rm1-complete`, 2026-07-23).** Delivered exactly as
+  specified; verified by 31 tests. See `docs/milestones/RM1-completion-report.md` and ADR-0005. This
+  document is retained as the frozen specification of record.
 - **Milestone:** RM1 (re-scoped first runtime milestone, replacing the withdrawn Situation State slice per ADR-0004 / CAP-0001).
 - **Layer:** Mini Prometheus (Layer 4 — Manufacturing Intelligence). Constitution v1.1.0.
 - **Owner:** Manufacturing team; Verifier-protocol + contract review: Architecture Board + Staff.

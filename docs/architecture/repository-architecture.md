@@ -128,13 +128,16 @@ mini-prometheus/
 │       ├── manufacturing_state/         [P1]  OWNED: manufacturing situation/twin state CONTENT (on Noetica substrate)
 │       ├── manufacturing_twin/          [P1]  OWNED: manufacturing digital-twin CONTENT (on Noetica twin engine; expandable namespace — see §12)
 │       ├── manufacturing_constraints/   [P1]  OWNED: manufacturing constraint CONTENT (in Noetica knowledge store; expandable namespace — see §12)
-│       ├── orchestration/              [P1]  OWNED: manufacturing runtime orchestration (composition root — see §14)
+│       ├── manufacturing_planning/     [RM1 ✓] OWNED: manufacturing planning & scheduling (MP's "heart"); deterministic planner
+│       ├── intake/                      [RM1 ✓] MP product-intent intake: ManufacturingRequest → DesignInput (Handbook §2.4)
+│       ├── orchestration/              [P1/RM1 ✓] OWNED: manufacturing runtime orchestration (composition root + episode emission — see §14)
 │       ├── integrations/               [P1]  Adapters ONLY — no business logic (see §12/§14)
-│       │   ├── velith/                       Adapter to Velith package (engineering entry point)
+│       │   ├── velith/                       [RM1 ✓] Adapter: Velith EngineeringResult → DesignInput (engineering entry point)
 │       │   └── noetica/                      Adapter to Noetica platform mechanisms (twin engine, provenance)
-│       ├── manufacturing_planning/     [M2]  OWNED: manufacturing planning & scheduling (MP's "heart")
 │       └── experience/                 [M3]  OWNED: experience collection (emits the Experience Flow, Law 21)
-│                                             (MiniFlyWire adapter removed — Law 4; engineering cognition/reasoning are Velith content)
+│                                             (RM1 emits episodes from orchestration; the standalone experience/ package is later.
+│                                              MiniFlyWire adapter removed — Law 4; engineering cognition/reasoning are Velith content)
+│       # RM1 also added internal mechanisms _contracts/_hashing/_validate/_provenance/_verifier (not owned objects)
 │
 ├── native/                        [P1]  Rust/C++ performance core (constraint-network hot paths, world-model kernels)
 │   ├── README.md                        Boundary established P1; accelerated impls land incrementally
@@ -221,8 +224,9 @@ Every top-level directory maps to a frozen clause. Nothing exists "for convenien
 | `src/mini_prometheus/manufacturing_constraints/` | Owns: **manufacturing constraint content** (HANDBOOK §6.5) | P1 |
 | `src/mini_prometheus/orchestration/` | Owns: **manufacturing runtime orchestration** | P1 |
 | `src/mini_prometheus/integrations/` | Consumes **Velith** (engineering) + **Noetica** (mechanisms) via interfaces; **not** MiniFlyWire (Law 4) | P1 |
-| `src/mini_prometheus/manufacturing_planning/` | Owns: **manufacturing planning & scheduling** (HANDBOOK §2.4) | M2 |
-| `src/mini_prometheus/experience/` | Owns: **experience collection** (Experience Flow, Law 21) | M3 |
+| `src/mini_prometheus/manufacturing_planning/` | Owns: **manufacturing planning & scheduling** (HANDBOOK §2.4) | **RM1 ✓** |
+| `src/mini_prometheus/intake/` | MP **product-intent intake** (HANDBOOK §2.4) | **RM1 ✓** |
+| `src/mini_prometheus/experience/` | Owns: **experience collection** (Experience Flow, Law 21); RM1 emits from `orchestration/` | M3 |
 | *(withdrawn)* engineering cognition / reasoning | **Velith** content, not MP (CAP-0001 / ADR-0004) | — |
 | `native/` | Runtime Architecture performance requirements; production quality | P1 (boundary), M2 (crates) |
 | `tests/` | Engineering Workflow → *Testing*, *Verification*; "never skip verification" | P1 |
