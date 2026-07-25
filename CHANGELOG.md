@@ -7,7 +7,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
 ## [Unreleased]
 
-_RM2 in planning (wire the real pinned Velith/Noetica packages). No changes yet._
+_RM3 in planning (wire the real pinned Velith package). No changes yet._
+
+## [0.3.0] — 2026-07-25 — RM2: experience read-back & idempotent reuse (compounding, rung 1)
+
+**RM2 complete and frozen** (tag `rm2-complete`). Mini Prometheus now *reuses* its own verified
+experience: a repeated `ManufacturingRequest` retrieves and reuses the prior `ProductionPlan` + `Verdict`
+deterministically, writing no duplicate episode — the first measurable rung of compounding. Purely additive:
+**RM1 is byte-unchanged and contracts stay frozen at `0.2.0`.** Runtime `0.2.0 → 0.3.0`.
+See `docs/milestones/RM2-completion-report.md` and `docs/ROADMAP.md`.
+
+### Added (RM2 — five milestones)
+- **M1** — `experience/episode_store_reader.py`: read RM1's episode JSONL back into verified
+  `ManufacturingEpisode` objects (explicit per-type reconstruction + content_hash integrity).
+- **M2** — `experience/episode_index.py`: deterministic composite-key index
+  (`(design_input_identity_hash, capability_model_version)`) with exact-match `lookup`.
+- **M3** — `orchestration/reuse_runner.py` (new file): `run_with_reuse` — intake → lookup → reuse (with a
+  reproducibility guard that re-derives the plan and asserts the content_hash) or delegate to RM1's `run`;
+  `ReuseRunResult`, `ExperienceConsistencyError`. RM1's `runner.py` untouched.
+- **M4** — `tests/boundary/test_experience_boundaries.py` + CI gates: Law-6 non-goals (no store/retention
+  engine), import discipline, contract-freeze (`VERSION == 0.2.0`), and an RM1 zero-diff gate vs `rm1-complete`.
+- **M5** — this governance close-out.
+- **Verified:** 50 tests pass (RM1's 31 unchanged + 19 RM2); ruff clean; contracts frozen; bindings drift-stable.
+- Planning record: `specs/milestones/RM2-experience-reuse.md` (spec), `docs/design/RM2-engineering-package.md`
+  (architecture), `docs/design/RM2-implementation-plan.md` (plan); decision in `docs/adr/0006-rm2-acceptance.md`.
 
 ## [0.2.0] — 2026-07-23 — RM1: "plan → verify → log" (first manufacturing capability)
 

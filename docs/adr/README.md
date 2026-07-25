@@ -12,6 +12,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0003](0003-runtime-implementation-order.md) | Runtime implementation order: Situation State first | Accepted (RM1 scope superseded by 0004) |
 | [0004](0004-conform-repository-to-handbook.md) | Conform repository to HANDBOOK_v1.1 (ratified CAP-0001) | Accepted |
 | [0005](0005-rm1-implementation-and-acceptance.md) | RM1 implementation decisions and acceptance | Accepted |
+| [0006](0006-rm2-acceptance.md) | RM2 implementation and acceptance | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

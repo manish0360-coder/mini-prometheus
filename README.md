@@ -8,9 +8,10 @@ manufacturing **content** and consumes the **Velith** engineering layer (and, tr
 > Mini Prometheus is **not** a research project. The research is complete and frozen. This
 > repository engineers the frozen theory into a working manufacturing intelligence.
 
-**Status:** RM1 complete (`rm1-complete`, runtime `0.2.0`) — the `plan → verify → log` loop turns a real
-engineer `ManufacturingRequest` into a verified `ProductionPlan` + `ManufacturingEpisode`. Next: RM2
-(wire the real pinned Velith/Noetica packages). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status:** RM2 complete (`rm2-complete`, runtime `0.3.0`) — on top of RM1's `plan → verify → log` loop,
+Mini Prometheus now **reuses its own verified experience**: a repeated request retrieves and reuses the prior
+`ProductionPlan` + `Verdict` deterministically (the first rung of compounding). Next: RM3 (wire the real
+pinned Velith package). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Where to start
 
