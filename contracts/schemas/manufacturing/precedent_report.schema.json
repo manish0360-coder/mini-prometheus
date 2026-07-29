@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/precedent_report.schema.json",
+  "title": "PrecedentReport",
+  "description": "RM3 Engineering Precedent Reasoning output (contract package §4). Advisory only; the report carries NO query-verdict field (structural honesty). schema_version 1.0.0. Identity view excludes report_id, content_hash, and provenance; report_id = uuid5(NS_MP, content_hash). References frozen RM1 enums (ManufacturabilityVerdictStatus/ManufacturabilityReasonCode/EngineeringVerificationStatus); reuses common primitives unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "query_design_input_ref",
+    "precedents",
+    "signal",
+    "signal_source_rank",
+    "precedent_model_version",
+    "content_hash",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "report_id": { "$ref": "../common.schema.json#/$defs/Uuid" },
+    "query_design_input_ref": { "$ref": "../common.schema.json#/$defs/Ref" },
+    "precedents": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PrecedentEntry" }
+    },
+    "signal": { "$ref": "#/$defs/PrecedentSignal" },
+    "signal_source_rank": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "rank of the entry that produced the signal; null iff signal = NONE."
+    },
+    "precedent_model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
+    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" }
+  },
+  "$defs": {
+    "PrecedentSignal": {
+      "title": "PrecedentSignal",
+      "description": "Closed enum (report-level derived signal). Member change = MAJOR.",
+      "type": "string",
+      "enum": ["SUPPORTING", "CAUTIONARY", "NONE"]
+    },
+    "PrecedentEntry": {
+      "title": "PrecedentEntry",
+      "description": "Precedent-entry data (contract package §3). No independent id/content_hash; grounded by episode_ref.content_hash.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank",
+        "episode_ref",
+        "relevance_score",
+        "verdict_status",
+        "reason_codes",
+        "precedent_verification_status"
+      ],
+      "properties": {
+        "rank": { "type": "integer", "minimum": 0 },
+        "episode_ref": { "$ref": "../common.schema.json#/$defs/Ref" },
+        "relevance_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Per-mille relevance (1000 = identical, D=0). Integer to keep hashing deterministic."
+        },
+        "verdict_status": { "$ref": "manufacturability.schema.json#/$defs/ManufacturabilityVerdictStatus" },
+        "reason_codes": {
+          "type": "array",
+          "items": { "$ref": "manufacturability.schema.json#/$defs/ManufacturabilityReasonCode" }
+        },
+        "precedent_verification_status": { "$ref": "design_input.schema.json#/$defs/EngineeringVerificationStatus" }
+      }
+    }
+  }
+}

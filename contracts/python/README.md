@@ -23,6 +23,7 @@ manufacturing/manufacturing_task_schema.py    # ManufacturingTask
 manufacturing/production_plan_schema.py        # ProductionPlan, ProcessStep, ResourceAssignment
 manufacturing/manufacturability_schema.py     # ManufacturabilityVerdictStatus, ManufacturabilityReasonCode (closed)
 manufacturing/manufacturing_episode_schema.py # ManufacturingEpisode (data contract, Law 21)
+manufacturing/precedent_report_schema.py      # PrecedentReport, PrecedentEntry, PrecedentSignal (RM3, additive)
 consumed/noetica/verdict_schema.py            # Verdict envelope (Noetica-owned stub)
 consumed/noetica/provenance_schema.py         # Noetica provenance alias
 consumed/velith/engineering_result_schema.py  # EngineeringResult (Velith-owned opaque stub)
