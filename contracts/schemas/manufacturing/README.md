@@ -17,7 +17,7 @@ and `contracts/native/` are generated from these by `tools/` — never hand-edit
 | `manufacturing_task.schema.json` | `ManufacturingTask` | MP | product_intent.summary, design_input_ref |
 | `production_plan.schema.json` | `ProductionPlan` (+`ProcessStep`,`ResourceAssignment`) | MP | task_ref, capability_model_version, steps, resource_assignments |
 | `manufacturability.schema.json` | `ManufacturabilityVerdictStatus`, `ManufacturabilityReasonCode` (closed enums) | MP | n/a (enums) |
-| `manufacturing_episode.schema.json` | `ManufacturingEpisode` (data contract, Law 21) | MP | task, design_ref, status, plan.content_hash, verdict.status+reason_codes, capability_model_version |
+| `manufacturing_episode.schema.json` | `ManufacturingEpisode` (data contract, Law 21; **v1.1.0** adds optional `design_input`) | MP | task, design_ref, status, plan.content_hash, verdict.status+reason_codes, capability_model_version *(design_input excluded — identity already in design_ref.content_hash)* |
 | `precedent_report.schema.json` *(RM3, additive)* | `PrecedentReport` (+`PrecedentEntry`, `PrecedentSignal`) — design: [`contracts/RM3-contract-package.md`](../../RM3-contract-package.md) | MP | query_design_input_ref, precedents(rank, episode_ref, relevance_score, verdict_status, sorted reason_codes, precedent_verification_status), signal, signal_source_rank, precedent_model_version |
 
 Consumed stubs (generated under `../consumed/`, owned upstream — RM1 pins, never owns):

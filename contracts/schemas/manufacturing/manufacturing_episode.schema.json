@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/manufacturing_episode.schema.json",
   "title": "ManufacturingEpisode",
-  "description": "Experience-Flow DATA contract (Law 21; package §3.6). MP produces the content; Noetica owns the lifecycle framework (deferred). Serialized as append-only JSONL (one canonical-JSON object per line). episode_id is deterministic = uuid5(NS_MP, content_hash). Persisted episodes NEVER carry status INFRA_ERROR. Identity view excludes episode_id, content_hash (self), and timing.",
+  "description": "Experience-Flow DATA contract (Law 21; package §3.6). schema_version 1.1.0. MP produces the content; Noetica owns the lifecycle framework (deferred). Serialized as append-only JSONL (one canonical-JSON object per line). episode_id is deterministic = uuid5(NS_MP, content_hash). Persisted episodes NEVER carry status INFRA_ERROR. Identity view excludes episode_id, content_hash (self), timing, and design_input. 1.1.0 (additive, backward-compatible): optional design_input embeds the complete DesignInput so new episodes are full-fidelity engineering memories; it is OPTIONAL (legacy 1.0.0 episodes omit it) and EXCLUDED from the identity view (design identity is already captured by design_ref.content_hash), so content_hash is unchanged.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "episode_id", "task", "design_ref", "engineering_verification_status", "plan", "verdict", "capability_model_version", "content_hash", "provenance", "timing"],
@@ -12,6 +12,10 @@
     "task": { "$ref": "manufacturing_task.schema.json" },
     "design_ref": { "$ref": "../common.schema.json#/$defs/Ref" },
     "engineering_verification_status": { "$ref": "design_input.schema.json#/$defs/EngineeringVerificationStatus" },
+    "design_input": {
+      "$ref": "design_input.schema.json",
+      "description": "OPTIONAL (1.1.0+). The complete DesignInput this episode was produced from — the full-fidelity engineering memory. Absent on legacy 1.0.0 episodes. Excluded from the content_hash identity view."
+    },
     "plan": { "$ref": "production_plan.schema.json" },
     "verdict": { "$ref": "../consumed/noetica/verdict.schema.json" },
     "capability_model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },

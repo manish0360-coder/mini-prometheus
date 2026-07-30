@@ -12,6 +12,11 @@ from pathlib import Path
 
 from mini_prometheus import _hashing as h
 from mini_prometheus._contracts import (
+    DeclaredOperation,
+    DesignArtifactRef,
+    DesignInput,
+    DesignSource,
+    DesignSourceKind,
     EngineeringVerificationStatus,
     ManufacturingEpisode,
     ManufacturingTask,
@@ -23,7 +28,9 @@ from mini_prometheus._contracts import (
     Provenance,
     Ref,
     ResourceAssignment,
+    StockForm,
     Timing,
+    Tolerances,
     Verdict,
 )
 from mini_prometheus.orchestration.episode_store import DEFAULT_STORE
@@ -114,6 +121,43 @@ def _timing(d: dict) -> Timing:
     return Timing(created_at=d["created_at"], plan_ms=d["plan_ms"], verify_ms=d["verify_ms"])
 
 
+# --- DesignInput reconstruction (episode schema 1.1.0+; absent on legacy 1.0.0 episodes) ------------
+
+def _tolerances(d: dict) -> Tolerances:
+    return Tolerances(general_tolerance_mm=d["general_tolerance_mm"])
+
+
+def _declared_operation(d: dict) -> DeclaredOperation:
+    return DeclaredOperation(op=ProcessOp(d["op"]), target=d.get("target"), params=d.get("params"))
+
+
+def _design_source(d: dict) -> DesignSource:
+    return DesignSource(kind=DesignSourceKind(d["kind"]), ref=_ref(d["ref"]))
+
+
+def _design_artifact_ref(d: dict) -> DesignArtifactRef:
+    return DesignArtifactRef(media_type=d["media_type"], id=d["id"], content_hash=d["content_hash"])
+
+
+def _design_input(d: dict) -> DesignInput:
+    return DesignInput(
+        schema_version=d["schema_version"],
+        design_input_id=d["design_input_id"],
+        engineering_verification_status=EngineeringVerificationStatus(d["engineering_verification_status"]),
+        source=_design_source(d["source"]),
+        material=d["material"],
+        stock_form=StockForm(d["stock_form"]),
+        declared_operations=[_declared_operation(o) for o in d["declared_operations"]],
+        quantity=d["quantity"],
+        provenance=_provenance(d["provenance"]),
+        material_code=d.get("material_code"),
+        tolerances=_tolerances(d["tolerances"]) if d.get("tolerances") is not None else None,
+        design_artifact_ref=_design_artifact_ref(d["design_artifact_ref"])
+        if d.get("design_artifact_ref") is not None
+        else None,
+    )
+
+
 def _episode(d: dict) -> ManufacturingEpisode:
     return ManufacturingEpisode(
         schema_version=d["schema_version"],
@@ -129,6 +173,7 @@ def _episode(d: dict) -> ManufacturingEpisode:
         content_hash=d["content_hash"],
         provenance=_provenance(d["provenance"]),
         timing=_timing(d["timing"]),
+        design_input=_design_input(d["design_input"]) if "design_input" in d else None,
     )
 
 

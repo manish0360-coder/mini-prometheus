@@ -2,7 +2,7 @@
 
 Enforces that the RM2 read side (`experience/`, `orchestration/reuse_runner.py`) is a minimal read
 index — not a Noetica memory/store/retention engine (Law 6, §11.11) — and imports only contracts +
-RM1 (read-only) + stdlib; never MiniFlyWire (Law 4); and that the contract suite version is 0.3.0.
+RM1 (read-only) + stdlib; never MiniFlyWire (Law 4); and that the contract suite version is 0.4.0.
 Scans AST (imports and symbol names), so it never false-matches boundary words in docstrings.
 """
 from __future__ import annotations
@@ -62,5 +62,5 @@ def test_no_lifecycle_framework_symbols():
                 assert not _LIFECYCLE_SYMBOL.search(node.name), f"{path.name}: lifecycle symbol '{node.name}'"
 
 
-def test_contracts_frozen_at_0_3_0():
-    assert (_REPO / "contracts" / "VERSION").read_text(encoding="utf-8").strip() == "0.3.0"
+def test_contracts_frozen_at_0_4_0():
+    assert (_REPO / "contracts" / "VERSION").read_text(encoding="utf-8").strip() == "0.4.0"

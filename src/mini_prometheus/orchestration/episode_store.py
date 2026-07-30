@@ -20,7 +20,7 @@ from mini_prometheus._contracts import (
 from mini_prometheus._provenance import make_provenance
 from mini_prometheus._validate import validate
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"  # 1.1.0: episodes embed the full DesignInput (complete engineering memory)
 _REPO = pathlib.Path(__file__).resolve().parents[3]
 DEFAULT_STORE = _REPO / "artifacts" / "episodes" / "manufacturing_episodes.jsonl"
 
@@ -42,6 +42,7 @@ def build_episode(
         task=task,
         design_ref=task.design_input_ref,
         engineering_verification_status=design_input.engineering_verification_status,
+        design_input=design_input,  # 1.1.0: embed the full DesignInput (excluded from the identity/content_hash)
         plan=plan,
         verdict=verdict,
         capability_model_version=capability_model_version,

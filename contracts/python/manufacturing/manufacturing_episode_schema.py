@@ -23,7 +23,7 @@ class Timing:
 @dataclass
 class ManufacturingEpisode:
     """
-    Experience-Flow DATA contract (Law 21; package §3.6). MP produces the content; Noetica owns the lifecycle framework (deferred). Serialized as append-only JSONL (one canonical-JSON object per line). episode_id is deterministic = uuid5(NS_MP, content_hash). Persisted episodes NEVER carry status INFRA_ERROR. Identity view excludes episode_id, content_hash (self), and timing.
+    Experience-Flow DATA contract (Law 21; package §3.6). schema_version 1.1.0. MP produces the content; Noetica owns the lifecycle framework (deferred). Serialized as append-only JSONL (one canonical-JSON object per line). episode_id is deterministic = uuid5(NS_MP, content_hash). Persisted episodes NEVER carry status INFRA_ERROR. Identity view excludes episode_id, content_hash (self), timing, and design_input. 1.1.0 (additive, backward-compatible): optional design_input embeds the complete DesignInput so new episodes are full-fidelity engineering memories; it is OPTIONAL (legacy 1.0.0 episodes omit it) and EXCLUDED from the identity view (design identity is already captured by design_ref.content_hash), so content_hash is unchanged.
     """
 
     schema_version: common_schema.SemVer
@@ -37,3 +37,4 @@ class ManufacturingEpisode:
     content_hash: common_schema.ContentHash
     provenance: common_schema.Provenance
     timing: Timing
+    design_input: design_input_schema.DesignInput | None = None

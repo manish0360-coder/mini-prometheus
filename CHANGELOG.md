@@ -7,7 +7,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
 ## [Unreleased]
 
-_RM3 in planning (wire the real pinned Velith package). No changes yet._
+### Changed — RM1 correction: `ManufacturingEpisode` complete engineering memory (ratified impact analysis)
+- **`ManufacturingEpisode` gains optional `design_input: DesignInput`** so new episodes embed the full engineering
+  input (complete engineering memory for future deterministic precedent reasoning). `manufacturing_episode`
+  `schema_version` `1.0.0 → 1.1.0`; contract suite `contracts/VERSION 0.3.0 → 0.4.0`. `DesignInput` unchanged.
+- **Backward compatible / migration:** `design_input` is **optional** and **excluded from the content-hash
+  identity view** (design identity is already in `design_ref.content_hash`), so existing episode hashes are
+  unchanged and legacy `1.0.0` episodes remain valid. Legacy episodes **cannot** be back-filled (their
+  `material_code`/`tolerances` live only inside one-way hashes); no migration is performed. **Retrieval policy for
+  legacy episodes is intentionally deferred to a later milestone** — legacy episodes are preserved, not classified.
+- Updated: episode schema + regenerated `manufacturing_episode` binding; RM1 emission (`orchestration/episode_store.py`)
+  now populates `design_input`; RM2 read-side (`experience/episode_store_reader.py`) reconstructs it when present;
+  contract-version assertions `0.3.0 → 0.4.0`. No RM3 work; retriever not implemented.
 
 ## [0.3.0] — 2026-07-25 — RM2: experience read-back & idempotent reuse (compounding, rung 1)
 
