@@ -1,5 +1,5 @@
-# CI is the machine enforcement of the frozen Engineering Workflow verification gate (RM1 + RM2).
-# Stages: contract-drift -> contract-freeze -> RM1 zero-diff -> lint -> import-linter -> tests -> boundary.
+# CI is the machine enforcement of the frozen Engineering Workflow verification gate (RM1 + RM2 + RM3).
+# Stages: contract-drift -> contract-freeze -> RM1/RM2 zero-diff -> lint -> import-linter -> tests -> boundary.
 # Non-skippable; red blocks merge. Do not weaken gates.
 name: ci
 
@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history + tags, so the RM1 zero-diff gate can diff against rm1-complete
+          fetch-depth: 0  # full history + tags, so the zero-diff gate can diff against rm2-complete
 
       - uses: actions/setup-python@v5
         with:
@@ -31,14 +31,21 @@ jobs:
           git diff --exit-code -- contracts/python \
             || (echo "contracts/python is stale — regenerate from schemas" && exit 1)
 
-      - name: Contract suite frozen (RM2 must not change contracts)
+      - name: Contract suite frozen at the ratified version (RM3 is additive)
+        # 0.4.0 = RM2's 0.2.0 + the RM3-additive PrecedentReport set + the ratified RM1 correction
+        # (optional design_input on ManufacturingEpisode). RM3-M2..M6 must not move it.
         run: |
           test "$(cat contracts/VERSION)" = "0.4.0" \
             || (echo "contracts/VERSION drifted from the frozen suite version 0.4.0" && exit 1)
 
-      - name: RM1 + contracts unchanged (zero-diff vs rm1-complete)
+      - name: RM1/RM2 behavioral core unchanged (zero-diff vs rm2-complete)
+        # RM3 must not modify RM1/RM2. This diffs the RM1/RM2 behavioral core that is byte-frozen at
+        # rm2-complete. The ratified RM1 correction deliberately changed episode_store.py,
+        # experience/episode_store_reader.py, the manufacturing_episode schema + binding, and
+        # contracts/VERSION; those are guarded instead by the contract-drift + contract-freeze gates and
+        # the full RM1/RM2 test suite, so they are intentionally NOT in this byte-diff set.
         run: |
-          git diff --exit-code rm1-complete -- \
+          git diff --exit-code rm2-complete -- \
             src/mini_prometheus/_contracts.py \
             src/mini_prometheus/_hashing.py \
             src/mini_prometheus/_validate.py \
@@ -47,11 +54,12 @@ jobs:
             src/mini_prometheus/intake \
             src/mini_prometheus/manufacturing_planning \
             src/mini_prometheus/manufacturing_constraints \
+            src/mini_prometheus/manufacturing_state \
+            src/mini_prometheus/manufacturing_twin \
             src/mini_prometheus/orchestration/__init__.py \
             src/mini_prometheus/orchestration/runner.py \
-            src/mini_prometheus/orchestration/episode_store.py \
-            contracts/ \
-            || (echo "RM1 or contracts changed — RM1 is frozen" && exit 1)
+            src/mini_prometheus/orchestration/reuse_runner.py \
+            || (echo "RM1/RM2 behavioral core changed — frozen since rm2-complete" && exit 1)
 
       - name: Lint (ruff)
         run: ruff check src tests tools
