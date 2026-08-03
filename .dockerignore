@@ -1,0 +1,13 @@
+# Keep the build context small and reproducible (the repo lives on a slow /mnt drive).
+.git/
+.github/
+**/__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+data/
+docs/
+specs/
+*.md

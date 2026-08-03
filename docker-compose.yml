@@ -1,0 +1,18 @@
+# Mini Prometheus — verifier service (mirrors the Velith M0 compose pattern).
+#
+# One service: it builds the pinned container shell and runs the project's gate INSIDE it. No databases,
+# queues, or networks — those arrive with the milestone that first needs them.
+#
+# Run (one command, builds then runs the default gate to green):
+#   docker compose run --rm --build verifier
+#
+# Other gates (override the command):
+#   docker compose run --rm verifier mypy src
+#   docker compose run --rm verifier ruff check .        # red until the formatting-normalization chore
+services:
+  verifier:
+    build:
+      context: .
+      dockerfile: docker/verifier.Dockerfile
+    image: mini-prometheus-verifier:rm4
+    command: ["pytest", "-q"]

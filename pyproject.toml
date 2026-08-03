@@ -15,12 +15,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Toolchain PINNED for reproducibility and ecosystem consistency with Velith (same lint/type/test
+# family, pinned to exact patch versions — no floating ranges). The local venv and the Docker verifier
+# install this exact set, so a verdict is identical on the workstation and in the container.
 dev = [
-    "pytest",
-    "ruff",
-    "mypy",
-    "import-linter",   # enforces contracts-only cross-boundary dependency direction
-    "datamodel-code-generator",  # regenerates contracts/python bindings from schemas
+    "pytest==8.3.3",
+    "ruff==0.6.9",
+    "mypy==1.11.2",
+    "types-jsonschema",            # jsonschema stubs — `mypy src` is type-clean with these present
+    "import-linter==2.13",         # enforces contracts-only cross-boundary dependency direction
+    "datamodel-code-generator==0.71.0",  # regenerates contracts/python bindings from schemas
 ]
 
 [build-system]
@@ -35,7 +39,31 @@ testpaths = ["tests"]
 pythonpath = ["src", ".", "tests"]
 
 [tool.ruff]
+line-length = 100
+target-version = "py311"
 src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+# Target standard, mirroring Velith's rule set. NOTE: the existing RM1–RM3 source predates any ruff
+# standard (long lines, unsorted imports), so `ruff check`/`ruff format` are NOT yet green. A one-time
+# `ruff format` + `ruff check --fix` normalization is a separate, tracked chore; until then the
+# verifier's blocking gate is `pytest` + `mypy src` (both green).
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mini_prometheus", "contracts"]
+
+# ----------------------------------------------------------------------------
+# mypy: pragmatic config; `mypy src` is clean today. Tightening to strict + tests is a follow-up
+# (the test helpers use a dict(...)+** idiom mypy rejects). No pydantic plugin — MP uses dataclasses.
+# ----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+mypy_path = ["src", "."]
+namespace_packages = true
+explicit_package_bases = true
+ignore_missing_imports = true
+warn_unused_configs = true
 
 # Dependency direction is one-way: implementations -> contracts.
 # Never contracts -> implementations; never src <-> src across packages except via contracts.
