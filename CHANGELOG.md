@@ -5,7 +5,42 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
-## [Unreleased]
+## [0.4.0] — 2026-08-03 — RM3 Engineering Precedent Reasoning + RM4 Engineering Judgment (compounding, rungs 2 & 3)
+
+**Consolidated release.** This cuts the accumulated, previously-unreleased work — RM3, the ratified RM1
+correction, and RM4 — into one runtime `0.3.0 → 0.4.0` release. The contract suite is **frozen at `0.4.0`**
+throughout (RM3 and RM4 are additive/internal; only the earlier RM1 correction touched contracts). See
+`docs/ROADMAP.md`, `docs/milestones/RM3-completion-report.md`, and `docs/milestones/RM4-completion-report.md`.
+
+### Added — RM4: Engineering Judgment (compounding rung 3; tag pending `rm4-complete`)
+- **Engineering Judgment** — the deterministic, advisory capability of judging a proposed manufacturing
+  solution in the full context of its case. Its first implementation is **Engineering Critique**. New package
+  `judgment/` + composition entry `orchestration/judgment_runner.py`, built in six commits:
+  - **C1** internal `EngineeringSituation` (the coherent engineering state of one case; strictly internal —
+    no contract, no persistence, no external identity); **C2** deterministic versioned `critic_model`
+    (closed finding-family taxonomy: intent-coverage, precedent-consistency, internal-verdict; summary
+    assessment); **C3** `engineering_critique` (applies the model, orders findings, assembles the advisory
+    critique with an in-memory reproducibility `content_hash` + provenance); **C4** `judgment_runner`
+    (thin read-only composition (episode, report) → situation → critique); **C5** boundary gates + CI wiring;
+    **C6** this close-out.
+- **Situated value:** a plan whose own RM1 verdict is `MANUFACTURABLE` yet strongly resembles a
+  `NOT_MANUFACTURABLE` precedent yields a **CAUTIONARY** critique — a signal isolated verification cannot produce.
+- **Purely additive / internal:** RM1/RM2/RM3 byte-unchanged; **no contract** (suite frozen at `0.4.0`); no
+  planning, verification, retrieval, persistence, ML, or external identity. `EngineeringSituation` is consumed
+  only within `judgment/` (boundary-test enforced). **Primitive-revelation record:** the observed load-bearing
+  constituents are `{design_input, plan, verdict, precedent_report}` (RM4 completion report §Primitive Revelation).
+- **Verified:** 131 tests pass (RM3's + 39 RM4: 6 situation, 8 critic-model, 8 critique, 6 pipeline, 7 boundary,
+  plus regressions); `mypy src` clean; contracts frozen.
+
+### Added — RM3: Engineering Precedent Reasoning (compounding rung 2; retroactively documented in this release)
+- **Engineering Precedent Reasoning** — a deterministic, read-only capability that surfaces the most *relevant
+  prior verified* manufacturing cases for a new request and derives a supporting/cautionary/none signal. New
+  package `precedent/` (`precedent_model`, `retriever`, `reasoner`) + `orchestration/precedent_runner.py`, built
+  across RM3-M2…M5. Additive `PrecedentReport`/`PrecedentEntry`/`PrecedentSignal` contracts (part of the `0.4.0`
+  suite). Retriever = extraction seed / mechanism; reasoner = domain identity (seed/identity separation, Law 3/8).
+- **Boundaries:** deterministic structural relevance only — no ML/embeddings/vector DB, no store/retention engine
+  (Law 6), no MiniFlyWire (Law 4); read-only. Architectural debt recorded: the O(N) retriever is an intentional
+  local extraction seed (`docs/governance/RM3-architectural-debt.md`).
 
 ### Changed — RM1 correction: `ManufacturingEpisode` complete engineering memory (ratified impact analysis)
 - **`ManufacturingEpisode` gains optional `design_input: DesignInput`** so new episodes embed the full engineering
