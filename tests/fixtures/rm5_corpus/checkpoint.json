@@ -1,0 +1,51 @@
+{
+  "checkpoint_id": "sha256:9aec551ee2f7eecc161fce08728e288151ad7a78a1ed03d4e127a298e4f64ed2",
+  "generator_version": "1.0.0",
+  "episode_schema_version": "1.1.0",
+  "fixed_produced_at": "2026-01-01T00:00:00+00:00",
+  "hold_out_modulo": 4,
+  "analogous_definition": {
+    "min_relevance": 1,
+    "exclude_relevance": 1000
+  },
+  "capability_regime": {
+    "version": "2.0.0",
+    "derivation": "default_model() minus resource 'lathe01'",
+    "op_capability": {
+      "cut_stock": "cap.saw",
+      "deburr": "cap.bench",
+      "drill": "cap.drill",
+      "face_mill": "cap.mill",
+      "inspect": "cap.cmm",
+      "pocket_mill": "cap.mill",
+      "turn": "cap.lathe"
+    },
+    "resources": {
+      "bench01": [
+        "cap.bench"
+      ],
+      "cmm01": [
+        "cap.cmm"
+      ],
+      "mill01": [
+        "cap.drill",
+        "cap.mill"
+      ],
+      "saw01": [
+        "cap.saw"
+      ]
+    },
+    "supported_materials": [
+      "aluminum",
+      "aluminum 6061",
+      "brass",
+      "brass 360",
+      "steel",
+      "steel 1018"
+    ]
+  },
+  "precedent_model_version": "1.0.0",
+  "n_total": 450,
+  "n_experience": 329,
+  "n_held_out": 121
+}
