@@ -10,6 +10,12 @@ v1.1.0); all ownership traces to Handbook §2.4.
 > (Constitution §1.7) ahead of external package integration: RM3 became **Engineering Precedent
 > Reasoning** and RM4 became **Engineering Judgment**. The real-Velith and real-Noetica integrations
 > (formerly labelled RM3/RM4) moved out to **RM5/RM6**. This table reflects what was built.
+>
+> **Reprioritization note (2026-09-15).** Real-Velith integration (then RM5) was **externally blocked**
+> — Velith is `m8-complete`, version `0.0.0`, with no consumable release and no `EngineeringTask`/
+> `EngineeringResult` API (manufacturing is its decade-scale destination). RM5 was reprioritized to the
+> fully-unblocked **Compounding Validation Experiment** (the held-out compounding measurement formerly
+> parked at RM7+). Real Velith moved to **RM6**, real Noetica to **RM7**. See ADR-0009.
 
 | Milestone | Capability | Status | Tag | Notes |
 |---|---|---|---|---|
@@ -18,9 +24,10 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM1 correction** | `ManufacturingEpisode` embeds the full `DesignInput` (complete engineering memory) | ✅ Ratified | — | contract suite `0.2.0 → 0.4.0`; backward-compatible; enables RM3/RM4 |
 | **RM3** | **Engineering Precedent Reasoning** — surface relevant prior verified cases and derive a supporting/cautionary/none signal (compounding, rung 2) | ✅ **Complete** (2026-08-03) | in `0.4.0` | runtime `0.4.0`; additive `PrecedentReport` contracts; deterministic structural relevance (no ML); read-only |
 | **RM4** | **Engineering Judgment** — situated advisory critique of a proposed plan against its whole case; first consumer of the internal `EngineeringSituation` primitive (compounding, rung 3) | ✅ **Complete** (2026-08-03) | pending `rm4-complete` | runtime `0.4.0`; additive, **no contract**; `EngineeringSituation` internal; RM1–RM3 byte-unchanged |
-| **RM5** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
-| **RM6** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
-| **RM7+** | Deepen manufacturing content (scheduling, tolerance/precedence models, model-based planner seam); held-out compounding experiment (D7/D8) | ⏳ Future | — | No premature abstraction |
+| **RM5** | **Compounding Validation Experiment** — deterministic, read-only measurement of whether accumulated verified experience improves RM4 judgment vs the RM1 oracle on held-out analogous cases within one fixed regime R* | ✅ **Complete** (2026-09-15) | `rm5-complete` | runtime `0.5.0`; measurement milestone, **no contract**; leaf `experiment/` package; RM1–RM4 byte-unchanged |
+| **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
+| **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
+| **RM8+** | Deepen manufacturing content (scheduling, tolerance/precedence models, model-based planner seam); revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
 
 ## RM3 — what shipped (2026-08-03)
 
@@ -50,11 +57,26 @@ v1.1.0); all ownership traces to Handbook §2.4.
 - Full record: `docs/milestones/RM4-completion-report.md`, ADR-0008, spec `specs/milestones/RM4-engineering-judgment.md`,
   engineering package `docs/design/RM4-engineering-package.md`.
 
-## Standing prerequisite for RM5/RM6
+## RM5 — what shipped (2026-09-15)
 
-RM1–RM4 deliberately depend on the Velith/Noetica **contracts**, not their published **packages** (mirrors
-Velith D16.3). **RM5** cannot leave Specification until **Velith publishes a pinned, consumable package**;
-**RM6** likewise for **Noetica** (grown by extraction, N.3). These external gates are independent of RM1–RM4.
+- A deterministic, read-only **Compounding Validation Experiment** (leaf package `experiment/`): does accumulated
+  verified experience measurably improve RM4 judgment against the RM1 oracle on strictly held-out,
+  analogous-but-non-identical cases within one fixed regime `R* = default_model()` minus `lathe01`? Three arms
+  (Cold Start / No Precedent / Full System); primary contrast **Arm 3 − Arm 2**; validity control **Arm 1 == Arm 2**.
+- **Result (oracle-internal world only):** a **positive finite-corpus precedent effect** — marginal **+42/121
+  (+0.3471)**, concentrated on MANUFACTURABLE (42/45; NOT-class marginal 0/76, so no oracle-label leakage). Controls
+  passed (Arm 1 == Arm 2 121/121; duplicates 0; deterministic checkpoint; reproducible report hash).
+- **Explicitly NOT demonstrated (valid findings):** the H2 false-alarm ceiling (3/45) and strict monotonic
+  compounding (curve 0 → 0.3223 → 0.3554 → 0.3471, final step decreases). Independent review (Gemini):
+  `SCIENTIFICALLY SOUND AS A LIMITED INTERNAL VALIDATION`. Measurement milestone — **no contract** (suite frozen
+  `0.4.0`); RM1–RM4 byte-unchanged.
+- Full record: `docs/milestones/RM5-completion-report.md`, ADR-0009, release `docs/releases/rm5-0.5.0.md`.
+
+## Standing prerequisite for RM6/RM7
+
+RM1–RM5 deliberately depend on the Velith/Noetica **contracts**, not their published **packages** (mirrors
+Velith D16.3). **RM6** cannot leave Specification until **Velith publishes a pinned, consumable package**;
+**RM7** likewise for **Noetica** (grown by extraction, N.3). These external gates are independent of RM1–RM5.
 
 ## Governance
 

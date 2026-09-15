@@ -5,6 +5,44 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.5.0] — 2026-09-15 — RM5 Compounding Validation Experiment (internal validation of the compounding spine)
+
+**Governance/versioning release.** Runtime `0.4.0 → 0.5.0`; the contract suite stays **frozen at `0.4.0`** (RM5 adds
+no public contract/schema). See `docs/milestones/RM5-completion-report.md`, ADR-0009, `docs/releases/rm5-0.5.0.md`.
+
+### Added — RM5: Compounding Validation Experiment (measurement milestone)
+- **New leaf package `experiment/`** (`corpus`, `partition`, `protocol`, `arms`, `runner`) — a deterministic,
+  read-only harness that measures whether accumulated verified experience improves RM4 judgment against the RM1
+  oracle on strictly held-out, analogous-but-non-identical cases within one fixed regime `R* = default_model()`
+  minus `lathe01`. Three arms (Cold Start / No Precedent / Full System); primary causal contrast **Arm 3 − Arm 2**;
+  validity control **Arm 1 == Arm 2**. Composes RM1/RM3/RM4 read-only; no reasoning re-implemented.
+- **Frozen fixture** `tests/fixtures/rm5_corpus/` (checkpoint `sha256:9aec55…`); the committed corpus is the source
+  of truth and is not regenerated during evaluation.
+- **Reproducibility freeze** `tests/unit/test_rm5_reproducibility.py` pins the report `content_hash`
+  (`sha256:2b7c48…`) and every Director-preserved headline value; boundary tests + an import-linter leaf contract
+  keep `experiment/` a leaf consumer that never writes the RM2 episode store.
+
+### Result (deterministic oracle-internal world only)
+- **Positive finite-corpus precedent effect:** Arm 2 = 76/121, Arm 3 = 118/121, **marginal +42/121 (+0.3471)**,
+  concentrated on MANUFACTURABLE (42/45; NOT-class marginal 0/76 — internal-verdict cancels, so no label leakage).
+  Coverage 45/45 and 76/76; excluded duplicates 0.
+- **NOT demonstrated (valid scientific findings, not bugs):** **H2 cautionary false-alarm ceiling = 0 → NOT MET
+  (3/45)**; **strict monotonic compounding → NOT MET** (marginal curve 0 → 0.3223 → 0.3554 → 0.3471, final step
+  decreases). The result is a positive learning effect, not strict monotonic compounding.
+- **Independent review (Gemini):** `SCIENTIFICALLY SOUND AS A LIMITED INTERNAL VALIDATION` (circularity LOW;
+  synthetic-corpus generalization MEDIUM; no mandatory correction). **Claim boundary:** no real-world manufacturing
+  correctness, DFM, cost/quality, human-superiority, or deployment-readiness claims.
+
+### Changed
+- Runtime version `0.4.0 → 0.5.0` (governance only). `docs/ROADMAP.md` updated to record RM5's reprioritization from
+  "wire real Velith" (externally blocked → RM6+) to the Compounding Validation Experiment. CI adds an RM3/RM4
+  zero-diff gate vs `rm4-complete` and `include_external_packages = true` (import-linter 2.13 compatibility for the
+  existing Law-4 external-forbidden contract; no contract semantics changed).
+
+### Unchanged
+- **RM1–RM4 byte-unchanged**; **`contracts/VERSION == 0.4.0`**; no new contract/schema; no ML/embeddings; no Noetica
+  store engine (Law 6); no MiniFlyWire (Law 4).
+
 ## [0.4.0] — 2026-08-03 — RM3 Engineering Precedent Reasoning + RM4 Engineering Judgment (compounding, rungs 2 & 3)
 
 **Consolidated release.** This cuts the accumulated, previously-unreleased work — RM3, the ratified RM1
