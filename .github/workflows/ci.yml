@@ -61,6 +61,18 @@ jobs:
             src/mini_prometheus/orchestration/reuse_runner.py \
             || (echo "RM1/RM2 behavioral core changed — frozen since rm2-complete" && exit 1)
 
+      - name: RM3/RM4 behavioral core unchanged (zero-diff vs rm4-complete)
+        # RM5 must not modify RM3 (Engineering Precedent) or RM4 (Engineering Judgment). This diffs the
+        # RM3/RM4 domain packages + their composition entries, byte-frozen at rm4-complete. RM5 is
+        # purely additive (experiment/ + tests), so this set must show zero diff.
+        run: |
+          git diff --exit-code rm4-complete -- \
+            src/mini_prometheus/precedent \
+            src/mini_prometheus/judgment \
+            src/mini_prometheus/orchestration/precedent_runner.py \
+            src/mini_prometheus/orchestration/judgment_runner.py \
+            || (echo "RM3/RM4 behavioral core changed — frozen since rm4-complete" && exit 1)
+
       - name: Lint (ruff) — ADVISORY until the formatting-normalization chore lands
         # The RM1-RM3 source predates any ruff standard (long lines, unsorted imports), so this is
         # non-blocking until the one-time `ruff format` + `ruff check --fix` normalization is committed.

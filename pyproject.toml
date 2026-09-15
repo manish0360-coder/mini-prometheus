@@ -69,6 +69,10 @@ warn_unused_configs = true
 # Never contracts -> implementations; never src <-> src across packages except via contracts.
 [tool.importlinter]
 root_packages = ["mini_prometheus"]
+# Required by import-linter when any contract forbids an EXTERNAL module (the Law-4 `miniflywire`
+# forbidden contract): grimp must model external packages as graph nodes for that check to evaluate.
+# Additive to the graph only — it changes no contract's semantics.
+include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "MiniFlyWire is never imported (Law 4)"
@@ -88,3 +92,20 @@ forbidden_modules = [
     "mini_prometheus.integrations",
     "mini_prometheus.intake",
 ]
+
+[[tool.importlinter.contracts]]
+name = "RM5 experiment is a leaf consumer — no RM1-RM4 module imports it (arch)"
+type = "forbidden"
+source_modules = [
+    "mini_prometheus.intake",
+    "mini_prometheus.manufacturing_planning",
+    "mini_prometheus.manufacturing_constraints",
+    "mini_prometheus.manufacturing_state",
+    "mini_prometheus.manufacturing_twin",
+    "mini_prometheus.experience",
+    "mini_prometheus.precedent",
+    "mini_prometheus.judgment",
+    "mini_prometheus.orchestration",
+    "mini_prometheus.integrations",
+]
+forbidden_modules = ["mini_prometheus.experiment"]
