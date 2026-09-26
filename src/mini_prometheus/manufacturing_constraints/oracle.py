@@ -29,8 +29,17 @@ or the plan assigns an unavailable resource (a stale plan) -> RESOURCE_UNAVAILAB
 NOT_MANUFACTURABLE, with the responsible resources named in ``detail``. A capability with no
 provider at all stays CAPABILITY_MISSING. The verifier reports 1.2.0 only when availability
 participates in the plan.
+
+RM10 — Single-job timeline (specs/milestones/RM10-single-job-timeline.md). Only when the plan
+carries timeline data: an inconsistent timeline (not covering every step, non-integer minutes, first
+start != 0, end != start + duration, a gap/overlap between consecutive steps, an unassigned step,
+or a lead time not equal to the final end / not on the final step only) -> PLAN_MALFORMED, status
+PLAN_INVALID. The verifier reports 1.3.0 only when it evaluated a timeline; plans without one are
+unchanged.
 """
 from __future__ import annotations
+
+from typing import TypeGuard
 
 from mini_prometheus._contracts import (
     ManufacturabilityReasonCode as RC,
@@ -54,6 +63,7 @@ _COMPONENT = "manufacturability-oracle"
 _VERSION = "1.0.0"          # the RM1 rule set (the default path)
 _VERSION_ECR = "1.1.0"      # RM1 rule set + RM8 declared-precedence and tolerance checks
 _VERSION_AVAILABILITY = "1.2.0"  # + RM9 resource availability (only when availability participates)
+_VERSION_TIMELINE = "1.3.0"      # + RM10 timeline consistency (only when a timeline is carried)
 
 # The step parameter through which the planner carries a requested tolerance (constrained model
 # only).
@@ -61,6 +71,49 @@ REQUIRED_TOLERANCE_PARAM = "required_tolerance_mm"
 # RM9: the step parameter recording the unavailable resources that materially affected that step's
 # resource selection (rerouted or unassignable). Written only on affected steps, never globally.
 UNAVAILABLE_RESOURCES_PARAM = "unavailable_resources"
+# RM10 (single-job timeline). INPUT: the engineer-declared operation time
+# (DeclaredOperation.params), copied onto the step. DERIVED by Mini Prometheus: start/end offsets
+# and, on the final step only, the lead time. All integer minutes.
+DURATION_PARAM = "duration_min"
+SCHEDULE_START_PARAM = "schedule_start_min"
+SCHEDULE_END_PARAM = "schedule_end_min"
+SCHEDULE_LEAD_TIME_PARAM = "schedule_lead_time_min"
+_TIMELINE_KEYS = (
+    DURATION_PARAM, SCHEDULE_START_PARAM, SCHEDULE_END_PARAM, SCHEDULE_LEAD_TIME_PARAM)
+
+
+def timeline_present(plan: ProductionPlan) -> bool:
+    """True iff any step carries RM10 timeline data (the only case the timeline check applies)."""
+    return any(k in (s.params or {}) for s in plan.steps for k in _TIMELINE_KEYS)
+
+
+def _minutes(value: object) -> TypeGuard[int]:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _timeline_inconsistent(plan: ProductionPlan) -> bool:
+    """RM10: a carried timeline is inconsistent unless it covers every step with integer minutes,
+    starts at 0, has end == start + duration (duration >= 1) and next start == previous end, every
+    step is assigned a machine, and the lead time sits on the final step only and equals its end."""
+    if not timeline_present(plan):
+        return False
+    assigned = {a.step_index for a in plan.resource_assignments}
+    expected_start = 0
+    for position, step in enumerate(plan.steps):
+        p = step.params or {}
+        duration = p.get(DURATION_PARAM)
+        start, end = p.get(SCHEDULE_START_PARAM), p.get(SCHEDULE_END_PARAM)
+        if not (_minutes(duration) and _minutes(start) and _minutes(end)):
+            return True
+        if duration < 1 or start != expected_start or end != start + duration:
+            return True
+        if step.index not in assigned:
+            return True
+        if position != len(plan.steps) - 1 and SCHEDULE_LEAD_TIME_PARAM in p:
+            return True
+        expected_start = end
+    lead = (plan.steps[-1].params or {}).get(SCHEDULE_LEAD_TIME_PARAM)
+    return not (_minutes(lead) and lead == expected_start)
 
 
 def availability_participates(plan: ProductionPlan, model: ProcessCapabilityModel) -> bool:
@@ -140,6 +193,7 @@ class ManufacturabilityOracle:
         status = Status.MANUFACTURABLE
         detail: str | None = None
         participates = False
+        timeline_checked = False
 
         indices = [s.index for s in plan.steps]
         if not plan.steps:
@@ -167,12 +221,18 @@ class ManufacturabilityOracle:
             if unavailable:
                 reasons.add(RC.RESOURCE_UNAVAILABLE)
                 detail = "RESOURCE_UNAVAILABLE: " + ", ".join(responsible)
-            if RC.PRECEDENCE_VIOLATION in reasons:
+            # RM10: inert unless the plan carries a timeline.
+            timeline_checked = timeline_present(plan)
+            if _timeline_inconsistent(plan):
+                reasons.add(RC.PLAN_MALFORMED)
+            if RC.PRECEDENCE_VIOLATION in reasons or RC.PLAN_MALFORMED in reasons:
                 status = Status.PLAN_INVALID
             elif reasons:
                 status = Status.NOT_MANUFACTURABLE
 
-        if participates:
+        if timeline_checked:
+            version = _VERSION_TIMELINE
+        elif participates:
             version = _VERSION_AVAILABILITY
         else:
             version = _VERSION_ECR if constraint_data_present(capability_model) else _VERSION

@@ -5,6 +5,30 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.8.0] — 2026-09-27 — RM10 Declared Operation Times and Single-Job Timeline
+
+Runtime `0.7.0 → 0.8.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM10-single-job-timeline.md`, ADR-0012, `docs/milestones/RM10-completion-report.md`.
+**RM10 is a single-job deterministic timeline, not a production scheduler.**
+
+### Added — RM10
+- Engineer-declared operation time `DeclaredOperation.params.duration_min` (integer minutes ≥ 1; no float, bool,
+  string or conversion; no time model).
+- Planner: a serialized single-job timeline (`schedule_start_min`, `schedule_end_min` per step,
+  `schedule_lead_time_min` on the final step, plus the declared `duration_min` copied) only when every operation has
+  a valid duration and every step is assigned; otherwise no timeline value at all. Planning rule `1.3.0` only then.
+- `planner.timeline_issues()` / `planner.lead_time_min()`; the CLI prints the lead time or the missing prerequisites.
+- Oracle: an inconsistent carried timeline → `PLAN_MALFORMED`, `PLAN_INVALID`; verifier `1.3.0` only when it
+  evaluates a timeline.
+- Frozen golden `tests/fixtures/rm10_rm9_baseline_golden.json` (generated once from `rm9-complete`) pinning the ECR and
+  availability paths for requests without durations; fixture `engineer_request_with_durations.json` (test inputs).
+- Tests A–T, the golden, and mutation tests.
+
+### Unchanged
+- Requests without durations (RM8 and RM10 goldens pass); RM9's manufacturability verdict for requests that do declare
+  durations; contracts; `Verifier` signature; RM2; CI configuration; no dependency, solver, ML, multi-job logic,
+  FutureScore, MiniFlyWire, Velith or Noetica change.
+
 ## [0.7.0] — 2026-09-27 — RM9 Resource Availability
 
 Runtime `0.6.0 → 0.7.0`; the contract suite stays **frozen at `0.4.0`**. See

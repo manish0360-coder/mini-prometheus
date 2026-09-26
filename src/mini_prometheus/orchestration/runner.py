@@ -177,6 +177,16 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - thin CLI
     else:
         result = run_from_request(request)
     print(f"{result.status} episode -> {result.episode_path}")
+    # RM10: only when the request declared operation times (otherwise the output is RM9's exactly).
+    episode = result.episode
+    if episode is not None and episode.design_input is not None and result.plan is not None:
+        if planner.timing_requested(episode.design_input):
+            lead_time = planner.lead_time_min(result.plan)
+            if lead_time is not None:
+                print(f"lead time: {lead_time} min (single-job serialized timeline)")
+            else:
+                issues = planner.timeline_issues(episode.design_input, result.plan)
+                print("timeline not derived: " + "; ".join(issues))
     return 1 if result.is_error else 0
 
 

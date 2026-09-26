@@ -1,0 +1,198 @@
+{
+ "fingerprint": {
+  "digest": "1eefcb613f56c744780b26ad75938a03400231918b8b1ba28db5d1a43ea3cae2",
+  "n": 11,
+  "rows": [
+   {
+    "case": "default",
+    "plan_content_hash": "sha256:7c137f96580af8e50c2bc39a24566a2a7ab502e14b8ac8a3812a4bc993dff662",
+    "plan_full": "150b52d11af451abeba941840ead7b660013e82c5ccbb5b482ce1c38b21e02bd",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.0.0"
+     },
+     "reason_codes": [],
+     "status": "MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "constrained",
+    "plan_content_hash": "sha256:ab36fa1bc5f480c823425f04635d8029d9e9b2c2b009f88ec9220a52c429b763",
+    "plan_full": "34e7dd0f997e62e5ec16395a42b97e74a6ef4191d8d1d2e2f5ca7272869c7551",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.1.0"
+     },
+     "reason_codes": [],
+     "status": "MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "constrained_tight_misordered",
+    "plan_content_hash": "sha256:71b0623379d419d47a07ec54643c4e50efde0208ffc1649d3c627fe85c09c1c7",
+    "plan_full": "23343103dedd54eaa3f53dd64ccb14d56f0f2345d3e262062f2c5b691beeaf50",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.1.0"
+     },
+     "reason_codes": [
+      "PRECEDENCE_VIOLATION",
+      "TOLERANCE_UNSUPPORTED"
+     ],
+     "status": "PLAN_INVALID"
+    }
+   },
+   {
+    "case": "constrained_tolerance_0_03",
+    "plan_content_hash": "sha256:be57fee00a231ab61eb0e545de3904011c3387e0307b0e786c4e78a000c182fd",
+    "plan_full": "5149473745a22ac4232efb58bf9581aec6c856c862d6c5ac25ec6479f1afea18",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.1.0"
+     },
+     "reason_codes": [
+      "TOLERANCE_UNSUPPORTED"
+     ],
+     "status": "NOT_MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_mill01_down",
+    "plan_content_hash": "sha256:3f4881bfe62f3608e6fd68cdcb6bb70a3d79c0bf04376ec12d660c340e698f35",
+    "plan_full": "fa693fa3c8c351174507b1ca1f917bcc3cc458f97288c4d730574904f2ada007",
+    "verdict": {
+     "detail": "RESOURCE_UNAVAILABLE: mill01",
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.2.0"
+     },
+     "reason_codes": [
+      "RESOURCE_UNAVAILABLE"
+     ],
+     "status": "NOT_MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_lathe01_down_irrelevant",
+    "plan_content_hash": "sha256:7c137f96580af8e50c2bc39a24566a2a7ab502e14b8ac8a3812a4bc993dff662",
+    "plan_full": "150b52d11af451abeba941840ead7b660013e82c5ccbb5b482ce1c38b21e02bd",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.0.0"
+     },
+     "reason_codes": [],
+     "status": "MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_mill01_cmm01_down",
+    "plan_content_hash": "sha256:a8d891142d1ec0dc7f43bb4e8538a2d516bb4d149fed8960191b9f424ded91bf",
+    "plan_full": "86cef8811aff15e30e316f02a18f572f7c95a950dcee6fd2428ab4309d3abbde",
+    "verdict": {
+     "detail": "RESOURCE_UNAVAILABLE: cmm01, mill01",
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.2.0"
+     },
+     "reason_codes": [
+      "RESOURCE_UNAVAILABLE"
+     ],
+     "status": "NOT_MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_twin_reroute",
+    "plan_content_hash": "sha256:13a1e4fa8082f006993697bc71a428b7fa27ec539917537e172eea5645f305d1",
+    "plan_full": "87dce69d79ec51eeae979228b8eaeeecdcd0e6207d3168ce72bc877a27028b0d",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.2.0"
+     },
+     "reason_codes": [],
+     "status": "MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_twin_mill02_down",
+    "plan_content_hash": "sha256:7c137f96580af8e50c2bc39a24566a2a7ab502e14b8ac8a3812a4bc993dff662",
+    "plan_full": "150b52d11af451abeba941840ead7b660013e82c5ccbb5b482ce1c38b21e02bd",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.0.0"
+     },
+     "reason_codes": [],
+     "status": "MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_no_lathe_turn",
+    "plan_content_hash": "sha256:76799f24ac698fcb550fae5518fcaf7c161a765acfaab9b046b0865a7622498d",
+    "plan_full": "ecd07339c7abad08afe2bff0f21512cd29531e6a35aadd6c0b26be5f3b17de51",
+    "verdict": {
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.0.0"
+     },
+     "reason_codes": [
+      "CAPABILITY_MISSING"
+     ],
+     "status": "NOT_MANUFACTURABLE"
+    }
+   },
+   {
+    "case": "avail_constrained_combined",
+    "plan_content_hash": "sha256:94e55bf81b7d70f446e8ca396acb3885eca564c936eaf480e395066e0b14147c",
+    "plan_full": "0d80ef2e4ec2b9acc4ed02b256b87f16958b0277647a4bb6245e3872b438dbe1",
+    "verdict": {
+     "detail": "RESOURCE_UNAVAILABLE: mill01",
+     "grounded": true,
+     "is_error": false,
+     "produced_by": {
+      "component": "manufacturability-oracle",
+      "version": "1.2.0"
+     },
+     "reason_codes": [
+      "PRECEDENCE_VIOLATION",
+      "RESOURCE_UNAVAILABLE",
+      "TOLERANCE_UNSUPPORTED"
+     ],
+     "status": "PLAN_INVALID"
+    }
+   }
+  ]
+ },
+ "generated_from": {
+  "commit": "6ca4d225c24eaedd222d520685471ad45e3783d7",
+  "tag": "rm9-complete"
+ },
+ "generator": "tests/rm10_rm9_baseline_probe.py fingerprint(), run ONCE against a core.autocrlf=false git archive of rm9-complete inside the docker/verifier.Dockerfile image; never regenerated",
+ "probe_sha256": "966a9e1106374207fd21260d41902e7b9392d553f595490ea0c7c3903ac5ab2f",
+ "schema": "mp-rm10-no-duration-golden/1"
+}

@@ -18,6 +18,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0009](0009-rm5-acceptance.md) | RM5 (Compounding Validation Experiment) implementation and acceptance | Accepted |
 | [0010](0010-rm8-acceptance.md) | RM8 (Engineering Constraint Reasoning) implementation and acceptance; RM1/RM2 byte-gate evolution for four files | Accepted |
 | [0011](0011-rm9-acceptance.md) | RM9 (Resource Availability) implementation and acceptance | Accepted |
+| [0012](0012-rm10-acceptance.md) | RM10 (Declared Operation Times and Single-Job Timeline) implementation and acceptance | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

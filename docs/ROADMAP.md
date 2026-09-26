@@ -28,8 +28,20 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
 | **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
 | **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010; the current manufacturing baseline |
-| **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | pending `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
-| **RM10+** | Scheduling (time, capacity, queues — the next separate milestone); model-based planner seam; revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
+| **RM10** | **Declared Operation Times and Single-Job Timeline** — engineer-declared `duration_min` per operation (integer minutes) → a serialized job timeline and lead time; missing prerequisites reported, nothing invented. **Not a production scheduler.** | ✅ **Complete** (2026-09-27) | pending `rm10-complete` | runtime `0.8.0`; **no contract** (suite `0.4.0`); RM8 + RM10 goldens pass; RM2 unchanged; ADR-0012 |
+| **RM11+** | Cross-task scheduling (several jobs sharing machines: contention, no-overlap, makespan) — preceded by an independent adversarial architecture review before any solver or multi-job design; then setup, calendars, capacity; model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM10 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: an engineer may declare, per operation, `params.duration_min` — the total
+  manufacturing time of that operation for the request, in integer minutes ≥ 1. With every duration valid and every
+  step assigned, the planner derives a serialized single-job timeline (start/end per step, lead time on the final
+  step); otherwise it writes no timeline value at all and reports the missing prerequisites. The verifier rejects an
+  inconsistent carried timeline (`PLAN_MALFORMED`, `PLAN_INVALID`). The CLI prints the lead time.
+- Requests without durations are byte-identical to RM9 (RM8 golden + a new golden generated from `rm9-complete`).
+- No contract change, no CI change, no solver, no multi-job logic, no invented times. **Not a production scheduler.**
+- Full record: `docs/milestones/RM10-completion-report.md`, ADR-0012, spec `specs/milestones/RM10-single-job-timeline.md`.
 
 ## RM9 — what shipped (2026-09-27)
 
