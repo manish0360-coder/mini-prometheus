@@ -16,6 +16,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0007](0007-rm3-acceptance.md) | RM3 (Engineering Precedent Reasoning) implementation and acceptance | Accepted |
 | [0008](0008-rm4-acceptance.md) | RM4 (Engineering Judgment) implementation and acceptance | Accepted |
 | [0009](0009-rm5-acceptance.md) | RM5 (Compounding Validation Experiment) implementation and acceptance | Accepted |
+| [0010](0010-rm8-acceptance.md) | RM8 (Engineering Constraint Reasoning) implementation and acceptance; RM1/RM2 byte-gate evolution for four files | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

@@ -1,5 +1,6 @@
-# CI is the machine enforcement of the frozen Engineering Workflow verification gate (RM1 + RM2 + RM3 + RM4).
-# Stages: contract-drift -> contract-freeze -> RM1/RM2 zero-diff -> lint -> import-linter -> types -> tests -> boundary.
+# CI is the machine enforcement of the frozen Engineering Workflow verification gate (RM1 + RM2 + RM3 + RM4 + RM8).
+# Stages: contract-drift -> contract-freeze -> RM1/RM2 zero-diff -> RM8 behavioral zero-diff -> RM3/RM4 zero-diff
+#         -> lint -> import-linter -> types -> tests -> boundary.
 # Non-skippable (except the advisory ruff step); red blocks merge. Do not weaken gates.
 name: ci
 
@@ -44,6 +45,10 @@ jobs:
         # experience/episode_store_reader.py, the manufacturing_episode schema + binding, and
         # contracts/VERSION; those are guarded instead by the contract-drift + contract-freeze gates and
         # the full RM1/RM2 test suite, so they are intentionally NOT in this byte-diff set.
+        # RM8 (ADR-0010, ratified Option A): the four files RM8 necessarily modifies — capability_model.py,
+        # oracle.py, planner.py and orchestration/runner.py — leave this byte-diff set and are guarded instead
+        # by the RM8 behavioral zero-diff gate below. The directories stay in the set (a new file there is
+        # still caught); only those exact files are excluded. Nothing else in this set changed.
         run: |
           git diff --exit-code rm2-complete -- \
             src/mini_prometheus/_contracts.py \
@@ -57,9 +62,19 @@ jobs:
             src/mini_prometheus/manufacturing_state \
             src/mini_prometheus/manufacturing_twin \
             src/mini_prometheus/orchestration/__init__.py \
-            src/mini_prometheus/orchestration/runner.py \
             src/mini_prometheus/orchestration/reuse_runner.py \
+            ':(exclude)src/mini_prometheus/manufacturing_constraints/capability_model.py' \
+            ':(exclude)src/mini_prometheus/manufacturing_constraints/oracle.py' \
+            ':(exclude)src/mini_prometheus/manufacturing_planning/planner.py' \
             || (echo "RM1/RM2 behavioral core changed — frozen since rm2-complete" && exit 1)
+
+      - name: RM8 behavioral zero-diff (default model == frozen rm5-complete golden)
+        # Replaces the byte-freeze for exactly the four RM8 files (ADR-0010). The protected property is that
+        # RM1-RM5 default-model behavior stays byte-identical: 902 full plans/verdicts/episodes (+ hashes),
+        # the legacy CLI, and the contracts/ tree, against a golden generated ONCE from rm5-complete and frozen
+        # by digest inside the test (together with the digest of the probe that generated it). The golden is
+        # never regenerated from the current implementation.
+        run: pytest -q tests/unit/test_rm8_default_zero_diff.py
 
       - name: RM3/RM4 behavioral core unchanged (zero-diff vs rm4-complete)
         # RM5 must not modify RM3 (Engineering Precedent) or RM4 (Engineering Judgment). This diffs the

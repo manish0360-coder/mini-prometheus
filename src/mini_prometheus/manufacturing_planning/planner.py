@@ -4,6 +4,11 @@ Maps a DesignInput's ordered declared operations 1:1 to ProcessSteps (index 0..n
 a required capability and a resource from the capability model, and produces a content-hashed,
 provenance-complete ProductionPlan. Fully deterministic (spec §9): same DesignInput + same model
 version -> same plan and same content_hash. A model-based planner is a later seam (spec §9).
+
+RM8 (C3): under a capability model that carries tolerance data (``constrained_model()``), a
+request's ``general_tolerance_mm`` is carried on each tolerance-bearing step as
+``params["required_tolerance_mm"]`` for the oracle, and the planning rule version becomes 1.1.0.
+With ``default_model()`` nothing changes.
 """
 from __future__ import annotations
 
@@ -22,10 +27,14 @@ from mini_prometheus._validate import validate
 from mini_prometheus.manufacturing_constraints.capability_model import (
     ProcessCapabilityModel,
     capability_for_op,
+    min_tolerance_for_capability,
     resource_for_capability,
 )
+from mini_prometheus.manufacturing_constraints.oracle import REQUIRED_TOLERANCE_PARAM
 
 SCHEMA_VERSION = "1.0.0"
+RULE_VERSION = "1.0.0"              # the RM1 planning rule (the default path)
+RULE_VERSION_TOLERANCE = "1.1.0"    # RM1 rule + RM8 tolerance carriage (only when data is added)
 
 
 def _summary(design_input: DesignInput) -> str:
@@ -63,9 +72,21 @@ def plan(
     di_ref = task.design_input_ref
     task_ref = Ref(id=task.task_id, content_hash=h.content_hash(h.task_identity(task)))
 
+    # RM8 (C3): carry the requested tolerance to the oracle through the open step params — ONLY
+    # when the model carries tolerance data and the request states a tolerance. Never on
+    # default_model() (empty tolerance map), so default-path plans stay byte-identical to RM1-RM5.
+    requested_tolerance = (
+        design_input.tolerances.general_tolerance_mm
+        if capability_model.capability_tolerance_mm and design_input.tolerances is not None
+        else None
+    )
     steps: list[ProcessStep] = []
     for i, declared in enumerate(design_input.declared_operations):
         capability = capability_for_op(capability_model, declared.op)
+        params: dict[str, object] = {"source_op_index": i}
+        tolerance_bearing = min_tolerance_for_capability(capability_model, capability) is not None
+        if requested_tolerance is not None and tolerance_bearing:
+            params[REQUIRED_TOLERANCE_PARAM] = requested_tolerance
         steps.append(
             ProcessStep(
                 index=i,
@@ -73,9 +94,12 @@ def plan(
                 required_capability=capability,
                 inputs=[design_input.material],
                 provenance_ref=di_ref,
-                params={"source_op_index": i},
+                params=params,
             )
         )
+    # The planning rule version records whether the RM8 tolerance rule actually introduced data.
+    tolerance_introduced = any(REQUIRED_TOLERANCE_PARAM in (s.params or {}) for s in steps)
+    rule_version = RULE_VERSION_TOLERANCE if tolerance_introduced else RULE_VERSION
 
     assignments: list[ResourceAssignment] = []
     for step in steps:
@@ -100,7 +124,7 @@ def plan(
         provenance=make_provenance(
             source_refs=[di_ref],
             rule_id="planner.deterministic",
-            rule_version="1.0.0",
+            rule_version=rule_version,
             produced_at=produced_at,
             capability_model_version=capability_model.version,
             component="manufacturing-planner",

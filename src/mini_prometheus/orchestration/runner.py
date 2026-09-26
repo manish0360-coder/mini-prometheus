@@ -26,6 +26,7 @@ from mini_prometheus.intake.request_intake import intake
 from mini_prometheus.integrations.velith.adapter import from_engineering_result
 from mini_prometheus.manufacturing_constraints.capability_model import (
     ProcessCapabilityModel,
+    constrained_model,
     default_model,
 )
 from mini_prometheus.manufacturing_constraints.oracle import ManufacturabilityOracle
@@ -109,12 +110,34 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - thin CLI
     import argparse
     import json
 
-    from mini_prometheus._contracts import DeclaredOperation, ManufacturingRequest, ProcessOp, StockForm
+    from mini_prometheus._contracts import (
+        DeclaredOperation,
+        ManufacturingRequest,
+        ProcessOp,
+        StockForm,
+        Tolerances,
+    )
 
     parser = argparse.ArgumentParser(description="RM1 plan -> verify -> log")
     parser.add_argument("request_json", help="path to a ManufacturingRequest JSON file")
+    parser.add_argument(
+        "--capability-model",
+        choices=("default", "constrained"),
+        default="default",
+        help=(
+            "default (legacy RM1 behavior): no tolerance or declared-precedence reasoning; "
+            "the request's 'tolerances' field is NOT read (known limitation, RM8 spec). "
+            "constrained (RM8 ECR, capability model 1.1.0): declared operation precedence + "
+            "tolerance feasibility, reading 'tolerances.general_tolerance_mm'."
+        ),
+    )
     args = parser.parse_args(argv)
     raw = json.loads(open(args.request_json, encoding="utf-8").read())
+    constrained = args.capability_model == "constrained"
+    # Legacy default: tolerances are not read. Only the constrained (ECR) mode carries them.
+    tolerances = None
+    if constrained and raw.get("tolerances") is not None:
+        tolerances = Tolerances(general_tolerance_mm=raw["tolerances"]["general_tolerance_mm"])
     request = ManufacturingRequest(
         schema_version=raw["schema_version"],
         request_id=raw["request_id"],
@@ -126,8 +149,12 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - thin CLI
             for o in raw["declared_operations"]
         ],
         quantity=raw["quantity"],
+        tolerances=tolerances,
     )
-    result = run_from_request(request)
+    if constrained:
+        result = run_from_request(request, capability_model=constrained_model())
+    else:
+        result = run_from_request(request)
     print(f"{result.status} episode -> {result.episode_path}")
     return 1 if result.is_error else 0
 

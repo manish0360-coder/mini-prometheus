@@ -27,7 +27,22 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM5** | **Compounding Validation Experiment** — deterministic, read-only measurement of whether accumulated verified experience improves RM4 judgment vs the RM1 oracle on held-out analogous cases within one fixed regime R* | ✅ **Complete** (2026-09-15) | `rm5-complete` | runtime `0.5.0`; measurement milestone, **no contract**; leaf `experiment/` package; RM1–RM4 byte-unchanged |
 | **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
 | **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
-| **RM8+** | Deepen manufacturing content (scheduling, tolerance/precedence models, model-based planner seam); revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | pending `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010 |
+| **RM9+** | Deepen manufacturing content further (scheduling / `RESOURCE_UNAVAILABLE`, model-based planner seam); revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM8 — what shipped (2026-09-26)
+
+- Owned manufacturing **content**: **Engineering Constraint Reasoning** — two deterministic oracle checks driven only by
+  the capability model's declarative constraint data. **Declared precedence:** a declared "A before B" pair violated
+  in the routing → `PRECEDENCE_VIOLATION`, `PLAN_INVALID`. **Tolerance feasibility:** a requested tolerance strictly
+  tighter than the assigned process capability's minimum → `TOLERANCE_UNSUPPORTED`, `NOT_MANUFACTURABLE`.
+- Opt-in through `constrained_model()` (capability model `1.1.0`, verifier `1.1.0`) and the existing CLI
+  `--capability-model constrained`. `default_model()` behavior is byte-identical to `rm5-complete`, pinned by a
+  behavioral golden generated once from `rm5-complete`. The legacy default CLI does not read `tolerances`
+  (documented limitation).
+- No contract/schema/enum change; `Verifier` signature unchanged; no dependency; no Velith/Noetica change.
+- CI: the RM1/RM2 byte-freeze is replaced by the behavioral gate for exactly the four RM8 files (ratified, ADR-0010).
+- Full record: `docs/milestones/RM8-completion-report.md`, ADR-0010, spec `specs/milestones/RM8-engineering-constraint-reasoning.md`.
 
 ## RM3 — what shipped (2026-08-03)
 

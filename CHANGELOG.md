@@ -5,6 +5,38 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.6.0] — 2026-09-26 — RM8 Engineering Constraint Reasoning (declared precedence + tolerance feasibility)
+
+Runtime `0.5.0 → 0.6.0`; the contract suite stays **frozen at `0.4.0`** (no contract, schema or enum change). See
+`specs/milestones/RM8-engineering-constraint-reasoning.md`, ADR-0010, `docs/milestones/RM8-completion-report.md`.
+
+### Added — RM8
+- **Declared-precedence check** in the manufacturability oracle: a declared "A before B" pair violated by the routing
+  → `PRECEDENCE_VIOLATION`, status `PLAN_INVALID`. Declared pairs only; unconstrained pairs never fail.
+- **Tolerance-feasibility check:** a requested tolerance strictly tighter than the assigned tolerance-bearing
+  capability's minimum → `TOLERANCE_UNSUPPORTED`, status `NOT_MANUFACTURABLE`; equal/looser feasible; absent
+  tolerance or non-bearing operation → no check. All findings reported together; `PLAN_INVALID` dominates.
+- **Capability model data (C1, originally local commit `ad90856`, audited and folded in):** defaulted-empty
+  `capability_tolerance_mm` / `ordering_constraints`, opt-in `constrained_model()` (`1.1.0`),
+  `min_tolerance_for_capability()`.
+- **CLI:** `--capability-model {default,constrained}` on the existing runner CLI (default = legacy behavior).
+- **Behavioral zero-diff gate:** `tests/fixtures/rm8_default_behavior_golden.json` (902 serialized plans/verdicts/
+  episodes + hashes, legacy CLI, contracts digest), generated once from `rm5-complete` and frozen by digest.
+- Tests: precedence, tolerance, multiple findings, versioning, determinism, CLI both modes, boundaries, mutation.
+
+### Changed
+- Verifier version `1.1.0` and planner rule version `1.1.0` are recorded only on the constrained path (tolerance
+  carried); the default path still reports `1.0.0`.
+- CI: the RM1/RM2 byte-freeze now excludes exactly `capability_model.py`, `oracle.py`, `planner.py` and
+  `orchestration/runner.py`, which are guarded by the new RM8 behavioral zero-diff step (ratified, ADR-0010).
+
+### Known limitation (documented, unchanged)
+- The legacy default CLI does not read the request's `tolerances` and performs no tolerance or precedence reasoning.
+
+### Unchanged
+- Default-model behavior byte-identical to `rm5-complete`; `contracts/` byte-identical; `Verifier` signature; RM3/RM4
+  byte gate; RM5 fixture and reproducibility freeze; no dependency, no ML, no MiniFlyWire, no Velith/Noetica change.
+
 ## [0.5.0] — 2026-09-15 — RM5 Compounding Validation Experiment (internal validation of the compounding spine)
 
 **Governance/versioning release.** Runtime `0.4.0 → 0.5.0`; the contract suite stays **frozen at `0.4.0`** (RM5 adds
