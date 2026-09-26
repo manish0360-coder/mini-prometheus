@@ -27,8 +27,22 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM5** | **Compounding Validation Experiment** — deterministic, read-only measurement of whether accumulated verified experience improves RM4 judgment vs the RM1 oracle on held-out analogous cases within one fixed regime R* | ✅ **Complete** (2026-09-15) | `rm5-complete` | runtime `0.5.0`; measurement milestone, **no contract**; leaf `experiment/` package; RM1–RM4 byte-unchanged |
 | **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
 | **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
-| **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | pending `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010 |
-| **RM9+** | Deepen manufacturing content further (scheduling / `RESOURCE_UNAVAILABLE`, model-based planner seam); revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010; the current manufacturing baseline |
+| **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | pending `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
+| **RM10+** | Scheduling (time, capacity, queues — the next separate milestone); model-based planner seam; revisit the RM5 near-miss / synthetic-corpus generalization caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM9 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: **Resource Availability** — known resources can be declared unavailable for one
+  planning snapshot (`with_unavailable_resources()`, unknown ids rejected before planning). The planner uses only
+  available capable machines, rerouting to an alternative when one exists; otherwise the oracle reports
+  `RESOURCE_UNAVAILABLE` (`NOT_MANUFACTURABLE`) and names the down machines. A machine absent from the model remains
+  `CAPABILITY_MISSING`. Stored plans assigned to a machine that is now down are flagged as stale.
+- Plan identity changes only when availability materially affects the request; irrelevant outages leave plan and
+  verdict byte-identical. RM2 is unchanged: its re-derivation guard fails closed when availability changes the plan.
+- No contract change; `Verifier` signature unchanged; no CI change (the four files stay under the RM8 behavioral gate,
+  which still passes). No scheduling, optimization or ML; no availability state held by Mini Prometheus.
+- Full record: `docs/milestones/RM9-completion-report.md`, ADR-0011, spec `specs/milestones/RM9-resource-availability.md`.
 
 ## RM8 — what shipped (2026-09-26)
 

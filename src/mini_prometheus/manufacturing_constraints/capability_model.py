@@ -15,10 +15,21 @@ Scientific boundary: ``capability_tolerance_mm`` is a **deliberately coarse MP d
 (one scalar min-achievable tolerance per tolerance-bearing capability), NOT a universal manufacturing
 law. Feature-level tolerance attribution, GD&T, geometry, fixturing, and empirical process capability
 are out of scope.
+
+RM9 (Resource Availability) adds one more **additive, defaulted-empty** field,
+``unavailable_resources``: the KNOWN resources declared unavailable for one planning snapshot. It is
+an immutable per-run input, never stored, updated or tracked by Mini Prometheus (no state substrate;
+Noetica owns state). Empty means every resource is available — exactly RM1–RM8. Build it only through
+``with_unavailable_resources()``, which rejects unknown resource ids before any planning.
+
+Availability *materially affects* a capability exactly when the resource RM1 would select for it
+(the first provider in sorted order) is unavailable; that single definition
+(``availability_affects_capability``) is shared by the planner and the oracle, so an unavailable
+resource that the request does not depend on changes neither the plan nor the verdict.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from mini_prometheus._contracts import ProcessOp
 
@@ -40,6 +51,8 @@ class ProcessCapabilityModel:
     # Pairwise precedence relation: (before, after) means every `before`-step precedes every `after`-step
     # whenever both ops are present in a plan. Minimal & justified only; NOT a total order, NOT a DAG.
     ordering_constraints: frozenset[tuple[ProcessOp, ProcessOp]] = field(default_factory=frozenset)
+    # --- RM9: known resources declared unavailable for this snapshot (empty => all available) ---
+    unavailable_resources: frozenset[str] = field(default_factory=frozenset)
 
 
 def default_model() -> ProcessCapabilityModel:
@@ -126,6 +139,50 @@ def resource_for_capability(model: ProcessCapabilityModel, capability: str) -> s
         if capability in model.resources[resource_id]:
             return resource_id
     return None
+
+
+# ---- RM9: resource availability ------------------------------------------------------------------
+class UnknownResourceError(ValueError):
+    """A resource declared unavailable is not a resource of the model (rejected before planning)."""
+
+
+def with_unavailable_resources(
+    model: ProcessCapabilityModel, resource_ids: list[str] | frozenset[str] | tuple[str, ...]
+) -> ProcessCapabilityModel:
+    """The same model with the given KNOWN resources declared unavailable for this snapshot.
+
+    Every id must be a resource of ``model``; an unknown id raises ``UnknownResourceError`` so it
+    can never be mistaken for a missing capability. The model ``version`` is unchanged: availability
+    is a per-run input, and its material effect is recorded in the plan itself (planner, RM9).
+    """
+    ids = frozenset(resource_ids)
+    unknown = sorted(ids - set(model.resources))
+    if unknown:
+        raise UnknownResourceError(
+            f"unknown resource id(s) declared unavailable: {', '.join(unknown)}")
+    return replace(model, unavailable_resources=ids)
+
+
+def providers_for_capability(model: ProcessCapabilityModel, capability: str) -> list[str]:
+    """All resources providing the capability, in the deterministic (sorted) selection order."""
+    return [r for r in sorted(model.resources) if capability in model.resources[r]]
+
+
+def available_resource_for_capability(model: ProcessCapabilityModel, capability: str) -> str | None:
+    """First AVAILABLE resource (deterministic order) providing the capability, else None."""
+    for resource_id in providers_for_capability(model, capability):
+        if resource_id not in model.unavailable_resources:
+            return resource_id
+    return None
+
+
+def availability_affects_capability(model: ProcessCapabilityModel, capability: str) -> bool:
+    """True iff availability materially affects the capability: the resource RM1 would select for it
+    exists and is unavailable. False when no resource provides it at all (that is
+    CAPABILITY_MISSING, not an availability matter) and when only a non-selected provider is
+    unavailable."""
+    selected = resource_for_capability(model, capability)
+    return selected is not None and selected in model.unavailable_resources
 
 
 def material_supported(model: ProcessCapabilityModel, material: str) -> bool:

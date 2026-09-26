@@ -9,6 +9,12 @@ RM8 (C3): under a capability model that carries tolerance data (``constrained_mo
 request's ``general_tolerance_mm`` is carried on each tolerance-bearing step as
 ``params["required_tolerance_mm"]`` for the oracle, and the planning rule version becomes 1.1.0.
 With ``default_model()`` nothing changes.
+
+RM9: resources are assigned from the AVAILABLE providers only (declared ``unavailable_resources``).
+A step is touched only when availability materially affects it (its RM1-selected resource is
+unavailable): it is rerouted to the next available provider or left unassigned, and its
+``params["unavailable_resources"]`` names that capability's unavailable providers; the planning rule
+version becomes 1.2.0. Unavailability irrelevant to the request leaves the plan byte-identical.
 """
 from __future__ import annotations
 
@@ -26,15 +32,21 @@ from mini_prometheus._provenance import make_provenance, now_rfc3339
 from mini_prometheus._validate import validate
 from mini_prometheus.manufacturing_constraints.capability_model import (
     ProcessCapabilityModel,
+    availability_affects_capability,
+    available_resource_for_capability,
     capability_for_op,
     min_tolerance_for_capability,
-    resource_for_capability,
+    providers_for_capability,
 )
-from mini_prometheus.manufacturing_constraints.oracle import REQUIRED_TOLERANCE_PARAM
+from mini_prometheus.manufacturing_constraints.oracle import (
+    REQUIRED_TOLERANCE_PARAM,
+    UNAVAILABLE_RESOURCES_PARAM,
+)
 
 SCHEMA_VERSION = "1.0.0"
 RULE_VERSION = "1.0.0"              # the RM1 planning rule (the default path)
 RULE_VERSION_TOLERANCE = "1.1.0"    # RM1 rule + RM8 tolerance carriage (only when data is added)
+RULE_VERSION_AVAILABILITY = "1.2.0"  # + RM9 availability-aware selection (only when it mattered)
 
 
 def _summary(design_input: DesignInput) -> str:
@@ -87,6 +99,14 @@ def plan(
         tolerance_bearing = min_tolerance_for_capability(capability_model, capability) is not None
         if requested_tolerance is not None and tolerance_bearing:
             params[REQUIRED_TOLERANCE_PARAM] = requested_tolerance
+        # RM9: record availability ONLY on a step it materially affects (its selected resource is
+        # unavailable -> rerouted or unassignable), naming just that capability's unavailable
+        # providers.
+        if availability_affects_capability(capability_model, capability):
+            params[UNAVAILABLE_RESOURCES_PARAM] = [
+                r for r in providers_for_capability(capability_model, capability)
+                if r in capability_model.unavailable_resources
+            ]
         steps.append(
             ProcessStep(
                 index=i,
@@ -97,13 +117,20 @@ def plan(
                 params=params,
             )
         )
-    # The planning rule version records whether the RM8 tolerance rule actually introduced data.
+    # The planning rule version records which rule actually introduced data into this plan.
     tolerance_introduced = any(REQUIRED_TOLERANCE_PARAM in (s.params or {}) for s in steps)
-    rule_version = RULE_VERSION_TOLERANCE if tolerance_introduced else RULE_VERSION
+    availability_introduced = any(UNAVAILABLE_RESOURCES_PARAM in (s.params or {}) for s in steps)
+    if availability_introduced:
+        rule_version = RULE_VERSION_AVAILABILITY
+    else:
+        rule_version = RULE_VERSION_TOLERANCE if tolerance_introduced else RULE_VERSION
 
     assignments: list[ResourceAssignment] = []
     for step in steps:
-        resource_id = resource_for_capability(capability_model, step.required_capability)
+        # RM9: the first AVAILABLE provider in the deterministic order. With no declared
+        # unavailability this is exactly RM1's selection; an unavailable selected resource reroutes
+        # to the next available provider, or leaves the step unassigned when none is available.
+        resource_id = available_resource_for_capability(capability_model, step.required_capability)
         if resource_id is not None:
             assignments.append(
                 ResourceAssignment(

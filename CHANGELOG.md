@@ -5,6 +5,28 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.7.0] — 2026-09-27 — RM9 Resource Availability
+
+Runtime `0.6.0 → 0.7.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM9-resource-availability.md`, ADR-0011, `docs/milestones/RM9-completion-report.md`.
+
+### Added — RM9
+- `ProcessCapabilityModel.unavailable_resources` (defaulted empty) and `with_unavailable_resources()` — declare KNOWN
+  resources unavailable for one planning snapshot; unknown ids raise `UnknownResourceError` before planning.
+- Planner: assigns only available capable machines (reroutes to an alternative when one exists); records
+  `params["unavailable_resources"]` only on steps availability materially affects; planning rule `1.2.0` only then.
+- Oracle: `RESOURCE_UNAVAILABLE` (status `NOT_MANUFACTURABLE`) when every capable machine for a required operation is
+  unavailable, or when a plan assigns a machine that is now unavailable; the machines are named in `Verdict.detail`.
+  Verifier `1.2.0` only when availability participates.
+- CLI: repeatable `--unavailable-resource ID` on the existing runner CLI.
+- Tests: outcomes, plan identity (irrelevant vs relevant unavailability), versioning, validation, CLI, RM2 reuse
+  guard interaction (A/B/C), and mutation tests.
+
+### Unchanged
+- Default and RM8 behavior (the RM8 behavioral golden passes unchanged); an absent machine is still
+  `CAPABILITY_MISSING`; contracts; `Verifier` signature; RM2 code and reuse key; CI configuration; no dependency,
+  scheduling, optimization, ML, FutureScore, MiniFlyWire, Velith or Noetica change.
+
 ## [0.6.0] — 2026-09-26 — RM8 Engineering Constraint Reasoning (declared precedence + tolerance feasibility)
 
 Runtime `0.5.0 → 0.6.0`; the contract suite stays **frozen at `0.4.0`** (no contract, schema or enum change). See

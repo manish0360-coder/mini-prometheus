@@ -26,8 +26,10 @@ from mini_prometheus.intake.request_intake import intake
 from mini_prometheus.integrations.velith.adapter import from_engineering_result
 from mini_prometheus.manufacturing_constraints.capability_model import (
     ProcessCapabilityModel,
+    UnknownResourceError,
     constrained_model,
     default_model,
+    with_unavailable_resources,
 )
 from mini_prometheus.manufacturing_constraints.oracle import ManufacturabilityOracle
 from mini_prometheus.manufacturing_planning import planner
@@ -131,6 +133,17 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - thin CLI
             "tolerance feasibility, reading 'tolerances.general_tolerance_mm'."
         ),
     )
+    parser.add_argument(
+        "--unavailable-resource",
+        action="append",
+        default=[],
+        metavar="ID",
+        help=(
+            "RM9: declare a KNOWN resource (e.g. mill01) unavailable for this planning snapshot; "
+            "repeatable. Steps are rerouted to an available capable resource, or reported "
+            "RESOURCE_UNAVAILABLE. Unknown ids are rejected before planning. Omit for RM8 behavior."
+        ),
+    )
     args = parser.parse_args(argv)
     raw = json.loads(open(args.request_json, encoding="utf-8").read())
     constrained = args.capability_model == "constrained"
@@ -151,7 +164,15 @@ def _main(argv: list[str] | None = None) -> int:  # pragma: no cover - thin CLI
         quantity=raw["quantity"],
         tolerances=tolerances,
     )
-    if constrained:
+    if args.unavailable_resource:
+        # RM9: explicit availability snapshot on the selected capability model (validated first).
+        base = constrained_model() if constrained else default_model()
+        try:
+            model = with_unavailable_resources(base, args.unavailable_resource)
+        except UnknownResourceError as exc:
+            parser.error(str(exc))
+        result = run_from_request(request, capability_model=model)
+    elif constrained:
         result = run_from_request(request, capability_model=constrained_model())
     else:
         result = run_from_request(request)

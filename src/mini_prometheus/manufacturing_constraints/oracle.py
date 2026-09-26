@@ -21,6 +21,14 @@ Two checks driven ONLY by the capability model's declarative constraint data (em
 All applicable findings are reported together; PLAN_INVALID takes precedence over
 NOT_MANUFACTURABLE.
 The Verifier signature and the closed taxonomies are unchanged.
+
+RM9 — Resource Availability (specs/milestones/RM9-resource-availability.md). Driven only by the
+model's declared ``unavailable_resources`` (empty on every existing model, so RM1-RM8 are unchanged):
+when a required capability's selected resource is unavailable and no other provider is available,
+or the plan assigns an unavailable resource (a stale plan) -> RESOURCE_UNAVAILABLE, status
+NOT_MANUFACTURABLE, with the responsible resources named in ``detail``. A capability with no
+provider at all stays CAPABILITY_MISSING. The verifier reports 1.2.0 only when availability
+participates in the plan.
 """
 from __future__ import annotations
 
@@ -34,18 +42,62 @@ from mini_prometheus._contracts import (
 )
 from mini_prometheus.manufacturing_constraints.capability_model import (
     ProcessCapabilityModel,
+    availability_affects_capability,
+    available_resource_for_capability,
     material_supported,
     min_tolerance_for_capability,
+    providers_for_capability,
     resource_for_capability,
 )
 
 _COMPONENT = "manufacturability-oracle"
 _VERSION = "1.0.0"          # the RM1 rule set (the default path)
 _VERSION_ECR = "1.1.0"      # RM1 rule set + RM8 declared-precedence and tolerance checks
+_VERSION_AVAILABILITY = "1.2.0"  # + RM9 resource availability (only when availability participates)
 
 # The step parameter through which the planner carries a requested tolerance (constrained model
 # only).
 REQUIRED_TOLERANCE_PARAM = "required_tolerance_mm"
+# RM9: the step parameter recording the unavailable resources that materially affected that step's
+# resource selection (rerouted or unassignable). Written only on affected steps, never globally.
+UNAVAILABLE_RESOURCES_PARAM = "unavailable_resources"
+
+
+def availability_participates(plan: ProductionPlan, model: ProcessCapabilityModel) -> bool:
+    """True iff declared availability materially bears on this plan: some step's selected resource
+    is unavailable, or the plan assigns an unavailable resource. False for irrelevant
+    unavailability."""
+    if not model.unavailable_resources:
+        return False
+    affected = any(availability_affects_capability(model, s.required_capability) for s in plan.steps)
+    stale = any(a.resource_id in model.unavailable_resources for a in plan.resource_assignments)
+    return affected or stale
+
+
+def _resource_unavailable(
+    plan: ProductionPlan, model: ProcessCapabilityModel
+) -> tuple[bool, list[str]]:
+    """RM9: (finding, unavailable resources responsible). A finding exists when a required
+    capability has providers but none is available, or when the plan assigns a resource that is
+    unavailable (a stale plan). A capability with NO provider at all is CAPABILITY_MISSING, never
+    this finding."""
+    if not model.unavailable_resources:
+        return False, []
+    found = False
+    responsible: set[str] = set()
+    for step in plan.steps:
+        capability = step.required_capability
+        if not availability_affects_capability(model, capability):
+            continue  # availability irrelevant to this step, or capability absent (MISSING)
+        if available_resource_for_capability(model, capability) is None:
+            found = True
+            responsible.update(r for r in providers_for_capability(model, capability)
+                               if r in model.unavailable_resources)
+    for assignment in plan.resource_assignments:
+        if assignment.resource_id in model.unavailable_resources:
+            found = True
+            responsible.add(assignment.resource_id)
+    return found, sorted(responsible)
 
 
 def constraint_data_present(model: ProcessCapabilityModel) -> bool:
@@ -86,6 +138,8 @@ class ManufacturabilityOracle:
     def verify(self, plan: ProductionPlan, capability_model: ProcessCapabilityModel) -> Verdict:
         reasons: set[RC] = set()
         status = Status.MANUFACTURABLE
+        detail: str | None = None
+        participates = False
 
         indices = [s.index for s in plan.steps]
         if not plan.steps:
@@ -107,17 +161,26 @@ class ManufacturabilityOracle:
                 reasons.add(RC.PRECEDENCE_VIOLATION)
             if _tolerance_unsupported(plan, capability_model):
                 reasons.add(RC.TOLERANCE_UNSUPPORTED)
+            # RM9: inert unless declared availability participates in this plan.
+            participates = availability_participates(plan, capability_model)
+            unavailable, responsible = _resource_unavailable(plan, capability_model)
+            if unavailable:
+                reasons.add(RC.RESOURCE_UNAVAILABLE)
+                detail = "RESOURCE_UNAVAILABLE: " + ", ".join(responsible)
             if RC.PRECEDENCE_VIOLATION in reasons:
                 status = Status.PLAN_INVALID
             elif reasons:
                 status = Status.NOT_MANUFACTURABLE
 
-        version = _VERSION_ECR if constraint_data_present(capability_model) else _VERSION
+        if participates:
+            version = _VERSION_AVAILABILITY
+        else:
+            version = _VERSION_ECR if constraint_data_present(capability_model) else _VERSION
         return Verdict(
             grounded=True,
             is_error=False,
             status=status.value,
             reason_codes=sorted(rc.value for rc in reasons),
             produced_by=ProducedBy(component=_COMPONENT, version=version),
-            detail=None,
+            detail=detail,
         )
