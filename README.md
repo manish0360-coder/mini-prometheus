@@ -1,17 +1,27 @@
 # Mini Prometheus
 
-The **Manufacturing Intelligence** layer (Layer 4) of the ecosystem. Mini Prometheus owns
-manufacturing **content** and consumes the **Velith** engineering layer (and, transitively,
-**Noetica** platform mechanisms) through versioned interfaces. It does **not** import MiniFlyWire
-(Law 4) and does **not** re-implement platform or engineering mechanisms (Laws 3/6).
+The **Manufacturing Intelligence** layer (Layer 4) of the MiniFlyWire → Noetica → Velith → Mini
+Prometheus ecosystem. Mini Prometheus owns manufacturing **content**. It is designed to consume the
+**Velith** engineering layer (and, through it, **Noetica** platform mechanisms) through pinned,
+versioned packages. **That seam is not connected yet:** Velith and Noetica are not published as
+packages, and `integrations/velith` targets a consumed *stub* contract that only test fixtures exercise.
+It does **not** import MiniFlyWire (Law 4) and does **not** re-implement platform or engineering
+mechanisms (Laws 3/6).
 
 > Mini Prometheus is **not** a research project. The research is complete and frozen. This
 > repository engineers the frozen theory into a working manufacturing intelligence.
 
-**Status:** RM2 complete (`rm2-complete`, runtime `0.3.0`) — on top of RM1's `plan → verify → log` loop,
-Mini Prometheus now **reuses its own verified experience**: a repeated request retrieves and reuses the prior
-`ProductionPlan` + `Verdict` deterministically (the first rung of compounding). Next: RM3 (wire the real
-pinned Velith package). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Status:** RM14 complete (`rm14-complete`, runtime `0.12.0`). RM1–RM14 deliver the manufacturing
+pipeline on **engineer-declared** requests:
+- `plan → verify → log` and verified experience reuse;
+- precedent reasoning and engineering judgment;
+- constraint reasoning and resource availability;
+- declared operation times;
+- deterministic, independently checked multi-job scheduling with downtime, an opt-in tie-break rule and
+  sequence-dependent changeover.
+
+Consuming a real Velith engineering result is gated on Noetica and Velith publishing packages. See
+[`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Where to start
 
@@ -27,9 +37,9 @@ frozen theory  →  stable contracts  →  implementations
  (constitution/)     (contracts/)         (src/, native/)
 ```
 
-Implementations depend on `contracts/` only. **Velith** and **Noetica** are consumed as **pinned,
-versioned package dependencies**, touched only through `src/mini_prometheus/integrations/`. MiniFlyWire
-is never imported (Law 4).
+Implementations depend on `contracts/` only. **Velith** and **Noetica** are to be consumed as **pinned,
+versioned package dependencies**, touched only through `src/mini_prometheus/integrations/`. Neither is
+published yet; see the commented placeholders in `pyproject.toml`. MiniFlyWire is never imported (Law 4).
 
 ## Owned by this repository (manufacturing content)
 
@@ -45,5 +55,7 @@ CAD/sim, the engineering oracle and engineering reasoning content (Velith). See
 
 ## Build
 
-Python orchestration + Rust/C++ performance core. See `CONTRIBUTING.md` (build instructions land
-with the first implementation milestone).
+Python ≥ 3.11; `jsonschema` is the only runtime dependency. The authoritative gate runs in the Docker
+verifier (`docker/verifier.Dockerfile`), and `tools/verify_installed_wheel.py` checks the installed
+wheel. `native/` is a placeholder for a future performance core; no native code exists yet. See
+`CONTRIBUTING.md`.
