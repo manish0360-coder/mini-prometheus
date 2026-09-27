@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "cccccccc-0000-4000-8000-000000000003",
+  "material": "Brass 360",
+  "stock_form": "block",
+  "declared_operations": [
+    {"op": "cut_stock", "params": {"duration_min": 8}},
+    {"op": "pocket_mill", "target": "pocket_1", "params": {"duration_min": 12}},
+    {"op": "deburr", "params": {"duration_min": 6}}
+  ],
+  "quantity": 1,
+  "metadata": {"author": "RM11 test fixture: declared operation times are test inputs, not manufacturing data"}
+}

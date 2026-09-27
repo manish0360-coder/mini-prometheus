@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "aaaaaaaa-0000-4000-8000-000000000001",
+  "material": "Aluminum 6061",
+  "stock_form": "block",
+  "declared_operations": [
+    {"op": "cut_stock", "params": {"duration_min": 10}},
+    {"op": "face_mill", "target": "top_face", "params": {"duration_min": 30}},
+    {"op": "inspect", "params": {"duration_min": 5}}
+  ],
+  "quantity": 1,
+  "metadata": {"author": "RM11 test fixture: declared operation times are test inputs, not manufacturing data"}
+}

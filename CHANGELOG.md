@@ -5,6 +5,34 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.9.0] — 2026-09-27 — RM11 Multi-Job Deterministic Scheduling
+
+Runtime `0.8.0 → 0.9.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM11-multi-job-schedule.md`, ADR-0013, `docs/milestones/RM11-completion-report.md`.
+**RM11 is a verified multi-job scheduling substrate with a lower-bound certificate — not an optimizer, not a
+dispatcher.**
+
+### Added — RM11
+- New content package `manufacturing_scheduling`: the internal `MultiJobSchedule` model with the frozen RM11 model
+  assumptions; the baseline rule `earliest_start_v1` (earliest feasible start; ties by `request_id`, then
+  `step_index`; `NOT_OPTIMIZED`); an independent checker (never imports the generator) that every schedule must
+  pass before it is returned; the lower-bound certificate (`lower_bound_min`, `gap_to_lower_bound_min`,
+  `PROVABLY_OPTIMAL` only when the gap is 0); `schedule_input_identity` (the problem) vs `schedule_digest` (the
+  artifact); all-or-nothing refusals (`EMPTY_JOB_SET`, `DUPLICATE_REQUEST_ID`, `JOB_NOT_MANUFACTURABLE`,
+  `JOB_OPERATION_UNASSIGNED`, `JOB_TIMELINE_MISSING`).
+- `orchestration/schedule_runner.py`: `schedule_requests()` and the dedicated CLI
+  `python -m mini_prometheus.orchestration.schedule_runner REQUEST.json ...` (`--capability-model`,
+  `--unavailable-resource`).
+- Import-linter: the new package joins the existing forbidden contracts; new contracts — no RM1–RM10 module imports
+  scheduling, and the checker is independent of the generator and the bound calculator.
+- Tests (Director list 1–20, every checker tampering class, determinism across permutations and hash seeds) and
+  true-source mutation tests; declared test fixtures `tests/fixtures/rm11_jobs/`.
+
+### Unchanged
+- Contracts; the `Verifier` signature; all RM1–RM10 code (`planner.py`, `oracle.py`, `capability_model.py`,
+  `runner.py`) and behavior (RM8 and RM10 goldens pass); RM2; CI configuration. No dependency, solver, ML,
+  persistence, execution, dispatch, FutureScore, MiniFlyWire, Velith or Noetica change.
+
 ## [0.8.0] — 2026-09-27 — RM10 Declared Operation Times and Single-Job Timeline
 
 Runtime `0.7.0 → 0.8.0`; the contract suite stays **frozen at `0.4.0`**. See

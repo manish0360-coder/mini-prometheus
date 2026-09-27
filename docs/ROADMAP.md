@@ -29,8 +29,26 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
 | **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010; the current manufacturing baseline |
 | **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
-| **RM10** | **Declared Operation Times and Single-Job Timeline** — engineer-declared `duration_min` per operation (integer minutes) → a serialized job timeline and lead time; missing prerequisites reported, nothing invented. **Not a production scheduler.** | ✅ **Complete** (2026-09-27) | pending `rm10-complete` | runtime `0.8.0`; **no contract** (suite `0.4.0`); RM8 + RM10 goldens pass; RM2 unchanged; ADR-0012 |
-| **RM11+** | Cross-task scheduling (several jobs sharing machines: contention, no-overlap, makespan) — preceded by an independent adversarial architecture review before any solver or multi-job design; then setup, calendars, capacity; model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM10** | **Declared Operation Times and Single-Job Timeline** — engineer-declared `duration_min` per operation (integer minutes) → a serialized job timeline and lead time; missing prerequisites reported, nothing invented. **Not a production scheduler.** | ✅ **Complete** (2026-09-27) | `rm10-complete` | runtime `0.8.0`; **no contract** (suite `0.4.0`); RM8 + RM10 goldens pass; RM2 unchanged; ADR-0012 |
+| **RM11** | **Multi-Job Deterministic Scheduling** — several verified, timed jobs sharing machines → one deterministic, independently checked schedule (`earliest_start_v1`, `NOT_OPTIMIZED`) → makespan with a lower-bound certificate; all-or-nothing refusals; pure/read-only; dedicated CLI | ✅ **Complete** (2026-09-27) | pending `rm11-complete` | runtime `0.9.0`; **no contract** (suite `0.4.0`, schedule internal); RM1–RM10 byte-unchanged; ADR-0013 |
+| **RM12+** | A measured comparison of scheduling rules against the RM11 lower bound (only if the evidence justifies it); then setup, calendars, capacity; model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM11 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: a verified **multi-job scheduling substrate**. Mini Prometheus plans and verifies
+  every job under one capability model (unchanged RM1–RM10), refuses the whole set if any job is not MANUFACTURABLE,
+  has an unassigned operation or lacks a valid RM10 timeline, and otherwise schedules all operations on their RM9
+  machines with the deterministic baseline `earliest_start_v1` (ties by `request_id`, then `step_index`). A one-job
+  set reproduces the RM10 timeline exactly.
+- An independent checker (it never imports the generator) proves every schedule before it is returned: every
+  operation exactly once, fixed machines, exact durations and arithmetic, step order, per-machine no-overlap,
+  canonical order, completions, makespan, lower bound, gap, metadata, identity and digest.
+- **Lower-bound certificate:** `LB = max(longest job, busiest machine)`; makespan = LB → provably optimal under the
+  RM11 model; otherwise only the gap is stated. `schedule_input_identity` (the problem) is separate from
+  `schedule_digest` (the artifact); both are stable across input order, hash seeds and the clock.
+- Internal artifact only (contracts stay `0.4.0`); pure and read-only; no solver, dependency, persistence,
+  execution or dispatch. Frozen model assumptions are recorded on every schedule.
+- Full record: `docs/milestones/RM11-completion-report.md`, ADR-0013, spec `specs/milestones/RM11-multi-job-schedule.md`.
 
 ## RM10 — what shipped (2026-09-27)
 

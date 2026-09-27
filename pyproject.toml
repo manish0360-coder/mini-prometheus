@@ -1,6 +1,6 @@
 [project]
 name = "mini-prometheus"
-version = "0.8.0"
+version = "0.9.0"
 description = "AI Manufacturing Intelligence — runtime orchestration platform integrating MiniFlyWire, Noetica, and Velith."
 requires-python = ">=3.11"
 
@@ -86,6 +86,7 @@ type = "forbidden"
 source_modules = [
     "mini_prometheus.manufacturing_planning",
     "mini_prometheus.manufacturing_constraints",
+    "mini_prometheus.manufacturing_scheduling",
 ]
 forbidden_modules = [
     "mini_prometheus.orchestration",
@@ -100,6 +101,7 @@ source_modules = [
     "mini_prometheus.intake",
     "mini_prometheus.manufacturing_planning",
     "mini_prometheus.manufacturing_constraints",
+    "mini_prometheus.manufacturing_scheduling",
     "mini_prometheus.manufacturing_state",
     "mini_prometheus.manufacturing_twin",
     "mini_prometheus.experience",
@@ -109,3 +111,43 @@ source_modules = [
     "mini_prometheus.integrations",
 ]
 forbidden_modules = ["mini_prometheus.experiment"]
+
+# RM11 (ADR-0013): multi-job scheduling is strictly downstream of per-job planning. No RM1-RM10 module may
+# import it, so a job's plan (and its identity / RM2 reuse key) can never depend on the other jobs it is
+# scheduled with, and RM3/RM4 never consume schedules.
+[[tool.importlinter.contracts]]
+name = "RM11 scheduling is downstream — no RM1-RM10 module imports it (arch)"
+type = "forbidden"
+source_modules = [
+    "mini_prometheus.intake",
+    "mini_prometheus.manufacturing_planning",
+    "mini_prometheus.manufacturing_constraints",
+    "mini_prometheus.manufacturing_state",
+    "mini_prometheus.manufacturing_twin",
+    "mini_prometheus.experience",
+    "mini_prometheus.precedent",
+    "mini_prometheus.judgment",
+    "mini_prometheus.experiment",
+    "mini_prometheus.integrations",
+    "mini_prometheus.orchestration.runner",
+    "mini_prometheus.orchestration.reuse_runner",
+    "mini_prometheus.orchestration.episode_store",
+    "mini_prometheus.orchestration.precedent_runner",
+    "mini_prometheus.orchestration.judgment_runner",
+]
+forbidden_modules = [
+    "mini_prometheus.manufacturing_scheduling",
+    "mini_prometheus.orchestration.schedule_runner",
+]
+
+# RM11: the schedule checker is independent of what it checks — a defect in the generator or the lower-bound
+# calculator cannot hide itself behind a shared implementation.
+[[tool.importlinter.contracts]]
+name = "RM11 checker is independent of the generator and the bound calculator"
+type = "forbidden"
+source_modules = ["mini_prometheus.manufacturing_scheduling.checker"]
+forbidden_modules = [
+    "mini_prometheus.manufacturing_scheduling.earliest_start",
+    "mini_prometheus.manufacturing_scheduling.lower_bound",
+    "mini_prometheus.manufacturing_scheduling.job_set",
+]

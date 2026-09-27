@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "bbbbbbbb-0000-4000-8000-000000000002",
+  "material": "Steel 1018",
+  "stock_form": "bar",
+  "declared_operations": [
+    {"op": "cut_stock", "params": {"duration_min": 5}},
+    {"op": "turn", "target": "outer_diameter", "params": {"duration_min": 20}},
+    {"op": "drill", "target": "cross_hole", "params": {"duration_min": 10}},
+    {"op": "inspect", "params": {"duration_min": 5}}
+  ],
+  "quantity": 1,
+  "metadata": {"author": "RM11 test fixture: declared operation times are test inputs, not manufacturing data"}
+}
