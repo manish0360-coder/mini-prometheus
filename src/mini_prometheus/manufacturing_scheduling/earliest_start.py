@@ -21,6 +21,17 @@ appending at a machine's available time never leaves a gap a later operation cou
 the placement order is the canonical ``(start, request_id, step_index)`` order. A one-job set
 reproduces the RM10 serial timeline exactly. Every generated schedule must pass the independent
 checker before it is returned (``job_set``).
+
+RM12 ``earliest_start_v1_downtime`` (ADR-0015), recorded only when relevant downtime exists (the
+no-downtime path is exactly ``earliest_start_v1``): step 2 becomes the earliest S >= max(job
+predecessor completion, machine available time) such that [S, S + duration_min) intersects no
+canonical downtime interval of the ASSIGNED machine — whenever it would, S := that downtime's end
+(half-open: ending exactly at a downtime start, or starting exactly at its end, is allowed). The
+machine is never changed (no rerouting), placement stays append-only (the machine's available time
+advances to the operation's end), and selection uses that downtime-adjusted start. Because every
+downtime interval is finite, every operation eventually fits. Placements still come in
+non-decreasing start order, so no idle gap before a placed operation can later be used by any
+operation: idle time created by downtime is a property of this rule, not a missed insertion.
 """
 
 from __future__ import annotations
@@ -30,13 +41,20 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from mini_prometheus.manufacturing_constraints.oracle import DURATION_PARAM
-from mini_prometheus.manufacturing_scheduling.lower_bound import lower_bound
+from mini_prometheus.manufacturing_scheduling.lower_bound import (
+    lower_bound,
+    window_aware_lower_bound,
+)
 from mini_prometheus.manufacturing_scheduling.model import (
     MODEL_ASSUMPTIONS,
+    MODEL_ASSUMPTIONS_DOWNTIME,
     OPTIMIZATION_STATUS,
     SCHEDULING_RULE,
+    SCHEDULING_RULE_DOWNTIME,
     SCHEDULING_RULE_VERSION,
     BoundStatus,
+    Downtime,
+    DowntimeInterval,
     JobCompletion,
     MultiJobSchedule,
     ScheduledOperation,
@@ -79,10 +97,23 @@ def _operations(job: SchedulingJob) -> list[_Operation]:
     return operations
 
 
+def _earliest_fit(start: int, duration: int, downtime: Sequence[DowntimeInterval]) -> int:
+    """The earliest S >= start with [S, S + duration) disjoint from every canonical downtime
+    interval (sorted, disjoint, non-touching) of the machine."""
+    for interval in downtime:
+        if start + duration <= interval.start_min:
+            break
+        if start < interval.end_min:
+            start = interval.end_min
+    return start
+
+
 def earliest_start_v1(
-    jobs: Sequence[SchedulingJob], capability_model_version: str
+    jobs: Sequence[SchedulingJob], capability_model_version: str, downtime: Downtime = ()
 ) -> MultiJobSchedule:
-    """Schedule a non-empty set of schedulable jobs with unique request_ids (module rule)."""
+    """Schedule a non-empty set of schedulable jobs with unique request_ids (module rule).
+    ``downtime`` is the relevant canonical downtime (RM12); empty means exactly RM11."""
+    blocked = dict(downtime)
     operations = {job.request_id: _operations(job) for job in jobs}
     next_step = {job.request_id: 0 for job in jobs}
     job_ready = {job.request_id: 0 for job in jobs}
@@ -97,6 +128,8 @@ def earliest_start_v1(
                 continue
             operation = ops[next_step[job.request_id]]
             start = max(job_ready[job.request_id], machine_free.get(operation.resource_id, 0))
+            machine_downtime = blocked.get(operation.resource_id, ())
+            start = _earliest_fit(start, operation.duration_min, machine_downtime)
             candidates.append(
                 _Candidate(start, job.request_id, operation.step_index, job.task_id, operation)
             )
@@ -122,19 +155,24 @@ def earliest_start_v1(
 
     makespan = max(op.end_min for op in placed)
     bound = lower_bound(jobs)
-    gap = makespan - bound.lower_bound_min
+    # RM12: with relevant downtime the gap is measured to the tighter window-aware bound.
+    window = window_aware_lower_bound(jobs, downtime) if downtime else None
+    reference = window.lower_bound_min if window else bound.lower_bound_min
+    gap = makespan - reference
+    rule = SCHEDULING_RULE_DOWNTIME if downtime else SCHEDULING_RULE
     ordered_jobs = sorted(jobs, key=lambda job: job.request_id)
     schedule = MultiJobSchedule(
-        scheduling_rule=SCHEDULING_RULE,
+        scheduling_rule=rule,
         scheduling_rule_version=SCHEDULING_RULE_VERSION,
         optimization_status=OPTIMIZATION_STATUS,
-        model_assumptions=MODEL_ASSUMPTIONS,
+        model_assumptions=MODEL_ASSUMPTIONS_DOWNTIME if downtime else MODEL_ASSUMPTIONS,
         capability_model_version=capability_model_version,
         schedule_input_identity=schedule_input_identity(
-            SCHEDULING_RULE,
+            rule,
             SCHEDULING_RULE_VERSION,
             capability_model_version,
             [(job.request_id, job.plan.content_hash) for job in jobs],
+            downtime,
         ),
         jobs=tuple(
             JobCompletion(
@@ -154,5 +192,8 @@ def earliest_start_v1(
             BoundStatus.PROVABLY_OPTIMAL if gap == 0 else BoundStatus.GAP_ABOVE_LOWER_BOUND
         ),
         schedule_digest="",
+        downtime=tuple(downtime),
+        window_aware_lower_bound_min=window.lower_bound_min if window else None,
+        window_aware_lower_bound_binding_resource_ids=window.binding_resource_ids if window else (),
     )
     return dataclasses.replace(schedule, schedule_digest=schedule_digest(schedule))

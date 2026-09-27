@@ -30,6 +30,11 @@ from mini_prometheus.manufacturing_constraints.capability_model import ProcessCa
 from mini_prometheus.manufacturing_constraints.oracle import ManufacturabilityOracle
 from mini_prometheus.manufacturing_planning import planner
 from mini_prometheus.manufacturing_scheduling.checker import schedule_issues
+from mini_prometheus.manufacturing_scheduling.downtime import (
+    DowntimeInput,
+    canonical_downtime,
+    relevant_downtime,
+)
 from mini_prometheus.manufacturing_scheduling.earliest_start import earliest_start_v1
 from mini_prometheus.manufacturing_scheduling.model import (
     JobInput,
@@ -88,7 +93,12 @@ def schedule_job_set(
     capability_model: ProcessCapabilityModel,
     *,
     produced_at: str | None = None,
+    downtime: DowntimeInput | None = None,
 ) -> ScheduleOutcome:
+    """RM12: ``downtime`` (machine id -> [start_min, end_min) pairs) is validated against the
+    model's known machines first — invalid input raises ``InvalidDowntimeError`` before any
+    planning; it is never a verdict or a refusal. Only machines the jobs use are relevant."""
+    canonical = canonical_downtime(downtime, capability_model.resources)
     if not job_inputs:
         refusal = Refusal(RefusalReason.EMPTY_JOB_SET, None, "no job was given")
         return ScheduleOutcome(ScheduleStatus.NOT_SCHEDULED, None, (refusal,))
@@ -119,8 +129,12 @@ def schedule_job_set(
             ScheduleStatus.NOT_SCHEDULED, None, tuple(sorted(refusals, key=_refusal_key))
         )
 
-    schedule = earliest_start_v1(jobs, capability_model.version)
-    issues = schedule_issues(schedule, jobs, capability_model.version)
+    relevant = relevant_downtime(canonical, jobs)
+    if relevant:
+        schedule = earliest_start_v1(jobs, capability_model.version, downtime=relevant)
+    else:  # no relevant downtime: exactly the RM11 call
+        schedule = earliest_start_v1(jobs, capability_model.version)
+    issues = schedule_issues(schedule, jobs, capability_model.version, downtime=downtime)
     if issues:
         raise ScheduleIntegrityError("; ".join(f"{issue.code}: {issue.detail}" for issue in issues))
     return ScheduleOutcome(ScheduleStatus.SCHEDULED, schedule, ())

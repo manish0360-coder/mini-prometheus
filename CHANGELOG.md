@@ -5,6 +5,33 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.10.0] — 2026-09-27 — RM12 Time-Aware Resource Downtime Scheduling
+
+Runtime `0.9.1 → 0.10.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM12-resource-downtime.md`, ADR-0015, `docs/milestones/RM12-completion-report.md`.
+**Explicit finite downtime on already-assigned machines; operations wait, never rerouted; not an optimizer.**
+
+### Added — RM12
+- `manufacturing_scheduling/downtime.py`: validation (`InvalidDowntimeError` before planning: unknown machines,
+  zero-length, negative, non-integer, unbounded) and canonicalization (sorted; overlapping and touching merged) of
+  per-machine `[start_min, end_min)` downtime; relevance filter (machines the job set uses).
+- Rule `earliest_start_v1_downtime` (only under relevant downtime): append-only earliest fit around the assigned
+  machine's downtime, half-open, RM11 tie-break.
+- Window-aware lower bound `window_aware_lower_bound_min` (LB_RM12 = max(LB_RM11, max T_avail)); the gap is measured
+  to it; the RM11 `lower_bound_min` is retained.
+- Checker: independent re-derivation of relevant canonical downtime and T_avail; `DowntimeIssueCode`
+  (`DOWNTIME_MISMATCH`, `DOWNTIME_CONFLICT`, `WINDOW_LOWER_BOUND_MISMATCH`).
+- Identity: relevant canonical downtime in `schedule_input_identity` (only when present).
+- CLI `--downtime MACHINE:START:END` (repeatable); `schedule_requests(..., downtime=...)`.
+- Frozen golden `tests/fixtures/rm12_rm11_baseline_golden.json` (generated once from `rm11-complete` by
+  `tests/rm12_rm11_baseline_probe.py`); RM12 tests A–AD; true-source mutants D1–D11; RM12 installed-CLI checks in
+  `tools/verify_installed_wheel.py`.
+
+### Unchanged
+- Without relevant downtime every output is byte-identical to `rm11-complete`. Contracts; `Verifier`; RM1–RM10; RM2;
+  RM11's `IssueCode` set and tests; CI configuration; dependencies. No calendars, shifts, maintenance policies, MES,
+  persistence, execution, rerouting, optimization or solver.
+
 ## [0.9.1] — 2026-09-27 — Packaging integrity (maintenance)
 
 Runtime `0.9.0 → 0.9.1`; the contract suite stays **frozen at `0.4.0`**. See ADR-0014.

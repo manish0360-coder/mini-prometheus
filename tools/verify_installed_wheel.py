@@ -6,7 +6,9 @@ environment and, from a neutral working directory with no repository path on ``s
 - runs the RM10 CLI on a request that violates the frozen schema (schema validation must execute
   from the installed contracts tree and reject it);
 - runs the RM11 scheduling CLI on the three-job fixture (makespan 68) and requires its schedule
-  digest to equal the digest produced from the repository source.
+  digest to equal the digest produced from the repository source;
+- RM12: runs it with ``--downtime mill01:20:45`` (makespan 103, window-aware bound 77, digest equal
+  to the repository source) and rejects an unknown downtime machine as a usage error.
 
 Run from the repository root inside the Docker verifier (Python 3.11). Needs network access for
 the isolated build backend and the runtime dependency. Exit code 0 = every check passed.
@@ -190,6 +192,43 @@ def main() -> int:
             digest(rm11.stdout) is not None and digest(rm11.stdout) == digest(reference.stdout),
             "the installed RM11 schedule digest equals the repository-source digest",
         )
+
+        # RM12 (ADR-0015): downtime scheduling from the installed package
+        down = ["--downtime", "mill01:20:45"]
+        rm12 = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", *map(str, JOBS), *down],
+            cwd=neutral,
+            env=env,
+        )
+        check(
+            rm12.returncode == 0
+            and "makespan: 103 min" in rm12.stdout
+            and "window-aware lower bound: 77 min (binding: mill01)" in rm12.stdout,
+            "RM12 downtime scheduling runs from the installed package",
+        )
+        reference12 = run(
+            [
+                sys.executable,
+                "-m",
+                "mini_prometheus.orchestration.schedule_runner",
+                *map(str, reversed(JOBS)),
+                *down,
+            ],
+            cwd=ROOT,
+            env=source_env,
+        )
+        check(
+            digest(rm12.stdout) is not None and digest(rm12.stdout) == digest(reference12.stdout),
+            "the installed RM12 schedule digest equals the repository-source digest",
+        )
+        invalid = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", str(JOBS[0]),
+             "--downtime", "mill99:0:10"],
+            cwd=neutral,
+            env=env,
+        )
+        check(invalid.returncode == 2 and "unknown machine" in invalid.stderr,
+              "invalid downtime is a usage error from the installed package")
         check(list(neutral.iterdir()) == [], "nothing is written to the working directory")
 
     print(f"{len(failures)} failure(s)")

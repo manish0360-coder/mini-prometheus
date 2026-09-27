@@ -21,6 +21,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0012](0012-rm10-acceptance.md) | RM10 (Declared Operation Times and Single-Job Timeline) implementation and acceptance | Accepted |
 | [0013](0013-rm11-acceptance.md) | RM11 (Multi-Job Deterministic Scheduling) implementation and acceptance | Accepted |
 | [0014](0014-packaging-integrity.md) | Packaging integrity: the installed wheel carries the contracts tree (maintenance) | Accepted |
+| [0015](0015-rm12-acceptance.md) | RM12 (Time-Aware Resource Downtime Scheduling) implementation and acceptance | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

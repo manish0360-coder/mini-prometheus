@@ -31,8 +31,26 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
 | **RM10** | **Declared Operation Times and Single-Job Timeline** — engineer-declared `duration_min` per operation (integer minutes) → a serialized job timeline and lead time; missing prerequisites reported, nothing invented. **Not a production scheduler.** | ✅ **Complete** (2026-09-27) | `rm10-complete` | runtime `0.8.0`; **no contract** (suite `0.4.0`); RM8 + RM10 goldens pass; RM2 unchanged; ADR-0012 |
 | **RM11** | **Multi-Job Deterministic Scheduling** — several verified, timed jobs sharing machines → one deterministic, independently checked schedule (`earliest_start_v1`, `NOT_OPTIMIZED`) → makespan with a lower-bound certificate; all-or-nothing refusals; pure/read-only; dedicated CLI | ✅ **Complete** (2026-09-27) | `rm11-complete` | runtime `0.9.0`; **no contract** (suite `0.4.0`, schedule internal); RM1–RM10 byte-unchanged; ADR-0013 |
-| *Maintenance* | **Packaging integrity** — the installed wheel carries the contracts tree (repository-shaped install + `.pth`); RM10/RM11 CLIs work from a regular installation | ✅ **Complete** (2026-09-27) | pending `packaging-integrity-complete` | runtime `0.9.1`; no source/contract/CI change; ADR-0014 |
-| **RM12+** | A measured comparison of scheduling rules against the RM11 lower bound (only if the evidence justifies it); then setup, calendars, capacity; model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+| *Maintenance* | **Packaging integrity** — the installed wheel carries the contracts tree (repository-shaped install + `.pth`); RM10/RM11 CLIs work from a regular installation | ✅ **Complete** (2026-09-27) | `packaging-integrity-complete` | runtime `0.9.1`; no source/contract/CI change; ADR-0014 |
+| **RM12** | **Time-Aware Resource Downtime Scheduling** — explicit finite downtime `[start, end)` on already-assigned machines for one scheduling run; operations wait (never rerouted); `earliest_start_v1_downtime` only under relevant downtime; RM11 bound retained + window-aware lower bound; independent checker extended; CLI `--downtime` | ✅ **Complete** (2026-09-27) | pending `rm12-complete` | runtime `0.10.0`; **no contract** (suite `0.4.0`); no-downtime path byte-identical to `rm11-complete` (frozen golden); ADR-0015 |
+| **RM13+** | To be chosen from RM12 evidence (candidates: a measured comparison of scheduling rules against the lower bounds, changeover, calendars compiled into downtime outside the core); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM12 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: **time-aware resource downtime**. For one scheduling run, known machines may be down
+  on finite integer intervals `[start_min, end_min)` from origin 0; they are available everywhere else, so every
+  operation still fits. Input is validated (unknown machines, zero-length, negative, non-integer or unbounded
+  intervals are rejected before planning) and canonicalized (sorted; overlapping and touching intervals merged).
+- Operations on a machine with downtime **wait** for it — never rerouted (RM9 chooses the machine at planning time).
+  Rule `earliest_start_v1_downtime` (append-only earliest fit, half-open) is recorded only when relevant downtime
+  exists; without it every output is byte-identical to `rm11-complete` (frozen golden, also with downtime on unused
+  machines).
+- Only downtime on machines the job set uses is relevant; it enters `schedule_input_identity` and the digest.
+- The RM11 lower bound is retained; a window-aware bound (earliest time each machine can finish its work around its
+  downtime) is added and the gap is measured to it. The independent checker re-derives the canonical downtime and the
+  bound itself and proves that no operation intersects downtime.
+- Internal only (contracts `0.4.0`); pure and read-only; no calendar, shift, maintenance policy, MES or state.
+- Full record: `docs/milestones/RM12-completion-report.md`, ADR-0015, spec `specs/milestones/RM12-resource-downtime.md`.
 
 ## RM11 — what shipped (2026-09-27)
 

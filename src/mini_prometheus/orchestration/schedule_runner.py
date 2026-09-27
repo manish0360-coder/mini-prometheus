@@ -29,9 +29,11 @@ from mini_prometheus.manufacturing_constraints.capability_model import (
     default_model,
     with_unavailable_resources,
 )
+from mini_prometheus.manufacturing_scheduling.downtime import DowntimeInput, canonical_downtime
 from mini_prometheus.manufacturing_scheduling.job_set import schedule_job_set
 from mini_prometheus.manufacturing_scheduling.model import (
     BoundStatus,
+    InvalidDowntimeError,
     JobInput,
     ScheduledOperation,
     ScheduleIntegrityError,
@@ -40,6 +42,9 @@ from mini_prometheus.manufacturing_scheduling.model import (
 )
 
 _OPTIMAL = "(makespan equals the lower bound: PROVABLY OPTIMAL under the RM11 model)"
+_OPTIMAL_DOWNTIME = (
+    "(makespan equals the window-aware lower bound: PROVABLY OPTIMAL under the RM12 model)"
+)
 
 
 def schedule_requests(
@@ -47,13 +52,18 @@ def schedule_requests(
     *,
     capability_model: ProcessCapabilityModel | None = None,
     produced_at: str | None = None,
+    downtime: DowntimeInput | None = None,
 ) -> ScheduleOutcome:
+    """RM12: ``downtime`` maps machine ids to finite [start_min, end_min) pairs for this run only;
+    invalid downtime raises ``InvalidDowntimeError`` before planning."""
     model = capability_model or default_model()
     produced_at = produced_at or now_rfc3339()
     jobs = [
         JobInput(request.request_id, intake(request, produced_at=produced_at))
         for request in requests
     ]
+    if downtime:
+        return schedule_job_set(jobs, model, produced_at=produced_at, downtime=downtime)
     return schedule_job_set(jobs, model, produced_at=produced_at)
 
 
@@ -85,12 +95,25 @@ def render(outcome: ScheduleOutcome) -> list[str]:
     ]
     lines += [_placement(op) for op in s.operations]
     lines += [f"job {job.request_id}: completion {job.completion_min} min" for job in s.jobs]
+    if s.downtime:  # RM12 lines only with relevant downtime; otherwise the RM11 report exactly
+        spans = [
+            f"{m} " + " ".join(f"[{i.start_min}, {i.end_min})" for i in ivs)
+            for m, ivs in s.downtime
+        ]
+        lines.append("downtime: " + "; ".join(spans))
     binding = [f"longest job {r}" for r in s.lower_bound_binding_request_ids]
     binding += [f"busiest machine {m}" for m in s.lower_bound_binding_resource_ids]
     lines.append(f"makespan: {s.makespan_min} min")
     lines.append(f"lower bound: {s.lower_bound_min} min ({'; '.join(binding)})")
+    optimal = _OPTIMAL
+    if s.downtime:
+        machines = "; ".join(s.window_aware_lower_bound_binding_resource_ids) or "the RM11 bound"
+        lines.append(
+            f"window-aware lower bound: {s.window_aware_lower_bound_min} min (binding: {machines})"
+        )
+        optimal = _OPTIMAL_DOWNTIME
     gap = f"gap to lower bound: {s.gap_to_lower_bound_min} min"
-    lines.append(f"{gap} {_OPTIMAL}" if s.bound_status == BoundStatus.PROVABLY_OPTIMAL else gap)
+    lines.append(f"{gap} {optimal}" if s.bound_status == BoundStatus.PROVABLY_OPTIMAL else gap)
     lines.append("model assumptions: " + "; ".join(s.model_assumptions))
     lines.append(f"schedule input identity: {s.schedule_input_identity}")
     lines.append(f"schedule digest: {s.schedule_digest}")
@@ -119,12 +142,31 @@ def _request_from_json(raw: Any, constrained: bool) -> ManufacturingRequest:
     )
 
 
+def _downtime_from_args(values: list[str]) -> dict[str, list[tuple[int, int]]]:
+    """``MACHINE:START:END`` values -> {machine: [(start, end), ...]} (integers only)."""
+    downtime: dict[str, list[tuple[int, int]]] = {}
+    for value in values:
+        parts = value.split(":")
+        if len(parts) != 3:
+            raise ValueError(f"--downtime {value!r}: expected MACHINE:START_MIN:END_MIN")
+        machine, start, end = parts
+        try:
+            interval = (int(start), int(end))
+        except ValueError:
+            raise ValueError(
+                f"--downtime {value!r}: start and end must be integer minutes"
+            ) from None
+        downtime.setdefault(machine, []).append(interval)
+    return downtime
+
+
 def _main(argv: list[str] | None = None) -> int:
     import argparse
     import json
 
     parser = argparse.ArgumentParser(
-        description="RM11 multi-job schedule (earliest_start_v1; NOT_OPTIMIZED; no dispatch)"
+        description="RM11/RM12 multi-job schedule (earliest_start_v1, with --downtime "
+        "earliest_start_v1_downtime; NOT_OPTIMIZED; no dispatch)"
     )
     parser.add_argument(
         "request_json",
@@ -145,6 +187,14 @@ def _main(argv: list[str] | None = None) -> int:
         help="RM9: declare a KNOWN resource unavailable for this planning snapshot (repeatable; "
         "applies to every job). Unknown ids are rejected before planning.",
     )
+    parser.add_argument(
+        "--downtime",
+        action="append",
+        default=[],
+        metavar="MACHINE:START:END",
+        help="RM12: a KNOWN machine is down on [START, END) minutes from schedule origin 0 "
+        "(integers, 0 <= START < END; repeatable). Operations on it wait; nothing is rerouted.",
+    )
     args = parser.parse_args(argv)
     constrained = args.capability_model == "constrained"
     model = constrained_model() if constrained else default_model()
@@ -153,12 +203,17 @@ def _main(argv: list[str] | None = None) -> int:
             model = with_unavailable_resources(model, args.unavailable_resource)
         except UnknownResourceError as exc:
             parser.error(str(exc))
+    try:
+        downtime = _downtime_from_args(args.downtime)
+        canonical_downtime(downtime, model.resources)
+    except (ValueError, InvalidDowntimeError) as exc:
+        parser.error(str(exc))
     requests = []
     for path in args.request_json:
         with open(path, encoding="utf-8") as handle:
             requests.append(_request_from_json(json.load(handle), constrained))
     try:
-        outcome = schedule_requests(requests, capability_model=model)
+        outcome = schedule_requests(requests, capability_model=model, downtime=downtime)
     except ScheduleIntegrityError as exc:
         print(f"SCHEDULE_INTEGRITY_ERROR (no schedule returned): {exc}")
         return 1

@@ -21,19 +21,31 @@ empty list means the schedule is valid. It proves:
 - job completions, makespan (= max operation end), lower bound, gap and bound status are exact
   (COMPLETION / MAKESPAN / LOWER_BOUND / GAP / BOUND_STATUS_MISMATCH);
 - the metadata, job set, input identity and digest match (METADATA / JOB_SET / DIGEST_MISMATCH).
+
+RM12 (ADR-0015), given the RAW downtime input of the run: it independently re-derives the relevant
+canonical downtime (machines the jobs use; the union of their intervals by an event sweep in which
+touching intervals join) and proves that the recorded downtime equals it (DOWNTIME_MISMATCH), that
+no operation intersects downtime of its machine under half-open semantics (DOWNTIME_CONFLICT), and
+that the window-aware lower bound is exact (WINDOW_LOWER_BOUND_MISMATCH; T_avail recomputed as the
+least fixed point of T = W + downtime inside [0, T)); the gap is then checked against that bound.
+It never imports the downtime canonicalizer (import-linter contract).
 """
 
 from __future__ import annotations
 
 import itertools
-from collections.abc import Sequence
-from typing import TypeGuard
+from collections.abc import Iterable, Mapping, Sequence
+from typing import TypeGuard, cast
 
 from mini_prometheus.manufacturing_constraints.oracle import DURATION_PARAM
 from mini_prometheus.manufacturing_scheduling.model import (
     MODEL_ASSUMPTIONS,
+    MODEL_ASSUMPTIONS_DOWNTIME,
     OPTIMIZATION_STATUS,
     BoundStatus,
+    Downtime,
+    DowntimeInterval,
+    DowntimeIssueCode,
     IssueCode,
     MultiJobSchedule,
     ScheduledOperation,
@@ -44,6 +56,63 @@ from mini_prometheus.manufacturing_scheduling.model import (
 )
 
 _Key = tuple[str, int]
+
+
+def _union(spans: list[tuple[int, int]]) -> tuple[DowntimeInterval, ...]:
+    """Union of half-open spans by an event sweep; at equal times starts precede ends, so touching
+    spans join."""
+    events = sorted(
+        [(s, 1) for s, _ in spans] + [(e, -1) for _, e in spans], key=lambda x: (x[0], -x[1])
+    )
+    union: list[DowntimeInterval] = []
+    depth, opened = 0, 0
+    for time, delta in events:
+        if delta == 1 and depth == 0:
+            opened = time
+        depth += delta
+        if delta == -1 and depth == 0:
+            union.append(DowntimeInterval(opened, time))
+    return tuple(union)
+
+
+def _relevant_downtime(
+    downtime: Mapping[str, Iterable[object]] | None, jobs: Sequence[SchedulingJob]
+) -> Downtime | None:
+    """The canonical downtime of the machines the jobs use, re-derived from the raw input (None if
+    the input is not valid downtime)."""
+    if not downtime:
+        return ()
+    used = {a.resource_id for job in jobs for a in job.plan.resource_assignments}
+    relevant: list[tuple[str, tuple[DowntimeInterval, ...]]] = []
+    for machine in sorted(m for m in downtime if m in used):
+        spans: list[tuple[int, int]] = []
+        for raw in downtime[machine]:
+            if isinstance(raw, DowntimeInterval):
+                pair: tuple[object, ...] = (raw.start_min, raw.end_min)
+            else:
+                try:
+                    pair = tuple(cast(Iterable[object], raw))
+                except TypeError:
+                    return None
+            if len(pair) != 2 or not all(_minutes(v) for v in pair):
+                return None
+            start, end = cast(tuple[int, int], pair)
+            if start < 0 or end <= start:
+                return None
+            spans.append((start, end))
+        if spans:
+            relevant.append((machine, _union(spans)))
+    return tuple(relevant)
+
+
+def _machine_ready(work: int, downtime: Sequence[DowntimeInterval]) -> int:
+    """T_avail(work), independently: the least fixed point of T = work + downtime inside [0, T)."""
+    t = work
+    while True:
+        inside = sum(min(i.end_min, t) - i.start_min for i in downtime if i.start_min < t)
+        if work + inside == t:
+            return t
+        t = work + inside
 
 
 def _minutes(value: object) -> TypeGuard[int]:
@@ -62,17 +131,29 @@ def schedule_issues(
     schedule: MultiJobSchedule,
     jobs: Sequence[SchedulingJob],
     capability_model_version: str,
+    downtime: Mapping[str, Iterable[object]] | None = None,
 ) -> list[ScheduleIssue]:
+    """``downtime`` is the raw downtime input of the run (RM12); None or empty means none."""
     issues: list[ScheduleIssue] = []
 
-    def add(code: IssueCode, detail: str) -> None:
+    def add(code: IssueCode | DowntimeIssueCode, detail: str) -> None:
         issues.append(ScheduleIssue(code, detail))
+
+    # --- RM12: the relevant canonical downtime, re-derived from the raw input ----------------
+    relevant = _relevant_downtime(downtime, jobs)
+    if relevant is None:
+        add(DowntimeIssueCode.DOWNTIME_MISMATCH, "the downtime input is not valid downtime")
+        relevant = ()
+    if tuple(schedule.downtime) != relevant:
+        add(DowntimeIssueCode.DOWNTIME_MISMATCH, "recorded downtime != relevant canonical input")
+    blocked = dict(relevant)
 
     # --- metadata and job set ---------------------------------------------------------------
     if schedule.optimization_status != OPTIMIZATION_STATUS:
         add(IssueCode.METADATA_MISMATCH, f"optimization_status {schedule.optimization_status!r}")
-    if tuple(schedule.model_assumptions) != MODEL_ASSUMPTIONS:
-        add(IssueCode.METADATA_MISMATCH, "model_assumptions differ from the RM11 model")
+    model = MODEL_ASSUMPTIONS_DOWNTIME if relevant else MODEL_ASSUMPTIONS
+    if tuple(schedule.model_assumptions) != model:
+        add(IssueCode.METADATA_MISMATCH, "model_assumptions differ from the model in force")
     if schedule.capability_model_version != capability_model_version:
         add(IssueCode.METADATA_MISMATCH, f"capability model {schedule.capability_model_version!r}")
     for job in jobs:
@@ -86,6 +167,7 @@ def schedule_issues(
         schedule.scheduling_rule_version,
         capability_model_version,
         [(job.request_id, job.plan.content_hash) for job in jobs],
+        relevant,
     )
     if schedule.schedule_input_identity != expected_identity:
         add(IssueCode.METADATA_MISMATCH, "schedule_input_identity does not match the inputs")
@@ -176,6 +258,17 @@ def schedule_issues(
             if holder is None or op.end_min > holder.end_min:
                 holder = op
 
+    # --- RM12: no operation intersects downtime of its machine (half-open) --------------------
+    for key in sorted(valid):
+        op = valid[key]
+        for down in blocked.get(op.resource_id, ()):
+            if op.start_min < down.end_min and down.start_min < op.end_min:
+                add(
+                    DowntimeIssueCode.DOWNTIME_CONFLICT,
+                    f"{_interval(op)} intersects {op.resource_id} downtime "
+                    f"[{down.start_min}, {down.end_min})",
+                )
+
     # --- canonical ordering -------------------------------------------------------------------
     if all(
         _minutes(op.start_min) and _minutes(op.step_index) and isinstance(op.request_id, str)
@@ -218,8 +311,26 @@ def schedule_issues(
             )
             if recorded != expected:
                 add(IssueCode.LOWER_BOUND_MISMATCH, f"lower bound {recorded}, expected {expected}")
-        if gap != makespan - recorded_bound:
-            add(IssueCode.GAP_MISMATCH, f"gap {gap} != {makespan} - {recorded_bound}")
+        # RM12: with relevant downtime the gap is measured to the window-aware bound.
+        window = schedule.window_aware_lower_bound_min
+        window_recorded = (window, tuple(schedule.window_aware_lower_bound_binding_resource_ids))
+        if relevant and job_totals and machine_loads:
+            ready = {m: _machine_ready(w, blocked.get(m, ())) for m, w in machine_loads.items()}
+            rm11 = max(max(job_totals.values()), max(machine_loads.values()))
+            value = max(rm11, max(ready.values()))
+            window_expected = (value, tuple(sorted(m for m, t in ready.items() if t == value)))
+            if window_recorded != window_expected:
+                add(
+                    DowntimeIssueCode.WINDOW_LOWER_BOUND_MISMATCH,
+                    f"window-aware lower bound {window_recorded}, expected {window_expected}",
+                )
+        elif not relevant and window_recorded != (None, ()):
+            add(
+                DowntimeIssueCode.WINDOW_LOWER_BOUND_MISMATCH, "window-aware bound without downtime"
+            )
+        reference = window if relevant else recorded_bound
+        if not _minutes(reference) or gap != makespan - reference:
+            add(IssueCode.GAP_MISMATCH, f"gap {gap} != {makespan} - {reference}")
         expected_status = (
             BoundStatus.PROVABLY_OPTIMAL if gap == 0 else BoundStatus.GAP_ABOVE_LOWER_BOUND
         )

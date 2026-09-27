@@ -27,6 +27,8 @@ from mini_prometheus._contracts import DesignInput, ProductionPlan
 
 SCHEDULING_RULE = "earliest_start_v1"
 SCHEDULING_RULE_VERSION = "1.0.0"
+# RM12 (ADR-0015): the same earliest-start family, recorded only when relevant downtime exists.
+SCHEDULING_RULE_DOWNTIME = "earliest_start_v1_downtime"
 OPTIMIZATION_STATUS = "NOT_OPTIMIZED"
 
 # RM11 MODEL ASSUMPTIONS (Director ruling D1): assumptions of this model, not universal claims.
@@ -44,6 +46,15 @@ MODEL_ASSUMPTIONS: tuple[str, ...] = (
     "no flexible machine reassignment during RM11",
     "no optimization",
     "no execution/dispatch",
+)
+
+# RM12 MODEL ASSUMPTIONS (ADR-0015): recorded instead of the RM11 list under relevant downtime.
+MODEL_ASSUMPTIONS_DOWNTIME: tuple[str, ...] = (
+    *MODEL_ASSUMPTIONS,
+    "a machine is unavailable exactly during its declared finite downtime [start_min, end_min)"
+    " and available at all other times",
+    "an operation never overlaps downtime on its machine; it waits for the downtime to end",
+    "downtime never reroutes an operation to another machine",
 )
 
 
@@ -90,6 +101,31 @@ class IssueCode(StrEnum):
     GAP_MISMATCH = "GAP_MISMATCH"
     BOUND_STATUS_MISMATCH = "BOUND_STATUS_MISMATCH"
     DIGEST_MISMATCH = "DIGEST_MISMATCH"
+
+
+class DowntimeIssueCode(StrEnum):
+    """RM12 checker findings about downtime (closed, internal; RM11's IssueCode set unchanged)."""
+
+    DOWNTIME_MISMATCH = "DOWNTIME_MISMATCH"  # recorded downtime != canonical relevant input
+    DOWNTIME_CONFLICT = "DOWNTIME_CONFLICT"  # an operation intersects its machine's downtime
+    WINDOW_LOWER_BOUND_MISMATCH = "WINDOW_LOWER_BOUND_MISMATCH"
+
+
+@dataclass(frozen=True, order=True)
+class DowntimeInterval:
+    """RM12: a machine is unavailable on [start_min, end_min), minutes from schedule origin 0."""
+
+    start_min: int
+    end_min: int
+
+
+# Relevant canonical downtime: (machine id, sorted pairwise disjoint and non-touching intervals),
+# machines in sorted order — only machines assigned to at least one operation of the job set.
+Downtime = tuple[tuple[str, tuple[DowntimeInterval, ...]], ...]
+
+
+class InvalidDowntimeError(ValueError):
+    """Invalid downtime input (rejected before scheduling; never a manufacturing verdict)."""
 
 
 @dataclass(frozen=True)
@@ -157,6 +193,11 @@ class MultiJobSchedule:
     gap_to_lower_bound_min: int
     bound_status: BoundStatus
     schedule_digest: str
+    # RM12: set only when relevant downtime exists; otherwise the artifact is exactly RM11's. Then
+    # the gap is measured to the window-aware bound; lower_bound_min stays the RM11 bound.
+    downtime: Downtime = ()
+    window_aware_lower_bound_min: int | None = None
+    window_aware_lower_bound_binding_resource_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -175,7 +216,7 @@ class ScheduleOutcome:
 
 @dataclass(frozen=True)
 class ScheduleIssue:
-    code: IssueCode
+    code: IssueCode | DowntimeIssueCode
     detail: str
 
 
@@ -183,27 +224,37 @@ class ScheduleIntegrityError(RuntimeError):
     """A generated schedule failed the independent checker. It is never returned (fail closed)."""
 
 
+def downtime_view(downtime: Downtime) -> dict[str, list[list[int]]]:
+    """Canonical JSON form of relevant downtime: {machine: [[start_min, end_min], ...]}."""
+    return {m: [[i.start_min, i.end_min] for i in ivs] for m, ivs in sorted(downtime)}
+
+
 def schedule_input_identity(
     scheduling_rule: str,
     scheduling_rule_version: str,
     capability_model_version: str,
     jobs: Sequence[tuple[str, str]],
+    downtime: Downtime = (),
 ) -> str:
     """Identity of the scheduling problem + rule. ``jobs`` = (request_id, plan content hash)
-    pairs, in any order (canonicalized here). Never includes a derived output such as makespan."""
-    return h.content_hash(
-        {
-            "scheduling_rule": scheduling_rule,
-            "scheduling_rule_version": scheduling_rule_version,
-            "capability_model_version": capability_model_version,
-            "jobs": [{"request_id": r, "plan_content_hash": p} for r, p in sorted(jobs)],
-        }
-    )
+    pairs, in any order (canonicalized here). Never includes a derived output such as makespan.
+    RM12: relevant canonical downtime enters only when there is some, so a run without relevant
+    downtime keeps exactly the RM11 identity."""
+    view: dict[str, object] = {
+        "scheduling_rule": scheduling_rule,
+        "scheduling_rule_version": scheduling_rule_version,
+        "capability_model_version": capability_model_version,
+        "jobs": [{"request_id": r, "plan_content_hash": p} for r, p in sorted(jobs)],
+    }
+    if downtime:
+        view["downtime"] = downtime_view(downtime)
+    return h.content_hash(view)
 
 
 def schedule_view(schedule: MultiJobSchedule) -> dict[str, object]:
-    """The canonical view of the artifact: every field except ``schedule_digest``."""
-    return {
+    """The canonical view of the artifact: every field except ``schedule_digest`` (the RM12
+    fields only when relevant downtime exists, so an RM11-shaped artifact digests as in RM11)."""
+    view: dict[str, object] = {
         "scheduling_rule": schedule.scheduling_rule,
         "scheduling_rule_version": schedule.scheduling_rule_version,
         "optimization_status": schedule.optimization_status,
@@ -219,6 +270,13 @@ def schedule_view(schedule: MultiJobSchedule) -> dict[str, object]:
         "gap_to_lower_bound_min": schedule.gap_to_lower_bound_min,
         "bound_status": str(schedule.bound_status),
     }
+    if schedule.downtime:
+        view["downtime"] = downtime_view(schedule.downtime)
+        view["window_aware_lower_bound_min"] = schedule.window_aware_lower_bound_min
+        view["window_aware_lower_bound_binding_resource_ids"] = list(
+            schedule.window_aware_lower_bound_binding_resource_ids
+        )
+    return view
 
 
 def schedule_digest(schedule: MultiJobSchedule) -> str:

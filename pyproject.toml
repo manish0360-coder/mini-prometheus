@@ -1,6 +1,6 @@
 [project]
 name = "mini-prometheus"
-version = "0.9.1"
+version = "0.10.0"
 description = "AI Manufacturing Intelligence — runtime orchestration platform integrating MiniFlyWire, Noetica, and Velith."
 requires-python = ">=3.11"
 
@@ -157,11 +157,12 @@ forbidden_modules = [
 # RM11: the schedule checker is independent of what it checks — a defect in the generator or the lower-bound
 # calculator cannot hide itself behind a shared implementation.
 [[tool.importlinter.contracts]]
-name = "RM11 checker is independent of the generator and the bound calculator"
+name = "RM11/RM12 checker is independent of the generator, bound calculator and downtime canonicalizer"
 type = "forbidden"
 source_modules = ["mini_prometheus.manufacturing_scheduling.checker"]
 forbidden_modules = [
     "mini_prometheus.manufacturing_scheduling.earliest_start",
     "mini_prometheus.manufacturing_scheduling.lower_bound",
     "mini_prometheus.manufacturing_scheduling.job_set",
+    "mini_prometheus.manufacturing_scheduling.downtime",
 ]
