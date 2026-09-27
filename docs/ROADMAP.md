@@ -32,8 +32,24 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM10** | **Declared Operation Times and Single-Job Timeline** — engineer-declared `duration_min` per operation (integer minutes) → a serialized job timeline and lead time; missing prerequisites reported, nothing invented. **Not a production scheduler.** | ✅ **Complete** (2026-09-27) | `rm10-complete` | runtime `0.8.0`; **no contract** (suite `0.4.0`); RM8 + RM10 goldens pass; RM2 unchanged; ADR-0012 |
 | **RM11** | **Multi-Job Deterministic Scheduling** — several verified, timed jobs sharing machines → one deterministic, independently checked schedule (`earliest_start_v1`, `NOT_OPTIMIZED`) → makespan with a lower-bound certificate; all-or-nothing refusals; pure/read-only; dedicated CLI | ✅ **Complete** (2026-09-27) | `rm11-complete` | runtime `0.9.0`; **no contract** (suite `0.4.0`, schedule internal); RM1–RM10 byte-unchanged; ADR-0013 |
 | *Maintenance* | **Packaging integrity** — the installed wheel carries the contracts tree (repository-shaped install + `.pth`); RM10/RM11 CLIs work from a regular installation | ✅ **Complete** (2026-09-27) | `packaging-integrity-complete` | runtime `0.9.1`; no source/contract/CI change; ADR-0014 |
-| **RM12** | **Time-Aware Resource Downtime Scheduling** — explicit finite downtime `[start, end)` on already-assigned machines for one scheduling run; operations wait (never rerouted); `earliest_start_v1_downtime` only under relevant downtime; RM11 bound retained + window-aware lower bound; independent checker extended; CLI `--downtime` | ✅ **Complete** (2026-09-27) | pending `rm12-complete` | runtime `0.10.0`; **no contract** (suite `0.4.0`); no-downtime path byte-identical to `rm11-complete` (frozen golden); ADR-0015 |
-| **RM13+** | To be chosen from RM12 evidence (candidates: a measured comparison of scheduling rules against the lower bounds, changeover, calendars compiled into downtime outside the core); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM12** | **Time-Aware Resource Downtime Scheduling** — explicit finite downtime `[start, end)` on already-assigned machines for one scheduling run; operations wait (never rerouted); `earliest_start_v1_downtime` only under relevant downtime; RM11 bound retained + window-aware lower bound; independent checker extended; CLI `--downtime` | ✅ **Complete** (2026-09-27) | `rm12-complete` | runtime `0.10.0`; **no contract** (suite `0.4.0`); no-downtime path byte-identical to `rm11-complete` (frozen golden); ADR-0015 |
+| **RM13** | **Opt-In Most-Work-Remaining Tie-Break Rule** — `earliest_start_v1_most_work_remaining`: exact earliest-start ties go to the job with the most remaining processing work; opt-in (`rule=` / `--rule`), default unchanged; frozen synthetic regression corpus RM13_REGRESSION_CORPUS_01 (124 → 131 of 135 optimal; one documented regression) | ✅ **Complete** (2026-09-27) | pending `rm13-complete` | runtime `0.11.0`; **no contract** (suite `0.4.0`); all RM11/RM12 goldens byte-identical; ADR-0016 |
+| **RM14+** | To be chosen from evidence (candidates: engineer-declared sequence-dependent changeover; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM13 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: a separately named, **opt-in** scheduling rule,
+  `earliest_start_v1_most_work_remaining`. It is `earliest_start_v1` (with RM12 downtime) except that among candidates
+  with exactly the same earliest feasible start, the job with the most remaining processing work (candidate + later
+  unscheduled RM10 durations; never downtime or waiting) goes first, then request_id, then step_index. It never
+  chooses a later-starting operation.
+- Opt-in via `rule=` and `--rule`; the default stays `earliest_start_v1`, so every RM11/RM12 golden and default identity
+  is byte-identical.
+- Evidence: the frozen synthetic algorithm-regression corpus RM13_REGRESSION_CORPUS_01 (135 instances, exhaustive
+  optima re-derived in the tests): 124 → 131 optimal, 42 → 49 under contention; case 130 regresses 163 → 167. **Not**
+  evidence of factory performance; promotion to default needs a separate decision.
+- Full record: `docs/milestones/RM13-completion-report.md`, ADR-0016, spec
+  `specs/milestones/RM13-most-work-remaining-rule.md`.
 
 ## RM12 — what shipped (2026-09-27)
 

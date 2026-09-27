@@ -32,6 +32,12 @@ advances to the operation's end), and selection uses that downtime-adjusted star
 downtime interval is finite, every operation eventually fits. Placements still come in
 non-decreasing start order, so no idle gap before a placed operation can later be used by any
 operation: idle time created by downtime is a property of this rule, not a missed insertion.
+
+RM13 ``earliest_start_v1_most_work_remaining`` (ADR-0016) is an OPT-IN, separately named rule that
+differs in step 4 only: among candidates with EXACTLY the same earliest feasible start, the job with
+the most remaining processing work goes first (then request_id, then step_index). It can never
+choose a later-starting candidate; downtime, machines and placement are exactly as above. It is
+recorded as ``earliest_start_v1_most_work_remaining_downtime`` under relevant downtime.
 """
 
 from __future__ import annotations
@@ -51,6 +57,8 @@ from mini_prometheus.manufacturing_scheduling.model import (
     OPTIMIZATION_STATUS,
     SCHEDULING_RULE,
     SCHEDULING_RULE_DOWNTIME,
+    SCHEDULING_RULE_MOST_WORK_REMAINING,
+    SCHEDULING_RULE_MOST_WORK_REMAINING_DOWNTIME,
     SCHEDULING_RULE_VERSION,
     BoundStatus,
     Downtime,
@@ -79,10 +87,14 @@ class _Candidate:
     step_index: int
     task_id: str
     operation: _Operation
+    priority: int = 0  # RM13: -(remaining processing work) for the opt-in rule; always 0 otherwise
 
 
-def _decision_key(candidate: _Candidate) -> tuple[int, str, int]:
-    return (candidate.start_min, candidate.request_id, candidate.step_index)
+def _decision_key(candidate: _Candidate) -> tuple[int, int, str, int]:
+    """Earliest feasible start FIRST — a tie-break can never prefer a later-starting candidate —
+    then the rule's priority (constant 0 for earliest_start_v1, so exactly the RM11 order), then
+    request_id, then step_index."""
+    return (candidate.start_min, candidate.priority, candidate.request_id, candidate.step_index)
 
 
 def _operations(job: SchedulingJob) -> list[_Operation]:
@@ -113,6 +125,28 @@ def earliest_start_v1(
 ) -> MultiJobSchedule:
     """Schedule a non-empty set of schedulable jobs with unique request_ids (module rule).
     ``downtime`` is the relevant canonical downtime (RM12); empty means exactly RM11."""
+    return _earliest_start(jobs, capability_model_version, downtime, most_work_remaining=False)
+
+
+def earliest_start_v1_most_work_remaining(
+    jobs: Sequence[SchedulingJob], capability_model_version: str, downtime: Downtime = ()
+) -> MultiJobSchedule:
+    """RM13 opt-in rule (ADR-0016): exactly earliest_start_v1 — same earliest feasible start
+    (RM12 downtime fit included), same append-only placement, same machines — except that among
+    candidates with EXACTLY the same earliest feasible start the job with the most remaining
+    processing work goes first: remaining_work = the candidate's duration_min + the duration_min
+    of every later unscheduled operation of that job (RM10 durations only: no downtime, waiting,
+    idle, calendar or setup time). Further ties: request_id, then step_index."""
+    return _earliest_start(jobs, capability_model_version, downtime, most_work_remaining=True)
+
+
+def _earliest_start(
+    jobs: Sequence[SchedulingJob],
+    capability_model_version: str,
+    downtime: Downtime,
+    *,
+    most_work_remaining: bool,
+) -> MultiJobSchedule:
     blocked = dict(downtime)
     operations = {job.request_id: _operations(job) for job in jobs}
     next_step = {job.request_id: 0 for job in jobs}
@@ -130,8 +164,12 @@ def earliest_start_v1(
             start = max(job_ready[job.request_id], machine_free.get(operation.resource_id, 0))
             machine_downtime = blocked.get(operation.resource_id, ())
             start = _earliest_fit(start, operation.duration_min, machine_downtime)
+            remaining_ops = ops[next_step[job.request_id] :]
+            priority = -sum(o.duration_min for o in remaining_ops) if most_work_remaining else 0
             candidates.append(
-                _Candidate(start, job.request_id, operation.step_index, job.task_id, operation)
+                _Candidate(
+                    start, job.request_id, operation.step_index, job.task_id, operation, priority
+                )
             )
         chosen = min(candidates, key=_decision_key)
         start = chosen.start_min
@@ -159,7 +197,12 @@ def earliest_start_v1(
     window = window_aware_lower_bound(jobs, downtime) if downtime else None
     reference = window.lower_bound_min if window else bound.lower_bound_min
     gap = makespan - reference
-    rule = SCHEDULING_RULE_DOWNTIME if downtime else SCHEDULING_RULE
+    rule = {
+        (False, False): SCHEDULING_RULE,
+        (False, True): SCHEDULING_RULE_DOWNTIME,
+        (True, False): SCHEDULING_RULE_MOST_WORK_REMAINING,
+        (True, True): SCHEDULING_RULE_MOST_WORK_REMAINING_DOWNTIME,
+    }[(most_work_remaining, bool(downtime))]
     ordered_jobs = sorted(jobs, key=lambda job: job.request_id)
     schedule = MultiJobSchedule(
         scheduling_rule=rule,

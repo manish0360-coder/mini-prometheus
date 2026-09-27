@@ -8,7 +8,9 @@ environment and, from a neutral working directory with no repository path on ``s
 - runs the RM11 scheduling CLI on the three-job fixture (makespan 68) and requires its schedule
   digest to equal the digest produced from the repository source;
 - RM12: runs it with ``--downtime mill01:20:45`` (makespan 103, window-aware bound 77, digest equal
-  to the repository source) and rejects an unknown downtime machine as a usage error.
+  to the repository source) and rejects an unknown downtime machine as a usage error;
+- RM13: runs it with ``--rule earliest_start_v1_most_work_remaining`` (makespan 67, digest equal to
+  the repository source).
 
 Run from the repository root inside the Docker verifier (Python 3.11). Needs network access for
 the isolated build backend and the runtime dependency. Exit code 0 = every check passed.
@@ -229,6 +231,27 @@ def main() -> int:
         )
         check(invalid.returncode == 2 and "unknown machine" in invalid.stderr,
               "invalid downtime is a usage error from the installed package")
+
+        # RM13 (ADR-0016): the opt-in rule from the installed package
+        mw = ["--rule", "earliest_start_v1_most_work_remaining"]
+        rm13 = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", *map(str, JOBS), *mw],
+            cwd=neutral,
+            env=env,
+        )
+        reference13 = run(
+            [sys.executable, "-m", "mini_prometheus.orchestration.schedule_runner",
+             *map(str, reversed(JOBS)), *mw],
+            cwd=ROOT,
+            env=source_env,
+        )
+        check(
+            rm13.returncode == 0
+            and "makespan: 67 min" in rm13.stdout
+            and digest(rm13.stdout) is not None
+            and digest(rm13.stdout) == digest(reference13.stdout),
+            "RM13 opt-in rule runs from the installed package (digest equals the repository source)",
+        )
         check(list(neutral.iterdir()) == [], "nothing is written to the working directory")
 
     print(f"{len(failures)} failure(s)")

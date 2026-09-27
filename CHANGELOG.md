@@ -5,6 +5,26 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.11.0] — 2026-09-27 — RM13 Opt-In Most-Work-Remaining Tie-Break Rule
+
+Runtime `0.10.0 → 0.11.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM13-most-work-remaining-rule.md`, ADR-0016, `docs/milestones/RM13-completion-report.md`.
+**Opt-in only; the default rule and every RM11/RM12 identity are unchanged.**
+
+### Added — RM13
+- Rule `earliest_start_v1_most_work_remaining` 1.0.0 (`..._downtime` under relevant downtime): exact earliest-start
+  ties go to the job with the most remaining processing work (candidate + later unscheduled RM10 durations), then
+  request_id, then step_index; never a later-starting candidate.
+- Selection: `schedule_requests(..., rule=...)`, `schedule_job_set(..., rule=...)`, CLI `--rule`;
+  `UnknownSchedulingRuleError` for anything else.
+- Frozen synthetic algorithm-regression corpus `tests/fixtures/rm13_regression_corpus_01.json`
+  (RM13_REGRESSION_CORPUS_01; digests pinned; optima re-derived in the tests) and pinned metrics for both rules.
+- Tests 1–16, true-source mutants, and an installed-wheel `--rule` check.
+
+### Unchanged
+- Default rule `earliest_start_v1`; all RM11/RM12 goldens and identities; RM12 downtime semantics; RM9 assignments;
+  checker; lower bounds; contracts; CI; dependencies. No Giffler–Thompson, solver, tuning or new benchmark.
+
 ## [0.10.0] — 2026-09-27 — RM12 Time-Aware Resource Downtime Scheduling
 
 Runtime `0.9.1 → 0.10.0`; the contract suite stays **frozen at `0.4.0`**. See

@@ -29,6 +29,12 @@ SCHEDULING_RULE = "earliest_start_v1"
 SCHEDULING_RULE_VERSION = "1.0.0"
 # RM12 (ADR-0015): the same earliest-start family, recorded only when relevant downtime exists.
 SCHEDULING_RULE_DOWNTIME = "earliest_start_v1_downtime"
+# RM13 (ADR-0016): OPT-IN rule — exact earliest-start ties go to the job with the most remaining
+# processing work (RM10 durations only), then request_id, then step_index. Never the default.
+SCHEDULING_RULE_MOST_WORK_REMAINING = "earliest_start_v1_most_work_remaining"
+SCHEDULING_RULE_MOST_WORK_REMAINING_DOWNTIME = "earliest_start_v1_most_work_remaining_downtime"
+# The rules a caller may select (the _downtime ids are provenance, recorded automatically).
+SELECTABLE_RULES: tuple[str, ...] = (SCHEDULING_RULE, SCHEDULING_RULE_MOST_WORK_REMAINING)
 OPTIMIZATION_STATUS = "NOT_OPTIMIZED"
 
 # RM11 MODEL ASSUMPTIONS (Director ruling D1): assumptions of this model, not universal claims.
@@ -126,6 +132,10 @@ Downtime = tuple[tuple[str, tuple[DowntimeInterval, ...]], ...]
 
 class InvalidDowntimeError(ValueError):
     """Invalid downtime input (rejected before scheduling; never a manufacturing verdict)."""
+
+
+class UnknownSchedulingRuleError(ValueError):
+    """A scheduling rule that is not selectable (rejected before planning)."""
 
 
 @dataclass(frozen=True)

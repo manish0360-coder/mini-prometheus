@@ -35,8 +35,14 @@ from mini_prometheus.manufacturing_scheduling.downtime import (
     canonical_downtime,
     relevant_downtime,
 )
-from mini_prometheus.manufacturing_scheduling.earliest_start import earliest_start_v1
+from mini_prometheus.manufacturing_scheduling.earliest_start import (
+    earliest_start_v1,
+    earliest_start_v1_most_work_remaining,
+)
 from mini_prometheus.manufacturing_scheduling.model import (
+    SCHEDULING_RULE,
+    SCHEDULING_RULE_MOST_WORK_REMAINING,
+    SELECTABLE_RULES,
     JobInput,
     Refusal,
     RefusalReason,
@@ -44,6 +50,7 @@ from mini_prometheus.manufacturing_scheduling.model import (
     ScheduleOutcome,
     ScheduleStatus,
     SchedulingJob,
+    UnknownSchedulingRuleError,
 )
 
 MANUFACTURABLE = ManufacturabilityVerdictStatus.MANUFACTURABLE.value
@@ -94,10 +101,18 @@ def schedule_job_set(
     *,
     produced_at: str | None = None,
     downtime: DowntimeInput | None = None,
+    rule: str = SCHEDULING_RULE,
 ) -> ScheduleOutcome:
     """RM12: ``downtime`` (machine id -> [start_min, end_min) pairs) is validated against the
     model's known machines first — invalid input raises ``InvalidDowntimeError`` before any
-    planning; it is never a verdict or a refusal. Only machines the jobs use are relevant."""
+    planning; it is never a verdict or a refusal. Only machines the jobs use are relevant.
+    RM13: ``rule`` selects the scheduling rule; the default is ``earliest_start_v1`` and
+    ``earliest_start_v1_most_work_remaining`` is opt-in. Any other value raises
+    ``UnknownSchedulingRuleError`` before planning."""
+    if rule not in SELECTABLE_RULES:
+        raise UnknownSchedulingRuleError(
+            f"unknown scheduling rule {rule!r}; selectable: {', '.join(SELECTABLE_RULES)}"
+        )
     canonical = canonical_downtime(downtime, capability_model.resources)
     if not job_inputs:
         refusal = Refusal(RefusalReason.EMPTY_JOB_SET, None, "no job was given")
@@ -130,10 +145,15 @@ def schedule_job_set(
         )
 
     relevant = relevant_downtime(canonical, jobs)
+    generate = (
+        earliest_start_v1_most_work_remaining
+        if rule == SCHEDULING_RULE_MOST_WORK_REMAINING
+        else earliest_start_v1
+    )
     if relevant:
-        schedule = earliest_start_v1(jobs, capability_model.version, downtime=relevant)
+        schedule = generate(jobs, capability_model.version, downtime=relevant)
     else:  # no relevant downtime: exactly the RM11 call
-        schedule = earliest_start_v1(jobs, capability_model.version)
+        schedule = generate(jobs, capability_model.version)
     issues = schedule_issues(schedule, jobs, capability_model.version, downtime=downtime)
     if issues:
         raise ScheduleIntegrityError("; ".join(f"{issue.code}: {issue.detail}" for issue in issues))

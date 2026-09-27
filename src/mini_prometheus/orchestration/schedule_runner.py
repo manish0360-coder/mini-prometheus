@@ -32,6 +32,8 @@ from mini_prometheus.manufacturing_constraints.capability_model import (
 from mini_prometheus.manufacturing_scheduling.downtime import DowntimeInput, canonical_downtime
 from mini_prometheus.manufacturing_scheduling.job_set import schedule_job_set
 from mini_prometheus.manufacturing_scheduling.model import (
+    SCHEDULING_RULE,
+    SELECTABLE_RULES,
     BoundStatus,
     InvalidDowntimeError,
     JobInput,
@@ -53,18 +55,23 @@ def schedule_requests(
     capability_model: ProcessCapabilityModel | None = None,
     produced_at: str | None = None,
     downtime: DowntimeInput | None = None,
+    rule: str | None = None,
 ) -> ScheduleOutcome:
     """RM12: ``downtime`` maps machine ids to finite [start_min, end_min) pairs for this run only;
-    invalid downtime raises ``InvalidDowntimeError`` before planning."""
+    invalid downtime raises ``InvalidDowntimeError`` before planning. RM13: ``rule`` opts into a
+    selectable rule (None = the job-set default, ``earliest_start_v1``)."""
     model = capability_model or default_model()
     produced_at = produced_at or now_rfc3339()
     jobs = [
         JobInput(request.request_id, intake(request, produced_at=produced_at))
         for request in requests
     ]
+    options: dict[str, Any] = {}
     if downtime:
-        return schedule_job_set(jobs, model, produced_at=produced_at, downtime=downtime)
-    return schedule_job_set(jobs, model, produced_at=produced_at)
+        options["downtime"] = downtime
+    if rule is not None:
+        options["rule"] = rule
+    return schedule_job_set(jobs, model, produced_at=produced_at, **options)
 
 
 def _row(
@@ -195,6 +202,14 @@ def _main(argv: list[str] | None = None) -> int:
         help="RM12: a KNOWN machine is down on [START, END) minutes from schedule origin 0 "
         "(integers, 0 <= START < END; repeatable). Operations on it wait; nothing is rerouted.",
     )
+    parser.add_argument(
+        "--rule",
+        choices=SELECTABLE_RULES,
+        default=SCHEDULING_RULE,
+        help="RM13: scheduling rule (default earliest_start_v1). "
+        "earliest_start_v1_most_work_remaining is opt-in: exact earliest-start ties go to the job "
+        "with the most remaining work.",
+    )
     args = parser.parse_args(argv)
     constrained = args.capability_model == "constrained"
     model = constrained_model() if constrained else default_model()
@@ -213,7 +228,9 @@ def _main(argv: list[str] | None = None) -> int:
         with open(path, encoding="utf-8") as handle:
             requests.append(_request_from_json(json.load(handle), constrained))
     try:
-        outcome = schedule_requests(requests, capability_model=model, downtime=downtime)
+        outcome = schedule_requests(
+            requests, capability_model=model, downtime=downtime, rule=args.rule
+        )
     except ScheduleIntegrityError as exc:
         print(f"SCHEDULE_INTEGRITY_ERROR (no schedule returned): {exc}")
         return 1

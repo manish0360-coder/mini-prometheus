@@ -1,0 +1,5916 @@
+{
+ "cases": [
+  {
+   "case": 0,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 19
+  },
+  {
+   "case": 1,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      61,
+      63
+     ],
+     [
+      40,
+      43
+     ]
+    ],
+    "lathe01": [
+     [
+      11,
+      24
+     ],
+     [
+      73,
+      84
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       11
+      ],
+      [
+       "inspect",
+       16
+      ],
+      [
+       "pocket_mill",
+       4
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 31
+  },
+  {
+   "case": 2,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      26,
+      30
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 3
+  },
+  {
+   "case": 3,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      66,
+      74
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       1
+      ],
+      [
+       "inspect",
+       8
+      ],
+      [
+       "face_mill",
+       12
+      ],
+      [
+       "inspect",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 43
+  },
+  {
+   "case": 4,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       6
+      ],
+      [
+       "cut_stock",
+       20
+      ],
+      [
+       "cut_stock",
+       23
+      ],
+      [
+       "inspect",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 50
+  },
+  {
+   "case": 5,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      61,
+      72
+     ],
+     [
+      77,
+      88
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       3
+      ],
+      [
+       "cut_stock",
+       7
+      ],
+      [
+       "deburr",
+       5
+      ],
+      [
+       "turn",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 25
+  },
+  {
+   "case": 6,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      41,
+      55
+     ],
+     [
+      37,
+      44
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 22
+  },
+  {
+   "case": 7,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      52,
+      62
+     ],
+     [
+      47,
+      55
+     ]
+    ],
+    "lathe01": [
+     [
+      27,
+      37
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       14
+      ],
+      [
+       "deburr",
+       4
+      ],
+      [
+       "cut_stock",
+       5
+      ],
+      [
+       "face_mill",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 59
+  },
+  {
+   "case": 8,
+   "contended": false,
+   "downtime": {
+    "saw01": [
+     [
+      71,
+      82
+     ],
+     [
+      7,
+      17
+     ],
+     [
+      44,
+      50
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       21
+      ],
+      [
+       "cut_stock",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 41
+  },
+  {
+   "case": 9,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      47,
+      57
+     ],
+     [
+      21,
+      35
+     ],
+     [
+      11,
+      16
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       13
+      ],
+      [
+       "drill",
+       11
+      ],
+      [
+       "deburr",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 101
+  },
+  {
+   "case": 10,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      12,
+      25
+     ]
+    ],
+    "mill01": [
+     [
+      2,
+      14
+     ],
+     [
+      41,
+      52
+     ],
+     [
+      61,
+      65
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       24
+      ],
+      [
+       "deburr",
+       12
+      ],
+      [
+       "face_mill",
+       4
+      ],
+      [
+       "face_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 89
+  },
+  {
+   "case": 11,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       14
+      ],
+      [
+       "inspect",
+       22
+      ],
+      [
+       "face_mill",
+       9
+      ],
+      [
+       "drill",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       6
+      ],
+      [
+       "deburr",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 56
+  },
+  {
+   "case": 12,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 11
+  },
+  {
+   "case": 13,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      23,
+      37
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       13
+      ],
+      [
+       "turn",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       24
+      ],
+      [
+       "turn",
+       19
+      ],
+      [
+       "face_mill",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 92
+  },
+  {
+   "case": 14,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       2
+      ],
+      [
+       "deburr",
+       16
+      ],
+      [
+       "turn",
+       12
+      ],
+      [
+       "drill",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 46
+  },
+  {
+   "case": 15,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      57,
+      64
+     ]
+    ],
+    "mill01": [
+     [
+      54,
+      66
+     ],
+     [
+      77,
+      80
+     ],
+     [
+      51,
+      52
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       7
+      ],
+      [
+       "face_mill",
+       7
+      ],
+      [
+       "turn",
+       17
+      ],
+      [
+       "pocket_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 103
+  },
+  {
+   "case": 16,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      23,
+      26
+     ],
+     [
+      35,
+      38
+     ],
+     [
+      22,
+      26
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       14
+      ],
+      [
+       "inspect",
+       11
+      ],
+      [
+       "face_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 69
+  },
+  {
+   "case": 17,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      59,
+      72
+     ],
+     [
+      58,
+      66
+     ],
+     [
+      11,
+      17
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       23
+      ],
+      [
+       "inspect",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 39
+  },
+  {
+   "case": 18,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      57,
+      63
+     ],
+     [
+      40,
+      46
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       3
+      ],
+      [
+       "inspect",
+       16
+      ],
+      [
+       "turn",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       8
+      ],
+      [
+       "face_mill",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 34
+  },
+  {
+   "case": 19,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      16,
+      25
+     ],
+     [
+      79,
+      82
+     ]
+    ],
+    "lathe01": [
+     [
+      44,
+      51
+     ],
+     [
+      22,
+      32
+     ]
+    ],
+    "saw01": [
+     [
+      20,
+      33
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       11
+      ],
+      [
+       "inspect",
+       1
+      ],
+      [
+       "cut_stock",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 20
+  },
+  {
+   "case": 20,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       20
+      ],
+      [
+       "deburr",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 25
+  },
+  {
+   "case": 21,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       5
+      ],
+      [
+       "pocket_mill",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       23
+      ],
+      [
+       "turn",
+       9
+      ],
+      [
+       "cut_stock",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 37
+  },
+  {
+   "case": 22,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       25
+      ],
+      [
+       "face_mill",
+       3
+      ],
+      [
+       "turn",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 46
+  },
+  {
+   "case": 23,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      19,
+      29
+     ],
+     [
+      1,
+      13
+     ]
+    ],
+    "saw01": [
+     [
+      42,
+      51
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       3
+      ],
+      [
+       "face_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       3
+      ],
+      [
+       "pocket_mill",
+       8
+      ],
+      [
+       "cut_stock",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 62
+  },
+  {
+   "case": 24,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       23
+      ],
+      [
+       "drill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 41
+  },
+  {
+   "case": 25,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       1
+      ],
+      [
+       "turn",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 23
+  },
+  {
+   "case": 26,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      80,
+      90
+     ],
+     [
+      40,
+      50
+     ],
+     [
+      59,
+      61
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 21
+  },
+  {
+   "case": 27,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      64,
+      71
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       8
+      ],
+      [
+       "cut_stock",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 24
+  },
+  {
+   "case": 28,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      53,
+      68
+     ]
+    ],
+    "mill01": [
+     [
+      59,
+      66
+     ],
+     [
+      11,
+      20
+     ],
+     [
+      51,
+      56
+     ]
+    ],
+    "saw01": [
+     [
+      72,
+      86
+     ],
+     [
+      5,
+      12
+     ],
+     [
+      62,
+      68
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       21
+      ],
+      [
+       "face_mill",
+       16
+      ],
+      [
+       "cut_stock",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 52
+  },
+  {
+   "case": 29,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      70,
+      72
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       22
+      ],
+      [
+       "drill",
+       8
+      ],
+      [
+       "deburr",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 50
+  },
+  {
+   "case": 30,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 18
+  },
+  {
+   "case": 31,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      10,
+      13
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       23
+      ],
+      [
+       "face_mill",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 43
+  },
+  {
+   "case": 32,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      51,
+      56
+     ],
+     [
+      3,
+      9
+     ]
+    ],
+    "lathe01": [
+     [
+      6,
+      7
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       5
+      ],
+      [
+       "deburr",
+       14
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       15
+      ],
+      [
+       "turn",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 43
+  },
+  {
+   "case": 33,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      26,
+      33
+     ],
+     [
+      37,
+      51
+     ],
+     [
+      36,
+      47
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       2
+      ],
+      [
+       "deburr",
+       14
+      ],
+      [
+       "cut_stock",
+       25
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       1
+      ],
+      [
+       "face_mill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 41
+  },
+  {
+   "case": 34,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       25
+      ],
+      [
+       "face_mill",
+       9
+      ],
+      [
+       "turn",
+       9
+      ],
+      [
+       "face_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 63
+  },
+  {
+   "case": 35,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       6
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 6
+  },
+  {
+   "case": 36,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      72,
+      84
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       21
+      ],
+      [
+       "deburr",
+       11
+      ],
+      [
+       "face_mill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       17
+      ],
+      [
+       "face_mill",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 62
+  },
+  {
+   "case": 37,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      12,
+      16
+     ],
+     [
+      1,
+      5
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       1
+      ],
+      [
+       "drill",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 21
+  },
+  {
+   "case": 38,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      72,
+      74
+     ],
+     [
+      67,
+      77
+     ]
+    ],
+    "mill01": [
+     [
+      79,
+      84
+     ],
+     [
+      4,
+      9
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 14
+  },
+  {
+   "case": 39,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      19,
+      25
+     ],
+     [
+      11,
+      20
+     ]
+    ],
+    "lathe01": [
+     [
+      31,
+      33
+     ],
+     [
+      71,
+      83
+     ],
+     [
+      57,
+      58
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       2
+      ],
+      [
+       "face_mill",
+       14
+      ],
+      [
+       "cut_stock",
+       23
+      ],
+      [
+       "face_mill",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       10
+      ],
+      [
+       "drill",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 47
+  },
+  {
+   "case": 40,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       8
+      ],
+      [
+       "cut_stock",
+       23
+      ],
+      [
+       "face_mill",
+       25
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 56
+  },
+  {
+   "case": 41,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       24
+      ],
+      [
+       "pocket_mill",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 42,
+   "contended": false,
+   "downtime": {
+    "saw01": [
+     [
+      23,
+      35
+     ],
+     [
+      28,
+      41
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 17
+  },
+  {
+   "case": 43,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       12
+      ],
+      [
+       "pocket_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       18
+      ],
+      [
+       "drill",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 30
+  },
+  {
+   "case": 44,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      28,
+      39
+     ],
+     [
+      54,
+      64
+     ],
+     [
+      27,
+      41
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       4
+      ],
+      [
+       "turn",
+       4
+      ],
+      [
+       "inspect",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       14
+      ],
+      [
+       "inspect",
+       10
+      ],
+      [
+       "pocket_mill",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 26
+  },
+  {
+   "case": 45,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       22
+      ],
+      [
+       "deburr",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 38
+  },
+  {
+   "case": 46,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      77,
+      88
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       9
+      ],
+      [
+       "inspect",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       18
+      ],
+      [
+       "face_mill",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000004"
+    }
+   ],
+   "optimum_makespan": 34
+  },
+  {
+   "case": 47,
+   "contended": false,
+   "downtime": {
+    "saw01": [
+     [
+      70,
+      71
+     ],
+     [
+      13,
+      23
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       8
+      ],
+      [
+       "cut_stock",
+       13
+      ],
+      [
+       "cut_stock",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 46
+  },
+  {
+   "case": 48,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       5
+      ],
+      [
+       "turn",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       5
+      ],
+      [
+       "turn",
+       15
+      ],
+      [
+       "turn",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 36
+  },
+  {
+   "case": 49,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      36,
+      48
+     ],
+     [
+      46,
+      60
+     ],
+     [
+      65,
+      74
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       19
+      ],
+      [
+       "drill",
+       15
+      ],
+      [
+       "deburr",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       7
+      ],
+      [
+       "turn",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 50
+  },
+  {
+   "case": 50,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      13,
+      27
+     ],
+     [
+      50,
+      64
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       18
+      ],
+      [
+       "pocket_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       15
+      ],
+      [
+       "inspect",
+       8
+      ],
+      [
+       "turn",
+       21
+      ],
+      [
+       "drill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 73
+  },
+  {
+   "case": 51,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      5,
+      19
+     ],
+     [
+      13,
+      20
+     ],
+     [
+      9,
+      19
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       6
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       25
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 52,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      1,
+      9
+     ],
+     [
+      57,
+      67
+     ]
+    ],
+    "lathe01": [
+     [
+      28,
+      30
+     ],
+     [
+      9,
+      23
+     ],
+     [
+      80,
+      81
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       10
+      ],
+      [
+       "pocket_mill",
+       10
+      ],
+      [
+       "drill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 44
+  },
+  {
+   "case": 53,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      31,
+      32
+     ],
+     [
+      80,
+      95
+     ]
+    ],
+    "lathe01": [
+     [
+      13,
+      15
+     ],
+     [
+      42,
+      57
+     ]
+    ],
+    "saw01": [
+     [
+      22,
+      23
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       1
+      ],
+      [
+       "deburr",
+       18
+      ],
+      [
+       "cut_stock",
+       8
+      ],
+      [
+       "inspect",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 54,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      22,
+      25
+     ],
+     [
+      38,
+      48
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       25
+      ],
+      [
+       "deburr",
+       2
+      ],
+      [
+       "drill",
+       1
+      ],
+      [
+       "turn",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 96
+  },
+  {
+   "case": 55,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      21,
+      35
+     ],
+     [
+      40,
+      55
+     ],
+     [
+      76,
+      87
+     ]
+    ],
+    "saw01": [
+     [
+      5,
+      14
+     ],
+     [
+      35,
+      46
+     ],
+     [
+      35,
+      47
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 72
+  },
+  {
+   "case": 56,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      32,
+      43
+     ]
+    ],
+    "lathe01": [
+     [
+      42,
+      43
+     ]
+    ],
+    "mill01": [
+     [
+      66,
+      78
+     ]
+    ],
+    "saw01": [
+     [
+      48,
+      62
+     ],
+     [
+      49,
+      59
+     ],
+     [
+      18,
+      30
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       16
+      ],
+      [
+       "turn",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       8
+      ],
+      [
+       "deburr",
+       6
+      ],
+      [
+       "drill",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 42
+  },
+  {
+   "case": 57,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      45,
+      46
+     ]
+    ],
+    "mill01": [
+     [
+      11,
+      12
+     ],
+     [
+      33,
+      43
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       3
+      ],
+      [
+       "face_mill",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 33
+  },
+  {
+   "case": 58,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      54,
+      62
+     ],
+     [
+      17,
+      23
+     ]
+    ],
+    "cmm01": [
+     [
+      24,
+      25
+     ],
+     [
+      49,
+      61
+     ]
+    ],
+    "lathe01": [
+     [
+      18,
+      21
+     ],
+     [
+      73,
+      88
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       5
+      ],
+      [
+       "inspect",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       20
+      ],
+      [
+       "inspect",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 70
+  },
+  {
+   "case": 59,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      61,
+      64
+     ]
+    ],
+    "mill01": [
+     [
+      50,
+      58
+     ],
+     [
+      43,
+      47
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       8
+      ],
+      [
+       "face_mill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 28
+  },
+  {
+   "case": 60,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      9,
+      14
+     ],
+     [
+      56,
+      68
+     ]
+    ],
+    "saw01": [
+     [
+      66,
+      69
+     ],
+     [
+      35,
+      36
+     ],
+     [
+      43,
+      49
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       22
+      ],
+      [
+       "cut_stock",
+       25
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 94
+  },
+  {
+   "case": 61,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      57,
+      61
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       1
+      ],
+      [
+       "pocket_mill",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       9
+      ],
+      [
+       "pocket_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 50
+  },
+  {
+   "case": 62,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       3
+      ],
+      [
+       "cut_stock",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 23
+  },
+  {
+   "case": 63,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      7,
+      10
+     ],
+     [
+      51,
+      54
+     ]
+    ],
+    "mill01": [
+     [
+      12,
+      27
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       7
+      ],
+      [
+       "inspect",
+       18
+      ],
+      [
+       "turn",
+       21
+      ],
+      [
+       "drill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       6
+      ],
+      [
+       "turn",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 67
+  },
+  {
+   "case": 64,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 10
+  },
+  {
+   "case": 65,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      59,
+      70
+     ],
+     [
+      79,
+      84
+     ]
+    ],
+    "saw01": [
+     [
+      30,
+      38
+     ],
+     [
+      41,
+      48
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 24
+  },
+  {
+   "case": 66,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      20,
+      27
+     ],
+     [
+      8,
+      18
+     ],
+     [
+      77,
+      89
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       3
+      ],
+      [
+       "inspect",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 67,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      53,
+      63
+     ],
+     [
+      23,
+      29
+     ]
+    ],
+    "mill01": [
+     [
+      47,
+      54
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       10
+      ],
+      [
+       "face_mill",
+       10
+      ],
+      [
+       "turn",
+       23
+      ],
+      [
+       "face_mill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 69
+  },
+  {
+   "case": 68,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      49,
+      51
+     ]
+    ],
+    "saw01": [
+     [
+      9,
+      21
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       12
+      ],
+      [
+       "drill",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       6
+      ],
+      [
+       "cut_stock",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 37
+  },
+  {
+   "case": 69,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      76,
+      91
+     ],
+     [
+      15,
+      30
+     ],
+     [
+      62,
+      77
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       7
+      ],
+      [
+       "turn",
+       9
+      ],
+      [
+       "cut_stock",
+       8
+      ],
+      [
+       "turn",
+       4
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 28
+  },
+  {
+   "case": 70,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      40,
+      54
+     ]
+    ],
+    "mill01": [
+     [
+      55,
+      62
+     ],
+     [
+      6,
+      15
+     ],
+     [
+      29,
+      42
+     ]
+    ],
+    "saw01": [
+     [
+      56,
+      62
+     ],
+     [
+      73,
+      77
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       17
+      ],
+      [
+       "cut_stock",
+       15
+      ],
+      [
+       "pocket_mill",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       12
+      ],
+      [
+       "drill",
+       6
+      ],
+      [
+       "inspect",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 101
+  },
+  {
+   "case": 71,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      55,
+      61
+     ],
+     [
+      2,
+      7
+     ]
+    ],
+    "mill01": [
+     [
+      41,
+      51
+     ],
+     [
+      69,
+      70
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       9
+      ],
+      [
+       "drill",
+       7
+      ],
+      [
+       "deburr",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 29
+  },
+  {
+   "case": 72,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      10,
+      18
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      6,
+      9
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       17
+      ],
+      [
+       "pocket_mill",
+       6
+      ],
+      [
+       "deburr",
+       16
+      ],
+      [
+       "deburr",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 57
+  },
+  {
+   "case": 73,
+   "contended": true,
+   "downtime": {
+    "saw01": [
+     [
+      73,
+      79
+     ],
+     [
+      10,
+      17
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       24
+      ],
+      [
+       "cut_stock",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       24
+      ],
+      [
+       "drill",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 42
+  },
+  {
+   "case": 74,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      32,
+      38
+     ],
+     [
+      33,
+      36
+     ],
+     [
+      38,
+      45
+     ]
+    ],
+    "mill01": [
+     [
+      19,
+      28
+     ],
+     [
+      56,
+      66
+     ],
+     [
+      4,
+      5
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       5
+      ],
+      [
+       "inspect",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 84
+  },
+  {
+   "case": 75,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       13
+      ],
+      [
+       "drill",
+       11
+      ],
+      [
+       "cut_stock",
+       17
+      ],
+      [
+       "cut_stock",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       6
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 49
+  },
+  {
+   "case": 76,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      54,
+      60
+     ]
+    ],
+    "saw01": [
+     [
+      75,
+      86
+     ],
+     [
+      68,
+      71
+     ],
+     [
+      37,
+      45
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       15
+      ],
+      [
+       "turn",
+       5
+      ],
+      [
+       "cut_stock",
+       5
+      ],
+      [
+       "deburr",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 43
+  },
+  {
+   "case": 77,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      24,
+      38
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       25
+      ],
+      [
+       "turn",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 26
+  },
+  {
+   "case": 78,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      35,
+      40
+     ],
+     [
+      24,
+      37
+     ],
+     [
+      71,
+      86
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       14
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 14
+  },
+  {
+   "case": 79,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      10,
+      11
+     ],
+     [
+      25,
+      26
+     ],
+     [
+      47,
+      55
+     ]
+    ],
+    "lathe01": [
+     [
+      68,
+      72
+     ],
+     [
+      66,
+      76
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       4
+      ],
+      [
+       "inspect",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       21
+      ],
+      [
+       "drill",
+       15
+      ],
+      [
+       "pocket_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 56
+  },
+  {
+   "case": 80,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      61,
+      71
+     ],
+     [
+      77,
+      90
+     ],
+     [
+      20,
+      31
+     ]
+    ],
+    "mill01": [
+     [
+      22,
+      23
+     ],
+     [
+      59,
+      63
+     ],
+     [
+      47,
+      56
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 9
+  },
+  {
+   "case": 81,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      38,
+      49
+     ],
+     [
+      21,
+      26
+     ],
+     [
+      12,
+      16
+     ]
+    ],
+    "mill01": [
+     [
+      44,
+      47
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       13
+      ],
+      [
+       "pocket_mill",
+       24
+      ],
+      [
+       "drill",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 44
+  },
+  {
+   "case": 82,
+   "contended": true,
+   "downtime": {
+    "saw01": [
+     [
+      34,
+      48
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       25
+      ],
+      [
+       "deburr",
+       5
+      ],
+      [
+       "drill",
+       4
+      ],
+      [
+       "turn",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       23
+      ],
+      [
+       "cut_stock",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 69
+  },
+  {
+   "case": 83,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      56,
+      64
+     ],
+     [
+      17,
+      27
+     ],
+     [
+      38,
+      48
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       11
+      ],
+      [
+       "face_mill",
+       24
+      ],
+      [
+       "pocket_mill",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 40
+  },
+  {
+   "case": 84,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      67,
+      82
+     ],
+     [
+      72,
+      84
+     ]
+    ],
+    "lathe01": [
+     [
+      72,
+      79
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       15
+      ],
+      [
+       "face_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 32
+  },
+  {
+   "case": 85,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      58,
+      65
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       11
+      ],
+      [
+       "deburr",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       18
+      ],
+      [
+       "deburr",
+       7
+      ],
+      [
+       "deburr",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 67
+  },
+  {
+   "case": 86,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       8
+      ],
+      [
+       "pocket_mill",
+       19
+      ],
+      [
+       "cut_stock",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 35
+  },
+  {
+   "case": 87,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      74,
+      83
+     ],
+     [
+      24,
+      32
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 18
+  },
+  {
+   "case": 88,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       9
+      ],
+      [
+       "turn",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 17
+  },
+  {
+   "case": 89,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      32,
+      38
+     ],
+     [
+      23,
+      27
+     ]
+    ],
+    "lathe01": [
+     [
+      39,
+      46
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       1
+      ],
+      [
+       "inspect",
+       15
+      ],
+      [
+       "drill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 21
+  },
+  {
+   "case": 90,
+   "contended": false,
+   "downtime": {
+    "saw01": [
+     [
+      52,
+      58
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       24
+      ],
+      [
+       "cut_stock",
+       21
+      ],
+      [
+       "pocket_mill",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 58
+  },
+  {
+   "case": 91,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       5
+      ],
+      [
+       "face_mill",
+       13
+      ],
+      [
+       "drill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       11
+      ],
+      [
+       "pocket_mill",
+       1
+      ],
+      [
+       "turn",
+       16
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 30
+  },
+  {
+   "case": 92,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       11
+      ],
+      [
+       "pocket_mill",
+       23
+      ],
+      [
+       "pocket_mill",
+       16
+      ],
+      [
+       "face_mill",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 58
+  },
+  {
+   "case": 93,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      22,
+      34
+     ],
+     [
+      58,
+      64
+     ],
+     [
+      7,
+      10
+     ]
+    ],
+    "lathe01": [
+     [
+      70,
+      81
+     ],
+     [
+      58,
+      63
+     ],
+     [
+      74,
+      85
+     ]
+    ],
+    "mill01": [
+     [
+      40,
+      42
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       9
+      ],
+      [
+       "inspect",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 19
+  },
+  {
+   "case": 94,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 23
+  },
+  {
+   "case": 95,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       23
+      ],
+      [
+       "deburr",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 38
+  },
+  {
+   "case": 96,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      67,
+      78
+     ],
+     [
+      5,
+      19
+     ],
+     [
+      48,
+      61
+     ]
+    ],
+    "cmm01": [
+     [
+      75,
+      86
+     ],
+     [
+      36,
+      38
+     ]
+    ],
+    "saw01": [
+     [
+      2,
+      14
+     ],
+     [
+      30,
+      38
+     ],
+     [
+      13,
+      21
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       23
+      ],
+      [
+       "inspect",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 43
+  },
+  {
+   "case": 97,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      0,
+      7
+     ],
+     [
+      17,
+      32
+     ],
+     [
+      3,
+      9
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       6
+      ],
+      [
+       "drill",
+       7
+      ],
+      [
+       "cut_stock",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 44
+  },
+  {
+   "case": 98,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      31,
+      42
+     ],
+     [
+      36,
+      49
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       24
+      ],
+      [
+       "cut_stock",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 99,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      34,
+      47
+     ],
+     [
+      50,
+      58
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 5
+  },
+  {
+   "case": 100,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       12
+      ],
+      [
+       "face_mill",
+       24
+      ],
+      [
+       "pocket_mill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 51
+  },
+  {
+   "case": 101,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      53,
+      63
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       4
+      ],
+      [
+       "face_mill",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       13
+      ],
+      [
+       "face_mill",
+       15
+      ],
+      [
+       "turn",
+       3
+      ],
+      [
+       "inspect",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 50
+  },
+  {
+   "case": 102,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      44,
+      48
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       13
+      ],
+      [
+       "deburr",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 38
+  },
+  {
+   "case": 103,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      12,
+      23
+     ]
+    ],
+    "mill01": [
+     [
+      67,
+      71
+     ],
+     [
+      53,
+      64
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       21
+      ],
+      [
+       "inspect",
+       11
+      ],
+      [
+       "inspect",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 39
+  },
+  {
+   "case": 104,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      43,
+      50
+     ],
+     [
+      50,
+      54
+     ],
+     [
+      10,
+      17
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 37
+  },
+  {
+   "case": 105,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       8
+      ],
+      [
+       "pocket_mill",
+       4
+      ],
+      [
+       "deburr",
+       22
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       3
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000004"
+    }
+   ],
+   "optimum_makespan": 34
+  },
+  {
+   "case": 106,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      72,
+      76
+     ],
+     [
+      48,
+      63
+     ],
+     [
+      13,
+      17
+     ]
+    ],
+    "mill01": [
+     [
+      26,
+      32
+     ],
+     [
+      76,
+      83
+     ],
+     [
+      57,
+      72
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       21
+      ],
+      [
+       "pocket_mill",
+       3
+      ],
+      [
+       "drill",
+       23
+      ],
+      [
+       "turn",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 99
+  },
+  {
+   "case": 107,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      2,
+      4
+     ],
+     [
+      73,
+      77
+     ]
+    ],
+    "mill01": [
+     [
+      63,
+      77
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      60,
+      66
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       3
+      ],
+      [
+       "inspect",
+       14
+      ],
+      [
+       "pocket_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 26
+  },
+  {
+   "case": 108,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      24,
+      36
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 24
+  },
+  {
+   "case": 109,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      8,
+      18
+     ],
+     [
+      33,
+      37
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       10
+      ],
+      [
+       "pocket_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       21
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 54
+  },
+  {
+   "case": 110,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      61,
+      73
+     ],
+     [
+      13,
+      21
+     ],
+     [
+      70,
+      81
+     ]
+    ],
+    "mill01": [
+     [
+      57,
+      64
+     ],
+     [
+      78,
+      90
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       18
+      ],
+      [
+       "deburr",
+       21
+      ],
+      [
+       "face_mill",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 114
+  },
+  {
+   "case": 111,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      60,
+      68
+     ],
+     [
+      49,
+      55
+     ]
+    ],
+    "mill01": [
+     [
+      27,
+      36
+     ],
+     [
+      67,
+      75
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       1
+      ],
+      [
+       "turn",
+       7
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 15
+  },
+  {
+   "case": 112,
+   "contended": true,
+   "downtime": {
+    "cmm01": [
+     [
+      11,
+      13
+     ],
+     [
+      14,
+      16
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       15
+      ],
+      [
+       "inspect",
+       24
+      ],
+      [
+       "turn",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       25
+      ],
+      [
+       "pocket_mill",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 51
+  },
+  {
+   "case": 113,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       23
+      ],
+      [
+       "drill",
+       6
+      ],
+      [
+       "turn",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 41
+  },
+  {
+   "case": 114,
+   "contended": false,
+   "downtime": {
+    "bench01": [
+     [
+      59,
+      65
+     ],
+     [
+      16,
+      25
+     ]
+    ],
+    "lathe01": [
+     [
+      76,
+      81
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 15
+  },
+  {
+   "case": 115,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      47,
+      58
+     ],
+     [
+      11,
+      20
+     ]
+    ],
+    "mill01": [
+     [
+      62,
+      69
+     ],
+     [
+      30,
+      44
+     ],
+     [
+      30,
+      33
+     ]
+    ],
+    "saw01": [
+     [
+      17,
+      22
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       20
+      ],
+      [
+       "pocket_mill",
+       8
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       25
+      ],
+      [
+       "turn",
+       7
+      ],
+      [
+       "cut_stock",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 97
+  },
+  {
+   "case": 116,
+   "contended": false,
+   "downtime": {
+    "lathe01": [
+     [
+      30,
+      44
+     ]
+    ],
+    "saw01": [
+     [
+      61,
+      62
+     ],
+     [
+      29,
+      33
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       22
+      ],
+      [
+       "deburr",
+       8
+      ],
+      [
+       "cut_stock",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 117,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       24
+      ],
+      [
+       "inspect",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 36
+  },
+  {
+   "case": 118,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      80,
+      94
+     ],
+     [
+      15,
+      21
+     ],
+     [
+      64,
+      65
+     ]
+    ],
+    "mill01": [
+     [
+      22,
+      37
+     ],
+     [
+      4,
+      9
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       13
+      ],
+      [
+       "drill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 52
+  },
+  {
+   "case": 119,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      79,
+      93
+     ],
+     [
+      12,
+      22
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       9
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       6
+      ],
+      [
+       "face_mill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 27
+  },
+  {
+   "case": 120,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       14
+      ],
+      [
+       "cut_stock",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       11
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 31
+  },
+  {
+   "case": 121,
+   "contended": false,
+   "downtime": {
+    "cmm01": [
+     [
+      71,
+      78
+     ],
+     [
+      45,
+      60
+     ],
+     [
+      36,
+      37
+     ]
+    ],
+    "lathe01": [
+     [
+      14,
+      15
+     ]
+    ],
+    "mill01": [
+     [
+      48,
+      61
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       23
+      ],
+      [
+       "pocket_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 46
+  },
+  {
+   "case": 122,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       24
+      ],
+      [
+       "face_mill",
+       25
+      ],
+      [
+       "cut_stock",
+       12
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 61
+  },
+  {
+   "case": 123,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      70,
+      74
+     ],
+     [
+      47,
+      61
+     ],
+     [
+      55,
+      63
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       4
+      ],
+      [
+       "cut_stock",
+       5
+      ],
+      [
+       "turn",
+       7
+      ],
+      [
+       "drill",
+       5
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 21
+  },
+  {
+   "case": 124,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       1
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 1
+  },
+  {
+   "case": 125,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      65,
+      74
+     ],
+     [
+      50,
+      59
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 18
+  },
+  {
+   "case": 126,
+   "contended": true,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       21
+      ],
+      [
+       "drill",
+       25
+      ],
+      [
+       "drill",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 65
+  },
+  {
+   "case": 127,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      46,
+      60
+     ],
+     [
+      6,
+      15
+     ]
+    ],
+    "cmm01": [
+     [
+      42,
+      50
+     ],
+     [
+      71,
+      81
+     ],
+     [
+      23,
+      27
+     ]
+    ],
+    "lathe01": [
+     [
+      14,
+      25
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "deburr",
+       22
+      ],
+      [
+       "inspect",
+       24
+      ],
+      [
+       "turn",
+       25
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "inspect",
+       1
+      ],
+      [
+       "inspect",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 130
+  },
+  {
+   "case": 128,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      42,
+      50
+     ],
+     [
+      25,
+      32
+     ],
+     [
+      4,
+      12
+     ]
+    ],
+    "cmm01": [
+     [
+      72,
+      78
+     ],
+     [
+      67,
+      77
+     ],
+     [
+      33,
+      45
+     ]
+    ],
+    "lathe01": [
+     [
+      1,
+      10
+     ],
+     [
+      12,
+      27
+     ],
+     [
+      22,
+      25
+     ]
+    ],
+    "mill01": [
+     [
+      19,
+      23
+     ],
+     [
+      55,
+      61
+     ],
+     [
+      32,
+      47
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "inspect",
+       6
+      ],
+      [
+       "drill",
+       10
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "pocket_mill",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       8
+      ],
+      [
+       "deburr",
+       13
+      ],
+      [
+       "deburr",
+       20
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 83
+  },
+  {
+   "case": 129,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       17
+      ],
+      [
+       "turn",
+       16
+      ],
+      [
+       "turn",
+       13
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       15
+      ],
+      [
+       "drill",
+       24
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 46
+  },
+  {
+   "case": 130,
+   "contended": true,
+   "downtime": {
+    "mill01": [
+     [
+      76,
+      89
+     ],
+     [
+      31,
+      46
+     ],
+     [
+      54,
+      63
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "drill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "drill",
+       15
+      ],
+      [
+       "pocket_mill",
+       25
+      ],
+      [
+       "face_mill",
+       15
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    },
+    {
+     "operations": [
+      [
+       "turn",
+       16
+      ],
+      [
+       "drill",
+       19
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000003"
+    }
+   ],
+   "optimum_makespan": 163
+  },
+  {
+   "case": 131,
+   "contended": false,
+   "downtime": {},
+   "jobs": [
+    {
+     "operations": [
+      [
+       "cut_stock",
+       19
+      ],
+      [
+       "drill",
+       12
+      ],
+      [
+       "turn",
+       14
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 45
+  },
+  {
+   "case": 132,
+   "contended": true,
+   "downtime": {
+    "bench01": [
+     [
+      13,
+      24
+     ],
+     [
+      34,
+      42
+     ]
+    ],
+    "cmm01": [
+     [
+      78,
+      88
+     ],
+     [
+      63,
+      74
+     ],
+     [
+      49,
+      61
+     ]
+    ],
+    "lathe01": [
+     [
+      8,
+      10
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "deburr",
+       21
+      ],
+      [
+       "inspect",
+       17
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "cut_stock",
+       7
+      ],
+      [
+       "deburr",
+       14
+      ],
+      [
+       "cut_stock",
+       2
+      ],
+      [
+       "deburr",
+       18
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 105
+  },
+  {
+   "case": 133,
+   "contended": false,
+   "downtime": {
+    "mill01": [
+     [
+      17,
+      22
+     ],
+     [
+      64,
+      73
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "face_mill",
+       9
+      ],
+      [
+       "pocket_mill",
+       16
+      ],
+      [
+       "face_mill",
+       6
+      ],
+      [
+       "face_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    }
+   ],
+   "optimum_makespan": 96
+  },
+  {
+   "case": 134,
+   "contended": true,
+   "downtime": {
+    "lathe01": [
+     [
+      18,
+      27
+     ],
+     [
+      31,
+      33
+     ],
+     [
+      41,
+      48
+     ]
+    ],
+    "mill01": [
+     [
+      71,
+      76
+     ],
+     [
+      72,
+      76
+     ],
+     [
+      10,
+      13
+     ]
+    ]
+   },
+   "jobs": [
+    {
+     "operations": [
+      [
+       "turn",
+       25
+      ],
+      [
+       "pocket_mill",
+       2
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000001"
+    },
+    {
+     "operations": [
+      [
+       "face_mill",
+       20
+      ],
+      [
+       "pocket_mill",
+       23
+      ]
+     ],
+     "request_id": "aaaaaaaa-0000-4000-8000-000000000002"
+    }
+   ],
+   "optimum_makespan": 78
+  }
+ ],
+ "name": "RM13_REGRESSION_CORPUS_01",
+ "note": "This is a synthetic algorithm-regression corpus. It is not representative evidence of factory performance.",
+ "origin": "Extracted once, unchanged, from the 135 tiny instances of the RM12 adversarial audit (instance generator seed 20260927, at rm12-complete 23e3b6d) that were used by the RM13 decision measurement and root-cause diagnostic. optimum_makespan is exhaustive: the minimum over every dispatch sequence with RM12 placement (append-only earliest fit around downtime, non-preemptive, integer minutes).",
+ "request_template": {
+  "material": "Aluminum 6061",
+  "quantity": 1,
+  "schema_version": "1.0.0",
+  "stock_form": "block"
+ }
+}
