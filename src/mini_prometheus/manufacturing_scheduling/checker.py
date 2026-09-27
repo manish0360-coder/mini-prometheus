@@ -29,6 +29,21 @@ no operation intersects downtime of its machine under half-open semantics (DOWNT
 that the window-aware lower bound is exact (WINDOW_LOWER_BOUND_MISMATCH; T_avail recomputed as the
 least fixed point of T = W + downtime inside [0, T)); the gap is then checked against that bound.
 It never imports the downtime canonicalizer (import-linter contract).
+
+RM14 (ADR-0017), given the RAW setup-rule input of the run: it re-reads the declared rules itself,
+re-derives the relevant ones (a transition rule whose transition can occur between two different
+jobs on its machine; a machine default when such a transition has no rule of its own) and proves the
+recorded rules equal them (SETUP_RULES_MISMATCH). From each machine's operation sequence in the
+schedule it re-derives which operations need a changeover — a machine with any declared rule, and a
+machine predecessor from another job — and its minutes (the transition rule, else the default; if
+neither, UNSPECIFIED_SETUP_TRANSITION), then proves every required changeover is recorded
+(SETUP_MISSING), none is fabricated (SETUP_UNEXPECTED: first operation, same job, undeclared
+machine), each records the right machine, transition, matched rule and minutes (SETUP_MISMATCH),
+integer times with end == start + minutes (SETUP_INVALID_TIME), ends exactly at its operation's
+start (SETUP_NOT_ADJACENT), starts no earlier than the job's previous step ends
+(SETUP_BEFORE_PREDECESSOR), avoids downtime (SETUP_DOWNTIME_CONFLICT), and that changeover +
+operation blocks never overlap on a machine (SETUP_OVERLAP). It never imports the setup-rule
+module (import-linter contract).
 """
 
 from __future__ import annotations
@@ -41,6 +56,8 @@ from mini_prometheus.manufacturing_constraints.oracle import DURATION_PARAM
 from mini_prometheus.manufacturing_scheduling.model import (
     MODEL_ASSUMPTIONS,
     MODEL_ASSUMPTIONS_DOWNTIME,
+    MODEL_ASSUMPTIONS_DOWNTIME_SETUP,
+    MODEL_ASSUMPTIONS_SETUP,
     OPTIMIZATION_STATUS,
     BoundStatus,
     Downtime,
@@ -49,13 +66,18 @@ from mini_prometheus.manufacturing_scheduling.model import (
     IssueCode,
     MultiJobSchedule,
     ScheduledOperation,
+    ScheduledSetup,
     ScheduleIssue,
     SchedulingJob,
+    SetupIssueCode,
+    SetupMatch,
+    SetupRule,
     schedule_digest,
     schedule_input_identity,
 )
 
 _Key = tuple[str, int]
+_Transition = tuple[str, str | None, str | None]  # (machine, prev_op, curr_op); None = default
 
 
 def _union(spans: list[tuple[int, int]]) -> tuple[DowntimeInterval, ...]:
@@ -105,6 +127,77 @@ def _relevant_downtime(
     return tuple(relevant)
 
 
+def _declared_setup_rules(setup_rules: Iterable[object] | None) -> dict[_Transition, int] | None:
+    """RM14: the declared rules {(machine, prev_op, curr_op): minutes}, re-read from the raw input
+    (None if the input is not valid setup rules)."""
+    if not setup_rules:
+        return {}
+    declared: dict[_Transition, int] = {}
+    for raw in setup_rules:
+        if isinstance(raw, SetupRule):
+            fields: tuple[object, ...] = (
+                raw.machine_id,
+                raw.prev_op,
+                raw.curr_op,
+                raw.duration_min,
+            )
+        elif isinstance(raw, str | bytes) or not isinstance(raw, Iterable):
+            return None
+        else:
+            fields = tuple(raw)
+        if len(fields) != 4:
+            return None
+        machine, prev_op, curr_op, minutes = fields
+        default = prev_op is None and curr_op is None
+        named = isinstance(prev_op, str) and isinstance(curr_op, str)
+        if not isinstance(machine, str) or not (default or named):
+            return None
+        if not _minutes(minutes) or minutes < 0:
+            return None
+        key = (machine, cast(str | None, prev_op), cast(str | None, curr_op))
+        if key in declared:
+            return None
+        declared[key] = minutes
+    return declared
+
+
+def _relevant_setup_rules(
+    declared: Mapping[_Transition, int], jobs: Sequence[SchedulingJob]
+) -> tuple[SetupRule, ...]:
+    """RM14: the declared rules that can apply to a transition between two different jobs on the
+    rule's machine, in canonical (machine, default first, prev_op, curr_op) order."""
+    job_ops: dict[str, dict[str, set[str]]] = {}  # machine -> request_id -> operation codes
+    for job in jobs:
+        assigned = {a.step_index: a.resource_id for a in job.plan.resource_assignments}
+        for step in job.plan.steps:
+            if step.index in assigned:
+                by_job = job_ops.setdefault(assigned[step.index], {})
+                by_job.setdefault(job.request_id, set()).add(step.op.value)
+    relevant: list[SetupRule] = []
+    for (machine, prev_op, curr_op), minutes in declared.items():
+        by_job = job_ops.get(machine, {})
+        transitions = {
+            (before, after)
+            for one, one_ops in by_job.items()
+            for other, other_ops in by_job.items()
+            if one != other
+            for before in one_ops
+            for after in other_ops
+        }
+        if prev_op is None:
+            applies = any((machine, b, a) not in declared for b, a in transitions)
+        else:
+            applies = (prev_op, curr_op) in transitions
+        if applies:
+            relevant.append(SetupRule(machine, prev_op, curr_op, minutes))
+    return tuple(
+        sorted(
+            relevant,
+            key=lambda r: (r.machine_id, r.prev_op is not None, r.prev_op or "", r.curr_op or ""),
+        )
+    )
+
+
 def _machine_ready(work: int, downtime: Sequence[DowntimeInterval]) -> int:
     """T_avail(work), independently: the least fixed point of T = work + downtime inside [0, T)."""
     t = work
@@ -127,16 +220,22 @@ def _interval(op: ScheduledOperation) -> str:
     return f"{_label(op.request_id, op.step_index)} [{op.start_min}, {op.end_min})"
 
 
+def _setup_label(setup: ScheduledSetup) -> str:
+    return f"changeover before {_label(setup.request_id, setup.step_index)}"
+
+
 def schedule_issues(
     schedule: MultiJobSchedule,
     jobs: Sequence[SchedulingJob],
     capability_model_version: str,
     downtime: Mapping[str, Iterable[object]] | None = None,
+    setup_rules: Iterable[object] | None = None,
 ) -> list[ScheduleIssue]:
-    """``downtime`` is the raw downtime input of the run (RM12); None or empty means none."""
+    """``downtime`` is the raw downtime input of the run (RM12) and ``setup_rules`` its raw setup
+    rules (RM14); None or empty means none."""
     issues: list[ScheduleIssue] = []
 
-    def add(code: IssueCode | DowntimeIssueCode, detail: str) -> None:
+    def add(code: IssueCode | DowntimeIssueCode | SetupIssueCode, detail: str) -> None:
         issues.append(ScheduleIssue(code, detail))
 
     # --- RM12: the relevant canonical downtime, re-derived from the raw input ----------------
@@ -148,10 +247,24 @@ def schedule_issues(
         add(DowntimeIssueCode.DOWNTIME_MISMATCH, "recorded downtime != relevant canonical input")
     blocked = dict(relevant)
 
+    # --- RM14: the relevant canonical setup rules, re-derived from the raw input --------------
+    declared = _declared_setup_rules(setup_rules)
+    if declared is None:
+        add(SetupIssueCode.SETUP_RULES_MISMATCH, "the setup-rule input is not valid setup rules")
+        declared = {}
+    relevant_setup = _relevant_setup_rules(declared, jobs)
+    if tuple(schedule.setup_rules) != relevant_setup:
+        add(SetupIssueCode.SETUP_RULES_MISMATCH, "recorded setup rules != relevant canonical input")
+
     # --- metadata and job set ---------------------------------------------------------------
     if schedule.optimization_status != OPTIMIZATION_STATUS:
         add(IssueCode.METADATA_MISMATCH, f"optimization_status {schedule.optimization_status!r}")
-    model = MODEL_ASSUMPTIONS_DOWNTIME if relevant else MODEL_ASSUMPTIONS
+    model = {
+        (False, False): MODEL_ASSUMPTIONS,
+        (True, False): MODEL_ASSUMPTIONS_DOWNTIME,
+        (False, True): MODEL_ASSUMPTIONS_SETUP,
+        (True, True): MODEL_ASSUMPTIONS_DOWNTIME_SETUP,
+    }[(bool(relevant), bool(relevant_setup))]
     if tuple(schedule.model_assumptions) != model:
         add(IssueCode.METADATA_MISMATCH, "model_assumptions differ from the model in force")
     if schedule.capability_model_version != capability_model_version:
@@ -168,6 +281,7 @@ def schedule_issues(
         capability_model_version,
         [(job.request_id, job.plan.content_hash) for job in jobs],
         relevant,
+        relevant_setup,
     )
     if schedule.schedule_input_identity != expected_identity:
         add(IssueCode.METADATA_MISMATCH, "schedule_input_identity does not match the inputs")
@@ -268,6 +382,121 @@ def schedule_issues(
                     f"{_interval(op)} intersects {op.resource_id} downtime "
                     f"[{down.start_min}, {down.end_min})",
                 )
+
+    # --- RM14: changeovers required by each machine's sequence in this schedule --------------
+    active = {machine for machine, _, _ in declared}  # machines with any declared rule
+    required_setups: dict[_Key, tuple[str, str, str, str, SetupMatch, int]] = {}
+    for resource_id in sorted(by_machine):
+        sequence = sorted(
+            by_machine[resource_id],
+            key=lambda o: (o.start_min, o.end_min, o.request_id, o.step_index),
+        )
+        for previous, current in itertools.pairwise(sequence):
+            if resource_id not in active or previous.request_id == current.request_id:
+                continue  # no declared rule on the machine, or the same job: no changeover
+            transition = (resource_id, previous.op, current.op)
+            if transition in declared:
+                match, minutes = SetupMatch.TRANSITION, declared[transition]
+            elif (resource_id, None, None) in declared:
+                match, minutes = SetupMatch.MACHINE_DEFAULT, declared[(resource_id, None, None)]
+            else:
+                add(
+                    SetupIssueCode.UNSPECIFIED_SETUP_TRANSITION,
+                    f"{resource_id}: {previous.op} -> {current.op} before "
+                    f"{_label(current.request_id, current.step_index)} has no declared changeover",
+                )
+                continue
+            required_setups[(current.request_id, current.step_index)] = (
+                resource_id,
+                previous.request_id,
+                previous.op,
+                current.op,
+                match,
+                minutes,
+            )
+    recorded_setups: dict[_Key, ScheduledSetup] = {}
+    block_start: dict[_Key, int] = {}  # operation -> start of its changeover + operation block
+    for setup in schedule.setups:
+        key = (setup.request_id, setup.step_index)
+        label = _setup_label(setup)
+        if key in recorded_setups:
+            add(SetupIssueCode.SETUP_MISMATCH, f"{label}: recorded more than once")
+            continue
+        recorded_setups[key] = setup
+        if key not in required_setups or key not in valid:
+            add(SetupIssueCode.SETUP_UNEXPECTED, f"{label}: no changeover applies here")
+            continue
+        found = (
+            setup.resource_id,
+            setup.prev_request_id,
+            setup.prev_op,
+            setup.curr_op,
+            setup.matched,
+            setup.duration_min,
+        )
+        if found != required_setups[key]:
+            add(SetupIssueCode.SETUP_MISMATCH, f"{label}: {found}, required {required_setups[key]}")
+        times = (setup.start_min, setup.end_min, setup.duration_min)
+        if (
+            not all(_minutes(t) for t in times)
+            or setup.start_min < 0
+            or setup.duration_min < 0
+            or setup.end_min != setup.start_min + setup.duration_min
+        ):
+            add(SetupIssueCode.SETUP_INVALID_TIME, f"{label}: invalid changeover interval")
+            continue
+        op = valid[key]
+        block_start[key] = setup.start_min
+        if setup.end_min != op.start_min:
+            add(
+                SetupIssueCode.SETUP_NOT_ADJACENT,
+                f"{label}: ends at {setup.end_min}, the operation starts at {op.start_min}",
+            )
+        steps = step_order.get(setup.request_id, [])
+        position = steps.index(setup.step_index) if setup.step_index in steps else 0
+        predecessor = valid.get((setup.request_id, steps[position - 1])) if position else None
+        if predecessor is not None and setup.start_min < predecessor.end_min:
+            add(
+                SetupIssueCode.SETUP_BEFORE_PREDECESSOR,
+                f"{label}: starts at {setup.start_min}, before {_interval(predecessor)} ends",
+            )
+        for down in blocked.get(op.resource_id, ()):
+            if setup.start_min < down.end_min and down.start_min < setup.end_min:
+                add(
+                    SetupIssueCode.SETUP_DOWNTIME_CONFLICT,
+                    f"{label} [{setup.start_min}, {setup.end_min}) intersects {op.resource_id} "
+                    f"downtime [{down.start_min}, {down.end_min})",
+                )
+    for key in sorted(required_setups):
+        if key not in recorded_setups:
+            add(SetupIssueCode.SETUP_MISSING, f"{_label(*key)}: required changeover not recorded")
+    if block_start:  # changeover + operation blocks never overlap on a machine (half-open)
+        for resource_id in sorted(by_machine):
+            blocks = sorted(
+                (
+                    block_start.get((o.request_id, o.step_index), o.start_min),
+                    o.end_min,
+                    _interval(o),
+                )
+                for o in by_machine[resource_id]
+            )
+            occupied_until: int | None = None
+            occupant = ""
+            for begin, finish, name in blocks:
+                if occupied_until is not None and begin < occupied_until:
+                    add(
+                        SetupIssueCode.SETUP_OVERLAP,
+                        f"{resource_id}: block of {name} from {begin} overlaps {occupant}",
+                    )
+                if occupied_until is None or finish > occupied_until:
+                    occupied_until, occupant = finish, name
+    if all(
+        _minutes(c.start_min) and _minutes(c.step_index) and isinstance(c.request_id, str)
+        for c in schedule.setups
+    ):
+        setup_order = [(c.start_min, c.request_id, c.step_index) for c in schedule.setups]
+        if setup_order != sorted(setup_order):
+            add(IssueCode.NON_CANONICAL_ORDER, "changeovers not in (start, request_id, step) order")
 
     # --- canonical ordering -------------------------------------------------------------------
     if all(

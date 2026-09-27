@@ -33,8 +33,29 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM11** | **Multi-Job Deterministic Scheduling** — several verified, timed jobs sharing machines → one deterministic, independently checked schedule (`earliest_start_v1`, `NOT_OPTIMIZED`) → makespan with a lower-bound certificate; all-or-nothing refusals; pure/read-only; dedicated CLI | ✅ **Complete** (2026-09-27) | `rm11-complete` | runtime `0.9.0`; **no contract** (suite `0.4.0`, schedule internal); RM1–RM10 byte-unchanged; ADR-0013 |
 | *Maintenance* | **Packaging integrity** — the installed wheel carries the contracts tree (repository-shaped install + `.pth`); RM10/RM11 CLIs work from a regular installation | ✅ **Complete** (2026-09-27) | `packaging-integrity-complete` | runtime `0.9.1`; no source/contract/CI change; ADR-0014 |
 | **RM12** | **Time-Aware Resource Downtime Scheduling** — explicit finite downtime `[start, end)` on already-assigned machines for one scheduling run; operations wait (never rerouted); `earliest_start_v1_downtime` only under relevant downtime; RM11 bound retained + window-aware lower bound; independent checker extended; CLI `--downtime` | ✅ **Complete** (2026-09-27) | `rm12-complete` | runtime `0.10.0`; **no contract** (suite `0.4.0`); no-downtime path byte-identical to `rm11-complete` (frozen golden); ADR-0015 |
-| **RM13** | **Opt-In Most-Work-Remaining Tie-Break Rule** — `earliest_start_v1_most_work_remaining`: exact earliest-start ties go to the job with the most remaining processing work; opt-in (`rule=` / `--rule`), default unchanged; frozen synthetic regression corpus RM13_REGRESSION_CORPUS_01 (124 → 131 of 135 optimal; one documented regression) | ✅ **Complete** (2026-09-27) | pending `rm13-complete` | runtime `0.11.0`; **no contract** (suite `0.4.0`); all RM11/RM12 goldens byte-identical; ADR-0016 |
-| **RM14+** | To be chosen from evidence (candidates: engineer-declared sequence-dependent changeover; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM13** | **Opt-In Most-Work-Remaining Tie-Break Rule** — `earliest_start_v1_most_work_remaining`: exact earliest-start ties go to the job with the most remaining processing work; opt-in (`rule=` / `--rule`), default unchanged; frozen synthetic regression corpus RM13_REGRESSION_CORPUS_01 (124 → 131 of 135 optimal; one documented regression) | ✅ **Complete** (2026-09-27) | `rm13-complete` | runtime `0.11.0`; **no contract** (suite `0.4.0`); all RM11/RM12 goldens byte-identical; ADR-0016 |
+| **RM14** | **Sequence-Dependent Resource Changeover Scheduling** — explicitly declared cross-job changeover per machine (transition rules + a machine default; an undeclared transition the schedule needs is refused, never zero); changeover + operation one uninterrupted block after the job's predecessor, around downtime; `_setup` rule ids only under relevant rules; independent checker extended; CLI `--setup` / `--setup-default` | ✅ **Complete** (2026-09-27) | pending `rm14-complete` | runtime `0.12.0`; **no contract** (suite `0.4.0`); without relevant rules byte-identical to RM11/RM12/RM13 (frozen golden, corpus); ADR-0017 |
+| **RM15+** | To be chosen from evidence (candidates: a declared per-run initial machine state; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+
+## RM14 — what shipped (2026-09-27)
+
+- Owned manufacturing **content**: **sequence-dependent cross-job changeover**. For one scheduling run an engineer may
+  declare, per known machine, the minutes of a changeover from one operation code to another (a transition rule) and a
+  machine default for every other cross-job transition. A changeover applies only when a machine's previous operation
+  in the run belongs to another job — never within a job (its `duration_min` is the declared total time) and never
+  before a machine's first operation.
+- Refuse to invent: on a machine with any declared rule, a cross-job transition the schedule needs without a rule or
+  default refuses the whole set with `UNSPECIFIED_SETUP_TRANSITION` (transitions never evaluated need no declaration);
+  machines without rules keep RM11's "no changeover".
+- The changeover occupies the machine immediately before its operation as one uninterrupted block that never starts
+  before the job's predecessor completes and never overlaps downtime; machines are never rerouted; RM13 remaining work
+  stays processing time; the lower bounds are unchanged (still valid).
+- Only relevant rules enter the artifact, `schedule_input_identity` and the digest; without them every output is
+  byte-identical to RM13 (frozen rm11-complete golden, RM12 downtime cases and the RM13 corpus re-checked). The
+  independent checker re-derives every required changeover from each machine's sequence.
+- Internal only (contracts `0.4.0`); pure and read-only; no material, tool, fixture, MES or machine state.
+- Full record: `docs/milestones/RM14-completion-report.md`, ADR-0017, spec
+  `specs/milestones/RM14-sequence-dependent-changeover.md`.
 
 ## RM13 — what shipped (2026-09-27)
 

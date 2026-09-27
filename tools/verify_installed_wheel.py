@@ -10,7 +10,10 @@ environment and, from a neutral working directory with no repository path on ``s
 - RM12: runs it with ``--downtime mill01:20:45`` (makespan 103, window-aware bound 77, digest equal
   to the repository source) and rejects an unknown downtime machine as a usage error;
 - RM13: runs it with ``--rule earliest_start_v1_most_work_remaining`` (makespan 67, digest equal to
-  the repository source).
+  the repository source);
+- RM14: runs it with ``--setup-default saw01:2 --setup-default mill01:6 --setup
+  mill01:face_mill:drill:3`` (makespan 77, digest equal to the repository source) and rejects a
+  rule for an operation the machine cannot perform as a usage error.
 
 Run from the repository root inside the Docker verifier (Python 3.11). Needs network access for
 the isolated build backend and the runtime dependency. Exit code 0 = every check passed.
@@ -252,6 +255,39 @@ def main() -> int:
             and digest(rm13.stdout) == digest(reference13.stdout),
             "RM13 opt-in rule runs from the installed package (digest equals the repository source)",
         )
+
+        # RM14 (ADR-0017): declared cross-job changeovers from the installed package
+        setup = [
+            "--setup-default", "saw01:2", "--setup-default", "mill01:6",
+            "--setup", "mill01:face_mill:drill:3",
+        ]
+        rm14 = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", *map(str, JOBS), *setup],
+            cwd=neutral,
+            env=env,
+        )
+        reference14 = run(
+            [sys.executable, "-m", "mini_prometheus.orchestration.schedule_runner",
+             *map(str, reversed(JOBS)), *setup],
+            cwd=ROOT,
+            env=source_env,
+        )
+        check(
+            rm14.returncode == 0
+            and "makespan: 77 min" in rm14.stdout
+            and "(rule earliest_start_v1_setup 1.0.0;" in rm14.stdout
+            and digest(rm14.stdout) is not None
+            and digest(rm14.stdout) == digest(reference14.stdout),
+            "RM14 changeover scheduling runs from the installed package (digest equals the source)",
+        )
+        invalid14 = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", str(JOBS[0]),
+             "--setup", "mill01:turn:drill:5"],
+            cwd=neutral,
+            env=env,
+        )
+        check(invalid14.returncode == 2 and "mill01 cannot perform turn" in invalid14.stderr,
+              "invalid setup rules are a usage error from the installed package")
         check(list(neutral.iterdir()) == [], "nothing is written to the working directory")
 
     print(f"{len(failures)} failure(s)")

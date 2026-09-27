@@ -13,6 +13,9 @@ Two distinct hashes (``sha256(canonical_json(view))`` via the existing ``_hashin
 - ``schedule_digest`` answers "what exact schedule artifact was produced?" — every field of the
   artifact (metadata, input identity, job completions, placements, makespan, lower bound, gap,
   bound status) except the digest itself.
+
+RM12 downtime and RM14 setup rules enter both hashes only when they are relevant, so a run without
+them keeps exactly the earlier identity and digest.
 """
 
 from __future__ import annotations
@@ -33,7 +36,15 @@ SCHEDULING_RULE_DOWNTIME = "earliest_start_v1_downtime"
 # processing work (RM10 durations only), then request_id, then step_index. Never the default.
 SCHEDULING_RULE_MOST_WORK_REMAINING = "earliest_start_v1_most_work_remaining"
 SCHEDULING_RULE_MOST_WORK_REMAINING_DOWNTIME = "earliest_start_v1_most_work_remaining_downtime"
-# The rules a caller may select (the _downtime ids are provenance, recorded automatically).
+# RM14 (ADR-0017): the same rules, recorded with a _setup suffix only when relevant setup rules
+# (declared sequence-dependent cross-job changeovers) exist.
+SCHEDULING_RULE_SETUP = "earliest_start_v1_setup"
+SCHEDULING_RULE_DOWNTIME_SETUP = "earliest_start_v1_downtime_setup"
+SCHEDULING_RULE_MOST_WORK_REMAINING_SETUP = "earliest_start_v1_most_work_remaining_setup"
+SCHEDULING_RULE_MOST_WORK_REMAINING_DOWNTIME_SETUP = (
+    "earliest_start_v1_most_work_remaining_downtime_setup"
+)
+# The rules a caller may select (the _downtime/_setup ids are provenance, recorded automatically).
 SELECTABLE_RULES: tuple[str, ...] = (SCHEDULING_RULE, SCHEDULING_RULE_MOST_WORK_REMAINING)
 OPTIMIZATION_STATUS = "NOT_OPTIMIZED"
 
@@ -63,6 +74,30 @@ MODEL_ASSUMPTIONS_DOWNTIME: tuple[str, ...] = (
     "downtime never reroutes an operation to another machine",
 )
 
+# RM14 MODEL ASSUMPTIONS (ADR-0017): recorded under relevant setup rules. The RM11 assumption
+# "no setup/changeover time" is withdrawn and the declared changeover model is stated instead.
+NO_SETUP_ASSUMPTION = "no setup/changeover time"
+SETUP_ASSUMPTIONS: tuple[str, ...] = (
+    "a declared changeover occupies the machine immediately before an operation whose predecessor"
+    " on that machine in this run belongs to another job: the declared (machine, previous"
+    " operation, operation) minutes, else the machine's declared default",
+    "no changeover between operations of the same job (duration_min is the declared total"
+    " operation time) and none before a machine's first operation in the run",
+    "a machine without declared setup rules has no changeover; on a machine with any declared"
+    " rule, a cross-job transition the rule needs without a rule or default is refused, never zero",
+    "a changeover starts no earlier than the job's predecessor completion and the machine's"
+    " available time; changeover and operation form one uninterrupted block that never overlaps"
+    " downtime",
+)
+MODEL_ASSUMPTIONS_SETUP: tuple[str, ...] = (
+    *(a for a in MODEL_ASSUMPTIONS if a != NO_SETUP_ASSUMPTION),
+    *SETUP_ASSUMPTIONS,
+)
+MODEL_ASSUMPTIONS_DOWNTIME_SETUP: tuple[str, ...] = (
+    *(a for a in MODEL_ASSUMPTIONS_DOWNTIME if a != NO_SETUP_ASSUMPTION),
+    *SETUP_ASSUMPTIONS,
+)
+
 
 class ScheduleStatus(StrEnum):
     SCHEDULED = "SCHEDULED"
@@ -77,6 +112,9 @@ class RefusalReason(StrEnum):
     JOB_NOT_MANUFACTURABLE = "JOB_NOT_MANUFACTURABLE"
     JOB_OPERATION_UNASSIGNED = "JOB_OPERATION_UNASSIGNED"
     JOB_TIMELINE_MISSING = "JOB_TIMELINE_MISSING"
+    # RM14: a cross-job transition the scheduling rule needs, on a machine with declared setup
+    # rules, has neither a transition rule nor a machine default (refuse to invent a changeover)
+    UNSPECIFIED_SETUP_TRANSITION = "UNSPECIFIED_SETUP_TRANSITION"
 
 
 class BoundStatus(StrEnum):
@@ -117,6 +155,28 @@ class DowntimeIssueCode(StrEnum):
     WINDOW_LOWER_BOUND_MISMATCH = "WINDOW_LOWER_BOUND_MISMATCH"
 
 
+class SetupIssueCode(StrEnum):
+    """RM14 checker findings about changeovers (closed, internal; earlier code sets unchanged)."""
+
+    SETUP_RULES_MISMATCH = "SETUP_RULES_MISMATCH"  # recorded rules != relevant canonical input
+    UNSPECIFIED_SETUP_TRANSITION = "UNSPECIFIED_SETUP_TRANSITION"  # no rule for a used transition
+    SETUP_MISSING = "SETUP_MISSING"  # a required changeover is not recorded
+    SETUP_UNEXPECTED = "SETUP_UNEXPECTED"  # a changeover where none applies (fabricated)
+    SETUP_MISMATCH = "SETUP_MISMATCH"  # wrong machine, transition, matched rule or minutes
+    SETUP_INVALID_TIME = "SETUP_INVALID_TIME"  # non-integer, negative, end != start + minutes
+    SETUP_NOT_ADJACENT = "SETUP_NOT_ADJACENT"  # changeover end != operation start
+    SETUP_OVERLAP = "SETUP_OVERLAP"  # changeover + operation block overlaps another on the machine
+    SETUP_DOWNTIME_CONFLICT = "SETUP_DOWNTIME_CONFLICT"  # changeover intersects machine downtime
+    SETUP_BEFORE_PREDECESSOR = "SETUP_BEFORE_PREDECESSOR"  # starts before the job's previous step
+
+
+class SetupMatch(StrEnum):
+    """RM14: which declared rule gave a changeover its minutes."""
+
+    TRANSITION = "transition"  # the (machine, prev_op, curr_op) rule
+    MACHINE_DEFAULT = "machine_default"  # the machine's default cross-job rule
+
+
 @dataclass(frozen=True, order=True)
 class DowntimeInterval:
     """RM12: a machine is unavailable on [start_min, end_min), minutes from schedule origin 0."""
@@ -130,8 +190,39 @@ class DowntimeInterval:
 Downtime = tuple[tuple[str, tuple[DowntimeInterval, ...]], ...]
 
 
+@dataclass(frozen=True)
+class SetupRule:
+    """RM14: a declared cross-job changeover on ``machine_id``, integer minutes >= 0. With operation
+    codes, ``prev_op -> curr_op`` is one transition; ``prev_op = curr_op = None`` is the machine's
+    default for every cross-job transition without its own rule (never a wildcard string)."""
+
+    machine_id: str
+    prev_op: str | None
+    curr_op: str | None
+    duration_min: int
+
+
+# Relevant canonical setup rules in (machine_id, default first, prev_op, curr_op) order: only the
+# rules that can apply to a possible cross-job transition of the job set.
+SetupRules = tuple[SetupRule, ...]
+
+
 class InvalidDowntimeError(ValueError):
     """Invalid downtime input (rejected before scheduling; never a manufacturing verdict)."""
+
+
+class InvalidSetupError(ValueError):
+    """Invalid setup-rule input (rejected before planning; never a manufacturing verdict)."""
+
+
+class UnspecifiedSetupTransitionError(ValueError):
+    """RM14: the scheduling rule needs cross-job changeovers that have neither a transition rule nor
+    a machine default. ``transitions``: sorted (machine, prev_op, curr_op). Reported by the job set
+    as UNSPECIFIED_SETUP_TRANSITION refusals — a changeover time is never invented."""
+
+    def __init__(self, transitions: Sequence[tuple[str, str, str]]) -> None:
+        self.transitions = tuple(sorted(set(transitions)))
+        super().__init__("; ".join(f"{m}: {p} -> {c}" for m, p, c in self.transitions))
 
 
 class UnknownSchedulingRuleError(ValueError):
@@ -163,6 +254,25 @@ class ScheduledOperation:
     step_index: int
     op: str
     resource_id: str
+    duration_min: int
+    start_min: int
+    end_min: int
+
+
+@dataclass(frozen=True)
+class ScheduledSetup:
+    """RM14: a changeover occupying ``resource_id`` on [start_min, end_min) immediately before the
+    operation (request_id, step_index), whose predecessor on the machine is ``prev_op`` of job
+    ``prev_request_id``: end_min == the operation's start_min and
+    end_min - start_min == duration_min."""
+
+    request_id: str
+    step_index: int
+    resource_id: str
+    prev_request_id: str
+    prev_op: str
+    curr_op: str
+    matched: SetupMatch
     duration_min: int
     start_min: int
     end_min: int
@@ -208,6 +318,10 @@ class MultiJobSchedule:
     downtime: Downtime = ()
     window_aware_lower_bound_min: int | None = None
     window_aware_lower_bound_binding_resource_ids: tuple[str, ...] = ()
+    # RM14: set only when relevant setup rules exist; otherwise the artifact is exactly RM13's.
+    # Changeovers are in canonical (start_min, request_id, step_index) order.
+    setup_rules: SetupRules = ()
+    setups: tuple[ScheduledSetup, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -226,7 +340,7 @@ class ScheduleOutcome:
 
 @dataclass(frozen=True)
 class ScheduleIssue:
-    code: IssueCode | DowntimeIssueCode
+    code: IssueCode | DowntimeIssueCode | SetupIssueCode
     detail: str
 
 
@@ -239,17 +353,23 @@ def downtime_view(downtime: Downtime) -> dict[str, list[list[int]]]:
     return {m: [[i.start_min, i.end_min] for i in ivs] for m, ivs in sorted(downtime)}
 
 
+def setup_rules_view(rules: SetupRules) -> list[dict[str, object]]:
+    """Canonical JSON form of relevant setup rules (a machine default has null operations)."""
+    return [dataclasses.asdict(rule) for rule in rules]
+
+
 def schedule_input_identity(
     scheduling_rule: str,
     scheduling_rule_version: str,
     capability_model_version: str,
     jobs: Sequence[tuple[str, str]],
     downtime: Downtime = (),
+    setup_rules: SetupRules = (),
 ) -> str:
     """Identity of the scheduling problem + rule. ``jobs`` = (request_id, plan content hash)
     pairs, in any order (canonicalized here). Never includes a derived output such as makespan.
     RM12: relevant canonical downtime enters only when there is some, so a run without relevant
-    downtime keeps exactly the RM11 identity."""
+    downtime keeps exactly the RM11 identity. RM14: likewise for relevant canonical setup rules."""
     view: dict[str, object] = {
         "scheduling_rule": scheduling_rule,
         "scheduling_rule_version": scheduling_rule_version,
@@ -258,12 +378,15 @@ def schedule_input_identity(
     }
     if downtime:
         view["downtime"] = downtime_view(downtime)
+    if setup_rules:
+        view["setup_rules"] = setup_rules_view(setup_rules)
     return h.content_hash(view)
 
 
 def schedule_view(schedule: MultiJobSchedule) -> dict[str, object]:
     """The canonical view of the artifact: every field except ``schedule_digest`` (the RM12
-    fields only when relevant downtime exists, so an RM11-shaped artifact digests as in RM11)."""
+    fields only when relevant downtime exists, the RM14 fields only when relevant setup rules exist,
+    so an RM11-shaped artifact digests as in RM11)."""
     view: dict[str, object] = {
         "scheduling_rule": schedule.scheduling_rule,
         "scheduling_rule_version": schedule.scheduling_rule_version,
@@ -286,6 +409,9 @@ def schedule_view(schedule: MultiJobSchedule) -> dict[str, object]:
         view["window_aware_lower_bound_binding_resource_ids"] = list(
             schedule.window_aware_lower_bound_binding_resource_ids
         )
+    if schedule.setup_rules:
+        view["setup_rules"] = setup_rules_view(schedule.setup_rules)
+        view["setups"] = [dataclasses.asdict(setup) for setup in schedule.setups]
     return view
 
 

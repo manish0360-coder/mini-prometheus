@@ -9,5 +9,6 @@ a lower-bound certificate measures the schedule's distance from a valid bound.
 Modules: ``model`` (types, frozen assumptions, identity/digest), ``lower_bound`` (the
 certificate), ``earliest_start`` (the baseline generator), ``checker`` (independent validity
 checker — never imports the generator or the bound calculator), ``job_set`` (prerequisites,
-refusals and the check-before-return gate).
+refusals and the check-before-return gate), ``downtime`` (RM12 downtime input) and ``changeover``
+(RM14 setup-rule input: declared sequence-dependent cross-job changeovers).
 """

@@ -5,6 +5,33 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.12.0] — 2026-09-27 — RM14 Sequence-Dependent Resource Changeover Scheduling
+
+Runtime `0.11.0 → 0.12.0`; the contract suite stays **frozen at `0.4.0`**. See
+`specs/milestones/RM14-sequence-dependent-changeover.md`, ADR-0017, `docs/milestones/RM14-completion-report.md`.
+**Without relevant setup rules every RM11/RM12/RM13 output, identity and digest is unchanged.**
+
+### Added — RM14
+- Optional per-run setup rules `SetupRule(machine_id, prev_op, curr_op, duration_min)`: transition rules and a
+  per-machine default `(machine, None, None, minutes)`; validated before planning (`InvalidSetupError`), canonical;
+  `schedule_requests(..., setup_rules=...)`, `schedule_job_set(..., setup_rules=...)`, CLI `--setup` /
+  `--setup-default`.
+- Cross-job changeover only (none within a job or before a machine's first operation): for a transition the rule
+  needs, the transition rule, else the machine default, else the set is refused with `UNSPECIFIED_SETUP_TRANSITION` —
+  never zero; transitions the rule never evaluates need no declaration.
+- Changeover + operation form one uninterrupted block, never started before the job's predecessor completes, fitted
+  as a whole around RM12 downtime; selection by the block start. Rule ids `..._setup` under relevant rules.
+- Artifact fields `setup_rules` / `setups` (changeover intervals), identity and digest only when relevant; model
+  assumptions state the changeover model. Independent checker extended (ten `SetupIssueCode`s); it never imports the
+  new `manufacturing_scheduling.changeover` module (import-linter).
+- Tests A–V, checker corruption tests, a seeded property test against an independent reference, the RM14 zero-diff
+  gate (frozen rm11-complete golden, RM12 downtime, RM13 corpus), 23 named mutants, CLI and boundary tests, and an
+  installed-wheel RM14 check.
+
+### Unchanged
+- RM9 assignments; RM12 downtime semantics; RM13 remaining work; lower bounds; contracts; CI; dependencies. No material,
+  tool or fixture model, no initial setup, no setup optimization or solver.
+
 ## [0.11.0] — 2026-09-27 — RM13 Opt-In Most-Work-Remaining Tie-Break Rule
 
 Runtime `0.10.0 → 0.11.0`; the contract suite stays **frozen at `0.4.0`**. See

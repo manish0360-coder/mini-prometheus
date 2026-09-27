@@ -29,6 +29,7 @@ from mini_prometheus.manufacturing_constraints.capability_model import (
     default_model,
     with_unavailable_resources,
 )
+from mini_prometheus.manufacturing_scheduling.changeover import SetupInput, canonical_setup_rules
 from mini_prometheus.manufacturing_scheduling.downtime import DowntimeInput, canonical_downtime
 from mini_prometheus.manufacturing_scheduling.job_set import schedule_job_set
 from mini_prometheus.manufacturing_scheduling.model import (
@@ -36,16 +37,23 @@ from mini_prometheus.manufacturing_scheduling.model import (
     SELECTABLE_RULES,
     BoundStatus,
     InvalidDowntimeError,
+    InvalidSetupError,
     JobInput,
     ScheduledOperation,
+    ScheduledSetup,
     ScheduleIntegrityError,
     ScheduleOutcome,
     ScheduleStatus,
+    SetupRule,
 )
 
 _OPTIMAL = "(makespan equals the lower bound: PROVABLY OPTIMAL under the RM11 model)"
 _OPTIMAL_DOWNTIME = (
     "(makespan equals the window-aware lower bound: PROVABLY OPTIMAL under the RM12 model)"
+)
+_OPTIMAL_SETUP = "(makespan equals the lower bound: PROVABLY OPTIMAL under the RM14 model)"
+_OPTIMAL_DOWNTIME_SETUP = (
+    "(makespan equals the window-aware lower bound: PROVABLY OPTIMAL under the RM14 model)"
 )
 
 
@@ -56,10 +64,13 @@ def schedule_requests(
     produced_at: str | None = None,
     downtime: DowntimeInput | None = None,
     rule: str | None = None,
+    setup_rules: SetupInput | None = None,
 ) -> ScheduleOutcome:
     """RM12: ``downtime`` maps machine ids to finite [start_min, end_min) pairs for this run only;
     invalid downtime raises ``InvalidDowntimeError`` before planning. RM13: ``rule`` opts into a
-    selectable rule (None = the job-set default, ``earliest_start_v1``)."""
+    selectable rule (None = the job-set default, ``earliest_start_v1``). RM14: ``setup_rules``
+    declares cross-job changeovers for this run only; invalid rules raise ``InvalidSetupError``
+    before planning."""
     model = capability_model or default_model()
     produced_at = produced_at or now_rfc3339()
     jobs = [
@@ -71,6 +82,8 @@ def schedule_requests(
         options["downtime"] = downtime
     if rule is not None:
         options["rule"] = rule
+    if setup_rules:
+        options["setup_rules"] = setup_rules
     return schedule_job_set(jobs, model, produced_at=produced_at, **options)
 
 
@@ -82,6 +95,19 @@ def _row(
 
 def _placement(op: ScheduledOperation) -> str:
     return _row(op.start_min, op.end_min, op.resource_id, op.request_id, op.step_index, op.op)
+
+
+def _setup_rule(rule: SetupRule) -> str:
+    what = f"{rule.prev_op} -> {rule.curr_op}" if rule.prev_op is not None else "default"
+    return f"{rule.machine_id} {what} {rule.duration_min} min"
+
+
+def _setup_line(setup: ScheduledSetup) -> str:
+    return (
+        f"changeover [{setup.start_min}, {setup.end_min}) {setup.resource_id} before "
+        f"{setup.request_id} step {setup.step_index}: {setup.prev_op} ({setup.prev_request_id}) "
+        f"-> {setup.curr_op}, {setup.duration_min} min ({setup.matched})"
+    )
 
 
 def render(outcome: ScheduleOutcome) -> list[str]:
@@ -108,6 +134,9 @@ def render(outcome: ScheduleOutcome) -> list[str]:
             for m, ivs in s.downtime
         ]
         lines.append("downtime: " + "; ".join(spans))
+    if s.setup_rules:  # RM14 lines only with relevant setup rules; else the RM13 report exactly
+        lines.append("setup rules: " + "; ".join(_setup_rule(r) for r in s.setup_rules))
+        lines += [_setup_line(setup) for setup in s.setups]
     binding = [f"longest job {r}" for r in s.lower_bound_binding_request_ids]
     binding += [f"busiest machine {m}" for m in s.lower_bound_binding_resource_ids]
     lines.append(f"makespan: {s.makespan_min} min")
@@ -119,6 +148,8 @@ def render(outcome: ScheduleOutcome) -> list[str]:
             f"window-aware lower bound: {s.window_aware_lower_bound_min} min (binding: {machines})"
         )
         optimal = _OPTIMAL_DOWNTIME
+    if s.setup_rules:
+        optimal = _OPTIMAL_DOWNTIME_SETUP if s.downtime else _OPTIMAL_SETUP
     gap = f"gap to lower bound: {s.gap_to_lower_bound_min} min"
     lines.append(f"{gap} {optimal}" if s.bound_status == BoundStatus.PROVABLY_OPTIMAL else gap)
     lines.append("model assumptions: " + "; ".join(s.model_assumptions))
@@ -167,13 +198,41 @@ def _downtime_from_args(values: list[str]) -> dict[str, list[tuple[int, int]]]:
     return downtime
 
 
+def _minutes_arg(flag: str, value: str, text: str) -> int:
+    try:
+        return int(text)
+    except ValueError:
+        raise ValueError(f"{flag} {value!r}: MINUTES must be integer minutes") from None
+
+
+def _setup_rules_from_args(transitions: list[str], defaults: list[str]) -> list[SetupRule]:
+    """``MACHINE:PREV_OP:CURR_OP:MINUTES`` and ``MACHINE:MINUTES`` values -> setup rules."""
+    rules: list[SetupRule] = []
+    for value in transitions:
+        parts = value.split(":")
+        if len(parts) != 4:
+            raise ValueError(f"--setup {value!r}: expected MACHINE:PREV_OP:CURR_OP:MINUTES")
+        machine, prev_op, curr_op, minutes = parts
+        rules.append(SetupRule(machine, prev_op, curr_op, _minutes_arg("--setup", value, minutes)))
+    for value in defaults:
+        parts = value.split(":")
+        if len(parts) != 2:
+            raise ValueError(f"--setup-default {value!r}: expected MACHINE:MINUTES")
+        machine, minutes = parts
+        rules.append(
+            SetupRule(machine, None, None, _minutes_arg("--setup-default", value, minutes))
+        )
+    return rules
+
+
 def _main(argv: list[str] | None = None) -> int:
     import argparse
     import json
 
     parser = argparse.ArgumentParser(
-        description="RM11/RM12 multi-job schedule (earliest_start_v1, with --downtime "
-        "earliest_start_v1_downtime; NOT_OPTIMIZED; no dispatch)"
+        description="RM11-RM14 multi-job schedule (earliest_start_v1, with --downtime "
+        "earliest_start_v1_downtime, with relevant --setup/--setup-default a _setup suffix; "
+        "NOT_OPTIMIZED; no dispatch)"
     )
     parser.add_argument(
         "request_json",
@@ -210,6 +269,24 @@ def _main(argv: list[str] | None = None) -> int:
         "earliest_start_v1_most_work_remaining is opt-in: exact earliest-start ties go to the job "
         "with the most remaining work.",
     )
+    parser.add_argument(
+        "--setup",
+        action="append",
+        default=[],
+        metavar="MACHINE:PREV_OP:CURR_OP:MINUTES",
+        help="RM14: on a KNOWN machine, a cross-job changeover from PREV_OP (another job's "
+        "operation) to CURR_OP takes MINUTES (integer >= 0; repeatable). On a machine with any "
+        "declared changeover, a cross-job transition the schedule needs without its own rule or "
+        "a --setup-default refuses the set (never assumed zero).",
+    )
+    parser.add_argument(
+        "--setup-default",
+        action="append",
+        default=[],
+        metavar="MACHINE:MINUTES",
+        help="RM14: the machine's default cross-job changeover for transitions without their own "
+        "--setup rule (repeatable, one per machine).",
+    )
     args = parser.parse_args(argv)
     constrained = args.capability_model == "constrained"
     model = constrained_model() if constrained else default_model()
@@ -223,13 +300,22 @@ def _main(argv: list[str] | None = None) -> int:
         canonical_downtime(downtime, model.resources)
     except (ValueError, InvalidDowntimeError) as exc:
         parser.error(str(exc))
+    try:
+        setup_rules = _setup_rules_from_args(args.setup, args.setup_default)
+        canonical_setup_rules(setup_rules, model)
+    except (ValueError, InvalidSetupError) as exc:
+        parser.error(str(exc))
     requests = []
     for path in args.request_json:
         with open(path, encoding="utf-8") as handle:
             requests.append(_request_from_json(json.load(handle), constrained))
     try:
         outcome = schedule_requests(
-            requests, capability_model=model, downtime=downtime, rule=args.rule
+            requests,
+            capability_model=model,
+            downtime=downtime,
+            rule=args.rule,
+            setup_rules=setup_rules,
         )
     except ScheduleIntegrityError as exc:
         print(f"SCHEDULE_INTEGRITY_ERROR (no schedule returned): {exc}")
