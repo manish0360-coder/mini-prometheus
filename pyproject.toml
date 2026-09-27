@@ -1,6 +1,6 @@
 [project]
 name = "mini-prometheus"
-version = "0.9.0"
+version = "0.9.1"
 description = "AI Manufacturing Intelligence — runtime orchestration platform integrating MiniFlyWire, Noetica, and Velith."
 requires-python = ">=3.11"
 
@@ -31,8 +31,22 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Packaging integrity (ADR-0014). The runtime imports the generated bindings as the top-level
+# `contracts.python.*` package and reads `contracts/schemas` relative to the source tree (the
+# repository layout: <root>/src/mini_prometheus next to <root>/contracts). The wheel therefore
+# installs that same layout under one directory in site-packages — mini-prometheus-runtime/{src,
+# contracts} — and `mini_prometheus.pth` puts mini-prometheus-runtime/src (for `mini_prometheus`)
+# and mini-prometheus-runtime (for `contracts`) on sys.path. No source file is changed. Editable
+# installs (CI) are unchanged: dev-mode-dirs keeps exactly <repo>/src on sys.path, and the runtime
+# .pth is not part of an editable wheel.
 [tool.hatch.build.targets.wheel]
-packages = ["src/mini_prometheus"]
+only-include = ["src/mini_prometheus", "contracts", "distribution/mini_prometheus.pth"]
+dev-mode-dirs = ["src"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = "mini-prometheus-runtime/src"
+"contracts" = "mini-prometheus-runtime/contracts"
+"distribution" = ""
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

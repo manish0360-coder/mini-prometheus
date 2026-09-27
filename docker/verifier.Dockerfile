@@ -15,9 +15,12 @@ WORKDIR /app
 # Install dependencies first for better layer caching: the hatchling build needs the metadata + source.
 COPY pyproject.toml ./
 COPY src/ ./src/
-# Mini Prometheus resolves `contracts.python.*` and reads `contracts/schemas/*` at runtime via the
-# repo-root pythonpath, so the contracts tree must be present in the image (it is NOT part of the wheel).
+# Mini Prometheus resolves `contracts.python.*` and reads `contracts/schemas/*` relative to the source
+# tree. The tests run from the repo-root pythonpath, and since ADR-0014 the wheel installs the same
+# layout (mini-prometheus-runtime/{src,contracts}) plus distribution/mini_prometheus.pth — so both the
+# contracts tree and distribution/ must be present before the wheel is built.
 COPY contracts/ ./contracts/
+COPY distribution/ ./distribution/
 RUN pip install ".[dev]"
 
 # Tests + fixtures are not part of the installed package; copy them in for execution.

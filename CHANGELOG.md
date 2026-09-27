@@ -5,6 +5,25 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [0.9.1] — 2026-09-27 — Packaging integrity (maintenance)
+
+Runtime `0.9.0 → 0.9.1`; the contract suite stays **frozen at `0.4.0`**. See ADR-0014.
+
+### Fixed
+- The installed wheel lacked the `contracts/` tree, so the RM10 and RM11 CLIs failed from a regular installation
+  (`ModuleNotFoundError: contracts`, then `NoSuchResource` for the schemas). The wheel now installs the repository
+  layout — `site-packages/mini-prometheus-runtime/{src/mini_prometheus, contracts}` — plus `mini_prometheus.pth`
+  (new source file `distribution/mini_prometheus.pth`), so every source-relative path resolves as in the
+  repository. No source, contract or CI file changed; editable installs are unchanged.
+
+### Added
+- `tools/verify_installed_wheel.py` (build, inspect, clean-venv install, RM10/RM11 CLIs from a neutral directory,
+  schema rejection, digest equality with the repository source) and `tests/boundary/test_packaging_integrity.py`.
+- The verifier Dockerfile copies `distribution/` before building the wheel.
+
+### Unchanged
+- All RM1–RM11 source and behavior; contracts; CI configuration; dependencies.
+
 ## [0.9.0] — 2026-09-27 — RM11 Multi-Job Deterministic Scheduling
 
 Runtime `0.8.0 → 0.9.0`; the contract suite stays **frozen at `0.4.0`**. See
