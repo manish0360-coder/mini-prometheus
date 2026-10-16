@@ -1,0 +1,20 @@
+{
+  "checkpoint_id": "sha256:11c039a96113aadeaba07a4078df04a6f4b25b94f3d1301a27db2123f09cb4d6",
+  "generator_version": "1.0.0",
+  "episode_schema_version": "1.1.0",
+  "fixed_produced_at": "2026-01-01T00:00:00+00:00",
+  "hold_out_modulo": 4,
+  "capability_model_version": "1.1.0",
+  "precedent_model_version": "1.0.0",
+  "analogous_definition": {
+    "min_relevance": 1,
+    "exclude_relevance": 1000
+  },
+  "adequacy_gates": {
+    "manufacturable": 30,
+    "single_cause_per_axis": 10
+  },
+  "n_total": 960,
+  "n_experience": 731,
+  "n_held_out": 229
+}
