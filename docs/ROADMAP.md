@@ -16,6 +16,16 @@ v1.1.0); all ownership traces to Handbook §2.4.
 > `EngineeringResult` API (manufacturing is its decade-scale destination). RM5 was reprioritized to the
 > fully-unblocked **Compounding Validation Experiment** (the held-out compounding measurement formerly
 > parked at RM7+). Real Velith moved to **RM6**, real Noetica to **RM7**. See ADR-0009.
+>
+> **Stage 0 reconciliation (2026-11-06).** A read-only forensic audit found that the record had fallen behind Git.
+> The owner's rulings are recorded in ADR-0021:
+> - **CAP-0001 ownership stands.**
+> - RM15 (a re-measurement, not Velith integration) is recorded with its mixed result (ADR-0019).
+> - RDAI-1 is recorded (ADR-0020).
+> - RM6.0 is **parked** on its unmerged branch, with ADR-0018 reserved.
+> - Velith work is **paused by the owner**.
+> - The next candidate is **MP-S1**, proceeding on synthetic shop models. Real-world evaluation (**MP-E1**) is
+>   blocked until real shop data exists.
 
 | Milestone | Capability | Status | Tag | Notes |
 |---|---|---|---|---|
@@ -23,9 +33,10 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM2** | **Experience read-back & idempotent reuse** — reuse a prior verified plan+verdict for a repeated request (compounding, rung 1) | ✅ **Complete** (2026-07-25) | `rm2-complete` | runtime `0.3.0`; additive read side; RM1 byte-unchanged |
 | **RM1 correction** | `ManufacturingEpisode` embeds the full `DesignInput` (complete engineering memory) | ✅ Ratified | — | contract suite `0.2.0 → 0.4.0`; backward-compatible; enables RM3/RM4 |
 | **RM3** | **Engineering Precedent Reasoning** — surface relevant prior verified cases and derive a supporting/cautionary/none signal (compounding, rung 2) | ✅ **Complete** (2026-08-03) | in `0.4.0` | runtime `0.4.0`; additive `PrecedentReport` contracts; deterministic structural relevance (no ML); read-only |
-| **RM4** | **Engineering Judgment** — situated advisory critique of a proposed plan against its whole case; first consumer of the internal `EngineeringSituation` primitive (compounding, rung 3) | ✅ **Complete** (2026-08-03) | pending `rm4-complete` | runtime `0.4.0`; additive, **no contract**; `EngineeringSituation` internal; RM1–RM3 byte-unchanged |
+| **RM4** | **Engineering Judgment** — situated advisory critique of a proposed plan against its whole case; first consumer of the internal `EngineeringSituation` primitive (compounding, rung 3) | ✅ **Complete** (2026-08-03) | `rm4-complete` | runtime `0.4.0`; additive, **no contract**; `EngineeringSituation` internal; RM1–RM3 byte-unchanged |
 | **RM5** | **Compounding Validation Experiment** — deterministic, read-only measurement of whether accumulated verified experience improves RM4 judgment vs the RM1 oracle on held-out analogous cases within one fixed regime R* | ✅ **Complete** (2026-09-15) | `rm5-complete` | runtime `0.5.0`; measurement milestone, **no contract**; leaf `experiment/` package; RM1–RM4 byte-unchanged |
-| **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned | — | Hard prerequisite: Velith publishes a consumable release (CAP-0001 Field 8) |
+| **RM6** | Wire the **real pinned Velith package** behind `integrations/velith` (verified-design path) | ⏳ Planned — **paused by owner** | — | Hard prerequisite: a consumable, pinned Velith release with a physical-design result contract (CAP-0001 Field 8). Read-only check on 2026-11-06: Velith tag `v0.1.0` (software artifacts only); untagged `0.2.0` on its main branch adds `application/vnd.velith.geometry-facts+json`. The MP consumed stub has diverged from both. |
+| *RM6.0* | Fail-closed design-artifact media-type admission (admits `model/step` only) | ⏸ **Parked** (ADR-0021 Q2) | — | Unmerged local branch `rm6.0-admission` (`c2e3b98`), ADR-0018 reserved. Its premise is stale, and it would reject Velith's geometry-facts type. Re-specify when Velith resumes. |
 | **RM7** | Consume real **Noetica** platform mechanisms (substrate/provenance/Verifier) via pinned package; evaluate `EngineeringSituation` extraction per the RM4 §12 gate | ⏳ Planned | — | Noetica is grown by extraction (N.3); publish availability gates this |
 | **RM8** | **Engineering Constraint Reasoning (ECR)** — the manufacturability oracle enforces declared operation precedence and tolerance feasibility (opt-in `constrained_model()`, CLI `--capability-model constrained`) | ✅ **Complete** (2026-09-26) | `rm8-complete` | runtime `0.6.0`; **no contract** (suite `0.4.0`); default model byte-identical to `rm5-complete` (behavioral golden); ADR-0010; the current manufacturing baseline |
 | **RM9** | **Resource Availability** — declare known machines unavailable for a planning snapshot; the planner reroutes to an available capable machine or the oracle reports `RESOURCE_UNAVAILABLE` (CLI `--unavailable-resource ID`) | ✅ **Complete** (2026-09-27) | `rm9-complete` | runtime `0.7.0`; **no contract** (suite `0.4.0`); RM8 golden unchanged; RM2 unchanged; ADR-0011 |
@@ -34,8 +45,12 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | *Maintenance* | **Packaging integrity** — the installed wheel carries the contracts tree (repository-shaped install + `.pth`); RM10/RM11 CLIs work from a regular installation | ✅ **Complete** (2026-09-27) | `packaging-integrity-complete` | runtime `0.9.1`; no source/contract/CI change; ADR-0014 |
 | **RM12** | **Time-Aware Resource Downtime Scheduling** — explicit finite downtime `[start, end)` on already-assigned machines for one scheduling run; operations wait (never rerouted); `earliest_start_v1_downtime` only under relevant downtime; RM11 bound retained + window-aware lower bound; independent checker extended; CLI `--downtime` | ✅ **Complete** (2026-09-27) | `rm12-complete` | runtime `0.10.0`; **no contract** (suite `0.4.0`); no-downtime path byte-identical to `rm11-complete` (frozen golden); ADR-0015 |
 | **RM13** | **Opt-In Most-Work-Remaining Tie-Break Rule** — `earliest_start_v1_most_work_remaining`: exact earliest-start ties go to the job with the most remaining processing work; opt-in (`rule=` / `--rule`), default unchanged; frozen synthetic regression corpus RM13_REGRESSION_CORPUS_01 (124 → 131 of 135 optimal; one documented regression) | ✅ **Complete** (2026-09-27) | `rm13-complete` | runtime `0.11.0`; **no contract** (suite `0.4.0`); all RM11/RM12 goldens byte-identical; ADR-0016 |
-| **RM14** | **Sequence-Dependent Resource Changeover Scheduling** — explicitly declared cross-job changeover per machine (transition rules + a machine default; an undeclared transition the schedule needs is refused, never zero); changeover + operation one uninterrupted block after the job's predecessor, around downtime; `_setup` rule ids only under relevant rules; independent checker extended; CLI `--setup` / `--setup-default` | ✅ **Complete** (2026-09-27) | pending `rm14-complete` | runtime `0.12.0`; **no contract** (suite `0.4.0`); without relevant rules byte-identical to RM11/RM12/RM13 (frozen golden, corpus); ADR-0017 |
-| **RM15+** | To be chosen from evidence (candidates: a declared per-run initial machine state; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence); model-based planner seam; revisit the RM5 caveat on organic data | ⏳ Future | — | No premature abstraction |
+| **RM14** | **Sequence-Dependent Resource Changeover Scheduling** — explicitly declared cross-job changeover per machine (transition rules + a machine default; an undeclared transition the schedule needs is refused, never zero); changeover + operation one uninterrupted block after the job's predecessor, around downtime; `_setup` rule ids only under relevant rules; independent checker extended; CLI `--setup` / `--setup-default` | ✅ **Complete** (2026-09-27) | `rm14-complete` | runtime `0.12.0`; **no contract** (suite `0.4.0`); without relevant rules byte-identical to RM11/RM12/RM13 (frozen golden, corpus); ADR-0017 |
+| **RM15** | **Enriched-Oracle Compounding Re-Measurement**: the frozen RM5 protocol re-run on a 960-episode synthetic corpus whose verdicts come from RM8 `constrained_model()`. **Not Velith integration.** | ✅ **Measured, reproduced** (run 2026-10-16; reproduced 2026-11-06) | `rm15-corpus-frozen` | **Mixed result.** H1 met (67/70, against a structurally abstaining baseline); **H2 not met** (3/70 false alarms); H3 met; **H4 not met** (0 → 65 → 63 → 67). No contract. Retrospective ADR-0019; report + evidence JSON. |
+| *RDAI-1* | **Real STEP design-artifact intake**: raw bytes → container check → sha256 identity, carried opaque into the episode. No geometry. | ✅ **Implemented, tested** (2026-10-17/23) | — | Leaf `artifact_intake/`; no contract change; synthetic 196-byte fixture only; no independent review. Retrospective ADR-0020. |
+| **MP-S1** *(proposed name)* | **Declared Shop Capability Model**: an external, schema-validated, content-hashed shop description; plans, verdicts, reuse and schedules bind to its content hash | 🔎 **Next candidate**, not yet authorised for implementation | — | Synthetic shop models only. Public machine specs allowed but labelled non-real evidence (ADR-0021 Q5). Needs spec + owner authorisation; would be an additive contract MINOR bump. |
+| **MP-E1** *(proposed name)* | First real-world evaluation: verdict agreement on historical jobs from a participating shop | ⛔ **Blocked** | — | No participating shop and no historical jobs with known outcomes (ADR-0021 Q5) |
+| **Later** | To be chosen from evidence (earlier candidates: a declared per-run initial machine state; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence; model-based planner seam; analysis of the RM5/RM15 H2 false alarms) | ⏳ Future | — | No premature abstraction; no further scheduling depth without demand |
 
 ## RM14 — what shipped (2026-09-27)
 
@@ -192,6 +207,10 @@ v1.1.0); all ownership traces to Handbook §2.4.
 RM1–RM5 deliberately depend on the Velith/Noetica **contracts**, not their published **packages** (mirrors
 Velith D16.3). **RM6** cannot leave Specification until **Velith publishes a pinned, consumable package**;
 **RM7** likewise for **Noetica** (grown by extraction, N.3). These external gates are independent of RM1–RM5.
+Since 2026-11-06 RM6 is also **paused by owner decision**, whatever Velith's release status (ADR-0021). When it
+resumes, its specification starts from the consumer-side result-verification boundary proposed in the Stage 0 audit:
+pinned contract version, producer allowlist, hash recomputation, artifact-hash match, media-type admission, evidence
+verdict, and typed rejections.
 
 ## Governance
 

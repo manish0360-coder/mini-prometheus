@@ -1,0 +1,350 @@
+{
+  "capability_regime": {
+    "capability_tolerance_mm": {
+      "cap.drill": 0.05,
+      "cap.lathe": 0.01,
+      "cap.mill": 0.02
+    },
+    "derivation": "constrained_model() (full default resources + declared precedence + tolerance)",
+    "op_capability": {
+      "cut_stock": "cap.saw",
+      "deburr": "cap.bench",
+      "drill": "cap.drill",
+      "face_mill": "cap.mill",
+      "inspect": "cap.cmm",
+      "pocket_mill": "cap.mill",
+      "turn": "cap.lathe"
+    },
+    "ordering_constraints": [
+      [
+        "cut_stock",
+        "deburr"
+      ],
+      [
+        "cut_stock",
+        "drill"
+      ],
+      [
+        "cut_stock",
+        "face_mill"
+      ],
+      [
+        "cut_stock",
+        "inspect"
+      ],
+      [
+        "cut_stock",
+        "pocket_mill"
+      ],
+      [
+        "cut_stock",
+        "turn"
+      ],
+      [
+        "deburr",
+        "inspect"
+      ],
+      [
+        "drill",
+        "inspect"
+      ],
+      [
+        "face_mill",
+        "inspect"
+      ],
+      [
+        "pocket_mill",
+        "inspect"
+      ],
+      [
+        "turn",
+        "inspect"
+      ]
+    ],
+    "resources": {
+      "bench01": [
+        "cap.bench"
+      ],
+      "cmm01": [
+        "cap.cmm"
+      ],
+      "lathe01": [
+        "cap.lathe"
+      ],
+      "mill01": [
+        "cap.drill",
+        "cap.mill"
+      ],
+      "saw01": [
+        "cap.saw"
+      ]
+    },
+    "supported_materials": [
+      "aluminum",
+      "aluminum 6061",
+      "brass",
+      "brass 360",
+      "steel",
+      "steel 1018"
+    ],
+    "unavailable_resources": [],
+    "version": "1.1.0"
+  },
+  "checkpoint_id": "sha256:11c039a96113aadeaba07a4078df04a6f4b25b94f3d1301a27db2123f09cb4d6",
+  "content_hash": "sha256:e00acabaaa69f4bd69a5d159a56ffb29d8f201dcebe32aa909ed841ddedf5085",
+  "critic_model_version": "1.0.0",
+  "enriched_generator_version": "1.0.0",
+  "evaluation_protocol_version": "1.0.0",
+  "fixture": "tests/fixtures/rm15_corpus/",
+  "hypothesis": {
+    "H1_precedent_marginal_positive_MANUFACTURABLE": {
+      "criterion": "primary (b-c)/n > 0 on held-out analogous MANUFACTURABLE",
+      "met": true,
+      "value": [
+        67,
+        70
+      ]
+    },
+    "H2_zero_false_alarms_on_controls": {
+      "criterion": "cautionary false alarms on MANUFACTURABLE controls == 0",
+      "met": false,
+      "origin": "RM4 H1 (zero cautionary false alarms on controls)",
+      "value": [
+        3,
+        70
+      ]
+    },
+    "H3_coverage_nonzero_both_classes": {
+      "criterion": "precedent coverage > 0 for both verdict classes",
+      "manufacturable": [
+        70,
+        70
+      ],
+      "met": true,
+      "not_manufacturable": [
+        159,
+        159
+      ]
+    },
+    "H4_compounding_non_decreasing": {
+      "criterion": "marginal non-decreasing in experience size (flat/decreasing is valid NOT-SUPPORTED)",
+      "marginals": [
+        0,
+        65,
+        63,
+        67
+      ],
+      "met": false
+    }
+  },
+  "metrics": {
+    "aggregate_marginal": [
+      67,
+      229
+    ],
+    "arm1_arm2_validity_control": {
+      "equal_exact": true,
+      "mismatches": 0
+    },
+    "cautionary_false_alarm_rate_on_controls": [
+      3,
+      70
+    ],
+    "compounding_curve": [
+      {
+        "arm3_agreement": [
+          159,
+          229
+        ],
+        "experience_axis_composition": {},
+        "experience_size": 0,
+        "fraction": [
+          0,
+          4
+        ],
+        "marginal_vs_arm2": [
+          0,
+          229
+        ]
+      },
+      {
+        "arm3_agreement": [
+          224,
+          229
+        ],
+        "experience_axis_composition": {
+          "MANUFACTURABLE": 49,
+          "material": 35,
+          "multi": 61,
+          "precedence": 24,
+          "tolerance": 13
+        },
+        "experience_size": 182,
+        "fraction": [
+          1,
+          4
+        ],
+        "marginal_vs_arm2": [
+          65,
+          229
+        ]
+      },
+      {
+        "arm3_agreement": [
+          222,
+          229
+        ],
+        "experience_axis_composition": {
+          "MANUFACTURABLE": 99,
+          "material": 73,
+          "multi": 106,
+          "precedence": 54,
+          "tolerance": 33
+        },
+        "experience_size": 365,
+        "fraction": [
+          2,
+          4
+        ],
+        "marginal_vs_arm2": [
+          63,
+          229
+        ]
+      },
+      {
+        "arm3_agreement": [
+          226,
+          229
+        ],
+        "experience_axis_composition": {
+          "MANUFACTURABLE": 200,
+          "material": 142,
+          "multi": 211,
+          "precedence": 109,
+          "tolerance": 69
+        },
+        "experience_size": 731,
+        "fraction": [
+          4,
+          4
+        ],
+        "marginal_vs_arm2": [
+          67,
+          229
+        ]
+      }
+    ],
+    "excluded_duplicate_count": 0,
+    "n_analogous_held_out": 229,
+    "per_arm_oracle_agreement_status_class": {
+      "arm1_cold_start": [
+        159,
+        229
+      ],
+      "arm2_no_precedent": [
+        159,
+        229
+      ],
+      "arm3_full_system": [
+        226,
+        229
+      ]
+    },
+    "per_axis_diagnostics": {
+      "material": {
+        "marginal": [
+          0,
+          38
+        ],
+        "note": "diagnostic only; not causal attribution",
+        "similarity_confounded": true
+      },
+      "precedence": {
+        "marginal": [
+          0,
+          35
+        ],
+        "note": "diagnostic only; not causal attribution",
+        "similarity_confounded": true
+      },
+      "tolerance": {
+        "marginal": [
+          0,
+          21
+        ],
+        "note": "diagnostic",
+        "similarity_confounded": false
+      }
+    },
+    "precedent_coverage": {
+      "manufacturable": [
+        70,
+        70
+      ],
+      "not_manufacturable": [
+        159,
+        159
+      ]
+    },
+    "primary_marginal_MANUFACTURABLE": {
+      "arm2_structurally_abstains": true,
+      "denominator": 70,
+      "interpretation": "Arm2 structurally abstains on this subset (NEUTRAL => non-correct), so c==0 by construction and (b-c)/n is Arm3's one-sample agreement rate against an abstaining baseline \u2014 NOT a conventional paired-classifier improvement.",
+      "marginal": [
+        67,
+        70
+      ],
+      "paired_table": {
+        "b_arm3_corrects_arm2_errors": 67,
+        "c_arm3_regressions": 0
+      },
+      "subset": "held_out_analogous_MANUFACTURABLE"
+    },
+    "reason_aligned_agreement": {
+      "measured": false,
+      "reason": "dropped per RM15 governance: no defensible frozen RM4-finding -> oracle reason-code mapping"
+    }
+  },
+  "precedent_model_version": "1.0.0",
+  "provenance": {
+    "component": "rm15-enriched-runner",
+    "component_version": "1.0.0",
+    "fixture": "tests/fixtures/rm15_corpus/",
+    "n_experience": 731,
+    "n_held_out": 229,
+    "n_total": 960,
+    "produced_at": "2026-10-16T19:28:45.411592+00:00"
+  },
+  "rm15_runner_version": "1.0.0",
+  "statement_of_claims": {
+    "cannot_claim": [
+      "real-world manufacturing correctness",
+      "real manufacturability improvement",
+      "cost or quality improvement",
+      "true DFM expertise",
+      "superiority to human engineers",
+      "that the deterministic oracle equals real manufacturability",
+      "generalization beyond the fixed regime R*"
+    ],
+    "compounding_evidence": "The precedent-marginal-agreement curve vs experience-corpus size N.",
+    "held_out_generalization": "Precedent marginal agreement (Arm3 - Arm2) on analogous, non-identical held-out cases within the fixed regime R*. The internal-model generalization claim.",
+    "internal_model_causal": "Precedent causes the marginal change ONLY within the oracle-internal, single-regime world, established by the Arm3-Arm2 ablation (arms differ only in the precedent input).",
+    "oracle_agreement": "Absolute per-arm agreement with the deterministic RM1 oracle. CAVEAT: inflated by the RM4 internal-verdict finding (a direct readout of the query's own verdict); not evidence of precedent value.",
+    "rm15_scientific_boundary": [
+      "The enriched RM1/RM8 oracle rules (declared precedence, scalar tolerance minimums) are SYNTHETIC declared-model rules \u2014 this is NOT real-world manufacturing validation.",
+      "Precedence and material per-axis diagnostics are similarity-confounded (DesignInput features RM3 ranks on) and are NOT causal attribution of engineering judgment.",
+      "On the primary MANUFACTURABLE subset the Arm2 baseline structurally abstains; the primary marginal is Arm3's one-sample agreement rate against an abstaining baseline, not a paired-classifier gain.",
+      "No generalization beyond this fixed regime and this synthetic corpus is claimed."
+    ]
+  },
+  "validity_gates": {
+    "RM15_primary_arm2_abstains_and_c_zero": true,
+    "VG1_arm1_equals_arm2_exact": true,
+    "VG2_both_verdict_classes_present": true,
+    "VG3_no_cross_partition_exact_duplicates": true,
+    "VG4_checkpoint_matches_committed": true,
+    "VG5_analogous_set_nonempty": true,
+    "VG6_partition_disjoint_and_covering": true
+  },
+  "validity_passed": true
+}

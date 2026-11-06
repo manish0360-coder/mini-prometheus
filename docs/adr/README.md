@@ -24,6 +24,10 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0015](0015-rm12-acceptance.md) | RM12 (Time-Aware Resource Downtime Scheduling) implementation and acceptance | Accepted |
 | [0016](0016-rm13-acceptance.md) | RM13 (Opt-In Most-Work-Remaining Tie-Break Rule) implementation and acceptance | Accepted |
 | [0017](0017-rm14-acceptance.md) | RM14 (Sequence-Dependent Resource Changeover Scheduling) implementation and acceptance | Accepted |
+| 0018 | RM6.0 design-artifact media-type admission | **Reserved.** Exists only on the unmerged local branch `rm6.0-admission` (`c2e3b98`). Parked by owner ruling Q2 (ADR-0021). |
+| [0019](0019-rm15-retrospective-record.md) | RM15 (Enriched-Oracle Compounding Re-Measurement) retrospective record | Accepted (retrospective) |
+| [0020](0020-rdai1-retrospective-record.md) | RDAI-1 (Real STEP Design-Artifact Intake) retrospective record | Accepted (retrospective) |
+| [0021](0021-stage0-record-reconciliation.md) | Stage 0 record reconciliation and owner rulings | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

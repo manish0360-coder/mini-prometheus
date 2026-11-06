@@ -5,6 +5,33 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [Unreleased] — 2026-11-06 — Stage 0 record reconciliation (documentation only)
+
+The runtime stays `0.12.0` and the contract suite stays **frozen at `0.4.0`**. No source, contract, schema, test,
+fixture, dependency or CI change. See ADR-0021.
+
+### Added
+- RM15 retrospective: `docs/milestones/RM15-completion-report.md`, ADR-0019, and the original measurement output
+  `docs/milestones/evidence/rm15_report.json`. The result was reproduced in the Docker verifier at HEAD with an
+  identical identity hash. **H1 met (67/70, against a structurally abstaining baseline); H2 not met (3/70); H3 met;
+  H4 not met.**
+- RDAI-1 retrospective (ADR-0020): byte-identity STEP intake and episode traceability (`abbc1b8`, `ab8cc44`). No
+  independent review is recorded, and the system has not been validated on a real part.
+- ADR-0021: owner rulings from the Stage 0 audit.
+  - CAP-0001 ownership stands.
+  - RM6.0 is parked, with ADR-0018 reserved.
+  - The research notes are admitted as proposed records.
+  - MP-E1 is blocked on real shop data.
+  - MP-S1 is the next candidate, proceeding on synthetic data.
+- `docs/research/`: five 2026-10-23 research notes, moved verbatim from the untracked `research/` folder, plus an index
+  `README.md` marking them proposed, not ratified.
+
+### Changed
+- `docs/ROADMAP.md`: RM15, RDAI-1, RM6.0 (parked) and MP-S1/MP-E1 rows; corrected the stale "pending" tags for RM4 and
+  RM14; the Velith gate restated with its 2026-11-06 state.
+- `docs/adr/README.md`: index entries 0018 (reserved) to 0021.
+- `README.md`: status line.
+
 ## [0.12.0] — 2026-09-27 — RM14 Sequence-Dependent Resource Changeover Scheduling
 
 Runtime `0.11.0 → 0.12.0`; the contract suite stays **frozen at `0.4.0`**. See

@@ -11,17 +11,19 @@ mechanisms (Laws 3/6).
 > Mini Prometheus is **not** a research project. The research is complete and frozen. This
 > repository engineers the frozen theory into a working manufacturing intelligence.
 
-**Status:** RM14 complete (`rm14-complete`, runtime `0.12.0`). RM1–RM14 deliver the manufacturing
-pipeline on **engineer-declared** requests:
+**Status:** RM14 complete (`rm14-complete`, runtime `0.12.0`); RM15 measured and recorded (mixed result,
+ADR-0019); Stage 0 record reconciliation 2026-11-06 (ADR-0021). RM1–RM5 and RM8–RM14 deliver the manufacturing
+pipeline on **engineer-declared** requests (RM6/RM7, the real Velith/Noetica integrations, are not built):
 - `plan → verify → log` and verified experience reuse;
 - precedent reasoning and engineering judgment;
 - constraint reasoning and resource availability;
 - declared operation times;
 - deterministic, independently checked multi-job scheduling with downtime, an opt-in tie-break rule and
-  sequence-dependent changeover.
+  sequence-dependent changeover;
+- byte-identity intake of a real STEP file, carried opaque and never parsed (RDAI-1, ADR-0020).
 
-Consuming a real Velith engineering result is gated on Noetica and Velith publishing packages. See
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+Consuming a real Velith engineering result (RM6) is not started. Velith work is paused by the owner, and no
+physical-design result contract is pinned. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Where to start
 
