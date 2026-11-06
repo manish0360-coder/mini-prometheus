@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "d0000000-0000-4000-8000-000000000002",
+  "material": "Steel 1018",
+  "stock_form": "bar",
+  "declared_operations": [
+    { "op": "cut_stock" },
+    { "op": "turn", "target": "outer_diameter" },
+    { "op": "deburr" },
+    { "op": "inspect" }
+  ],
+  "quantity": 40,
+  "tolerances": { "general_tolerance_mm": 0.1 }
+}

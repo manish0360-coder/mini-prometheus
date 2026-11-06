@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "model_version": "1.0.0",
+  "display_name": "Example workshop (synthetic)",
+  "evidence_class": "synthetic",
+  "declaration": {
+    "declared_by": "Mini Prometheus pilot demonstrator (synthetic example)",
+    "declared_on": "2026-11-07",
+    "sources": []
+  },
+  "notes": "Synthetic example for the shop-owner pilot demonstrator (ADR-0023). It describes no real workshop. Derived from tests/fixtures/shop_models/three_cell_synthetic.json, with tolerance minimums added.",
+  "resources": [
+    { "resource_id": "mill01", "capabilities": ["cap.mill", "cap.drill"] },
+    { "resource_id": "mill02", "capabilities": ["cap.mill"] },
+    { "resource_id": "saw01", "capabilities": ["cap.saw"] },
+    { "resource_id": "bench01", "capabilities": ["cap.bench"] },
+    { "resource_id": "cmm01", "capabilities": ["cap.cmm"] }
+  ],
+  "op_capability": {
+    "cut_stock": "cap.saw",
+    "face_mill": "cap.mill",
+    "pocket_mill": "cap.mill",
+    "drill": "cap.drill",
+    "deburr": "cap.bench",
+    "inspect": "cap.cmm"
+  },
+  "unsupported_ops": ["turn"],
+  "supported_materials": ["aluminum 6061", "steel 1018"],
+  "capability_tolerance_mm": { "cap.mill": 0.02, "cap.drill": 0.05 }
+}

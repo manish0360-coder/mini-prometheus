@@ -29,6 +29,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0020](0020-rdai1-retrospective-record.md) | RDAI-1 (Real STEP Design-Artifact Intake) retrospective record | Accepted (retrospective) |
 | [0021](0021-stage0-record-reconciliation.md) | Stage 0 record reconciliation and owner rulings | Accepted |
 | [0022](0022-mp-s1-acceptance.md) | MP-S1 (Declared Shop Capability Model) implementation, acceptance and gate evolution | Accepted |
+| [0023](0023-shop-owner-pilot-demonstrator.md) | Shop-owner pilot demonstrator (`demo/pilot/`): static, display-only, captured MP-S1 output | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.

@@ -1,0 +1,41 @@
+{
+  "plan_content_hash": "sha256:a0f9e8eed1de96186c02648eb776fd325ae5467b40d6e3b40049f41b4ffd2636",
+  "steps": [
+    {
+      "index": 0,
+      "op": "cut_stock",
+      "required_capability": "cap.saw",
+      "resource_id": "saw01"
+    },
+    {
+      "index": 1,
+      "op": "face_mill",
+      "required_capability": "cap.mill",
+      "resource_id": "mill01"
+    },
+    {
+      "index": 2,
+      "op": "drill",
+      "required_capability": "cap.drill",
+      "resource_id": "mill01"
+    },
+    {
+      "index": 3,
+      "op": "deburr",
+      "required_capability": "cap.bench",
+      "resource_id": "bench01"
+    },
+    {
+      "index": 4,
+      "op": "inspect",
+      "required_capability": "cap.cmm",
+      "resource_id": "cmm01"
+    }
+  ],
+  "verdict": {
+    "reason_codes": [
+      "MATERIAL_UNSUPPORTED"
+    ],
+    "status": "NOT_MANUFACTURABLE"
+  }
+}

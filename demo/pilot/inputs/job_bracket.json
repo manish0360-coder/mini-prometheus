@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "d0000000-0000-4000-8000-000000000001",
+  "material": "Aluminum 6061",
+  "stock_form": "block",
+  "declared_operations": [
+    { "op": "cut_stock" },
+    { "op": "face_mill", "target": "top_face" },
+    { "op": "drill", "target": "mount_hole_1" },
+    { "op": "drill", "target": "mount_hole_2" },
+    { "op": "deburr" },
+    { "op": "inspect" }
+  ],
+  "quantity": 25,
+  "tolerances": { "general_tolerance_mm": 0.1 }
+}

@@ -149,6 +149,9 @@ mini-prometheus/
 │   ├── unit/                            Per-module unit tests
 │   └── integration/                     Cross-module + upstream-adapter tests
 │
+├── demo/                          [ADR-0023]  End-user demonstrators (static, display-only, not packaged)
+│   └── pilot/                           Shop-owner pilot page: captured MP-S1 CLI output on synthetic data
+│
 ├── tools/                         [P1]  Repo tooling: codegen (schemas→bindings), linters, dev scripts
 │   └── README.md
 │
@@ -195,6 +198,10 @@ Home for performance-critical kernels (constraint propagation, world-model updat
 The non-negotiable gate. `contracts/` compliance suites validate *any* implementation against the interface; `unit/` and `integration/` cover module internals and upstream adapters. The Constitution says "Never skip verification. Never bypass tests." — this directory plus CI is how that rule is mechanized. **Separate top-level** (not co-located per module) so contract-compliance suites can run against multiple implementations (Python reference vs native) identically.
 **Traces to:** workflow steps *Testing* and *Verification*; "Never skip verification."
 
+### `demo/` — end-user demonstrators (ADR-0023)
+Static pages that show end users what Mini Prometheus does, using only output captured from the shipped CLI. `demo/pilot/` is the shop-owner pilot page. **Separate from `src/`** because it is not runtime: it is not in the wheel, has no backend and computes no verdict (Law 13). `tests/boundary/test_demo_pilot.py` requires its snapshots to reproduce byte for byte.
+**Traces to:** Handbook §2.4, "Consumers: end users".
+
 ### `tools/` — repository tooling
 Codegen (schemas → language bindings), linters, spec validators, developer scripts. Exists so the contract spine stays automatically consistent and the workflow gates are runnable locally, not just in CI. **Separate from `src/`** because it is developer-facing infrastructure, not runtime cognition.
 **Traces to:** "reusable mechanisms," "avoid duplication" (codegen is the mechanism that prevents Python/native contract drift).
@@ -230,6 +237,7 @@ Every top-level directory maps to a frozen clause. Nothing exists "for convenien
 | *(withdrawn)* engineering cognition / reasoning | **Velith** content, not MP (CAP-0001 / ADR-0004) | — |
 | `native/` | Runtime Architecture performance requirements; production quality | P1 (boundary), M2 (crates) |
 | `tests/` | Engineering Workflow → *Testing*, *Verification*; "never skip verification" | P1 |
+| `demo/` | HANDBOOK §2.4 "Consumers: end users"; display-only, no MP logic (Law 13) | **ADR-0023** |
 | `tools/` | "reusable mechanisms," "prefer extraction over duplication" | P1 |
 | `deploy/` | Mission (ship a working intelligence); *Commit* → delivery | P1 |
 | `experiments/` | Scientific reasoning / experimentation (MiniFlyWire integration) | M2 |

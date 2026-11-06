@@ -5,6 +5,25 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
+## [Unreleased] — 2026-11-07 — Shop-owner pilot demonstrator (ADR-0023)
+
+Runtime `0.13.0` and contract suite `0.5.0` are **unchanged**: no file under `src/` or `contracts/` changes, and the
+wheel is unaffected.
+
+### Added
+- `demo/pilot/`: a static, offline, four-screen page for the real-shop pilot (the workshop, a job, the check, what
+  it does not know).
+  - It displays only actual MP-S1 CLI output, captured by `demo/pilot/capture.py` on a synthetic shop and four
+    synthetic jobs.
+  - `snapshots/MANIFEST.json` records every SHA-256, the commit and the exact commands.
+  - All text is in `strings.js` (English; Hindi-ready). Lead time is not shown.
+- `tests/boundary/test_demo_pilot.py`: it re-captures and requires byte-identical snapshots, and checks that every
+  displayed verdict equals the CLI output. It also checks the labels, the synthetic evidence class, and that the page
+  holds no verdict literal and makes no network load.
+
+### Changed
+- `docker/verifier.Dockerfile`: one added line, `COPY demo/ ./demo/`, so the demonstrator gate runs in the verifier.
+
 ## [0.13.0] — 2026-11-06 — MP-S1 Declared Shop Capability Model
 
 Runtime `0.12.0 → 0.13.0`; contract suite `0.4.0 → 0.5.0` (**additive**: every other 0.4.0 file is byte-identical).

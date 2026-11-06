@@ -23,6 +23,9 @@ COPY contracts/ ./contracts/
 COPY distribution/ ./distribution/
 RUN pip install ".[dev]"
 
+# The ADR-0023 pilot demonstrator is checked by tests/boundary/test_demo_pilot.py (not packaged).
+COPY demo/ ./demo/
+
 # Tests + fixtures are not part of the installed package; copy them in for execution.
 COPY tests/ ./tests/
 

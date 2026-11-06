@@ -1,0 +1,93 @@
+{
+  "adr": "ADR-0023",
+  "cases": [
+    {
+      "command": "python -m mini_prometheus.orchestration.runner demo/pilot/inputs/job_bracket.json --capability-model-file demo/pilot/inputs/shop.example_workshop.json",
+      "episode_hash": "sha256:a1d4125a512ae90be8058ee6303daedf140d8c63b3581326dce1bbac457c7368",
+      "exit_code": 0,
+      "id": "bracket",
+      "job_path": "demo/pilot/inputs/job_bracket.json",
+      "job_sha256": "13bea0805d2db3289eecdfb76e4cba06af9986feeaef8d99856d240624865751",
+      "plan_hash": "sha256:00ebf85fc37790e2bf011018fc2e5ed603060f55953fd98fec219e61275c95e2",
+      "plan_path": "demo/pilot/snapshots/case.bracket.plan.json",
+      "plan_sha256": "5105631d1556a8a71fdcebb82287b899a6f6c3f3425f2ecc78cc7a59444be29a",
+      "reason_codes": [],
+      "shop_declaration_hash": "sha256:77f39940f9a613a34b025bb045e0cda326165a1c44f72e61f54f2d342ef33a07",
+      "status": "MANUFACTURABLE",
+      "stdout_path": "demo/pilot/snapshots/case.bracket.stdout.txt",
+      "stdout_sha256": "da8463427a11b51b8d0adad8d6ddbfe35f057797675224a9a979e92a7b302d20",
+      "trace_hash": "sha256:de8dd311142127776f11837ee91641c58ff564f1dd137136a0bea57483025b87"
+    },
+    {
+      "command": "python -m mini_prometheus.orchestration.runner demo/pilot/inputs/job_turned_shaft.json --capability-model-file demo/pilot/inputs/shop.example_workshop.json",
+      "episode_hash": "sha256:666ab3d5ad9b19b9a09439e36ec8ab46694d6382da407a8aa784e9deee47b44e",
+      "exit_code": 0,
+      "id": "turned_shaft",
+      "job_path": "demo/pilot/inputs/job_turned_shaft.json",
+      "job_sha256": "0e48f97cb8b5dd8a3dac2ecb69e5803d378f6fd9cd71f9db496cecaa91b6aefb",
+      "plan_hash": "sha256:1344dd455ad1cbc07c161eb3fd6bd77d206d88d0e03aeae40effd291f31692c4",
+      "plan_path": "demo/pilot/snapshots/case.turned_shaft.plan.json",
+      "plan_sha256": "d664fd143dd7fb3dbbc2293731c86b0fd07265919f8c1b76018d11723c71aaa2",
+      "reason_codes": [
+        "CAPABILITY_MISSING"
+      ],
+      "shop_declaration_hash": "sha256:77f39940f9a613a34b025bb045e0cda326165a1c44f72e61f54f2d342ef33a07",
+      "status": "NOT_MANUFACTURABLE",
+      "stdout_path": "demo/pilot/snapshots/case.turned_shaft.stdout.txt",
+      "stdout_sha256": "65634e250e0ff1fe4c468b2f629460126a23a0804c22acf4eb03794a81c39dfe",
+      "trace_hash": "sha256:a2ad8b3e3ccb2a5d5426af08e74a1c756377d4df4b6e69588797256aa006e62a"
+    },
+    {
+      "command": "python -m mini_prometheus.orchestration.runner demo/pilot/inputs/job_brass_cover.json --capability-model-file demo/pilot/inputs/shop.example_workshop.json",
+      "episode_hash": "sha256:e9d94e1979c9c2244edf16390f518339f731897352dff545da14c0241f532064",
+      "exit_code": 0,
+      "id": "brass_cover",
+      "job_path": "demo/pilot/inputs/job_brass_cover.json",
+      "job_sha256": "f717698c302786bf94501a86eb248be6cce79daf092095e07367c15ea1b95294",
+      "plan_hash": "sha256:a0f9e8eed1de96186c02648eb776fd325ae5467b40d6e3b40049f41b4ffd2636",
+      "plan_path": "demo/pilot/snapshots/case.brass_cover.plan.json",
+      "plan_sha256": "8e2d46450d3fd1f524f7f83fdf41fe4c962378593a936c4b005d696d64195848",
+      "reason_codes": [
+        "MATERIAL_UNSUPPORTED"
+      ],
+      "shop_declaration_hash": "sha256:77f39940f9a613a34b025bb045e0cda326165a1c44f72e61f54f2d342ef33a07",
+      "status": "NOT_MANUFACTURABLE",
+      "stdout_path": "demo/pilot/snapshots/case.brass_cover.stdout.txt",
+      "stdout_sha256": "1d2c12451c63631ded2e16e5e1e97ca1c99fc70b97ee5b19335d7e7ab9568dbd",
+      "trace_hash": "sha256:ce632914d89d5aafdaa96e9e3e97bdddd19f1b45dcbf66479146f5e94d9c2cb0"
+    },
+    {
+      "command": "python -m mini_prometheus.orchestration.runner demo/pilot/inputs/job_precision_plate.json --capability-model-file demo/pilot/inputs/shop.example_workshop.json",
+      "episode_hash": "sha256:b4ccc107a79530dea1a432328c9ba516181fbbf365d94692c02f8c0aafce5b10",
+      "exit_code": 0,
+      "id": "precision_plate",
+      "job_path": "demo/pilot/inputs/job_precision_plate.json",
+      "job_sha256": "945d7bb2d69eddf3c161d2c80e375f9bd36d132b2ff802022420691f759adf20",
+      "plan_hash": "sha256:47fed9ea227a66a23ce3c2f3ad5ef5f47fe04a8f51bdc241376e163d9a596f9e",
+      "plan_path": "demo/pilot/snapshots/case.precision_plate.plan.json",
+      "plan_sha256": "8d112e8cec7f618e39d3868629997a3d54e3ec60974241c879482ce2dd9f5144",
+      "reason_codes": [
+        "TOLERANCE_UNSUPPORTED"
+      ],
+      "shop_declaration_hash": "sha256:77f39940f9a613a34b025bb045e0cda326165a1c44f72e61f54f2d342ef33a07",
+      "status": "NOT_MANUFACTURABLE",
+      "stdout_path": "demo/pilot/snapshots/case.precision_plate.stdout.txt",
+      "stdout_sha256": "947abb296a0b755467637f2505eda6372b89c3a8095185cf9aa84be84a65b3e8",
+      "trace_hash": "sha256:08f9d58a1d893f8e47682fc22b32484dfece20350e269ea17dc01509a6fac3df"
+    }
+  ],
+  "data_js_sha256": "2b6a7c23e96fe5d6bbf4e689b46efe099a2d492ca66a49820127e9140f930b56",
+  "episode_store": "redirected to a temporary file per case; path redacted as <temporary episode store>",
+  "evidence": "synthetic example data; verdicts are actual MP-S1 CLI output on it",
+  "generator": "demo/pilot/capture.py",
+  "generator_sha256": "de8bffa04cbf98f59f401cb0749ab1c59ff9fd95c16631a0e7fdb989cf3f0b2e",
+  "mp_commit": "f0206082693967466b6d3dc442ae2587c50486f3",
+  "python": "3.11.18",
+  "shop": {
+    "evidence_class": "synthetic",
+    "path": "demo/pilot/inputs/shop.example_workshop.json",
+    "sha256": "966f741459c406f14d17694b767c42979fdd4e2f8f28057b419557eefb3dbde4",
+    "shop_content_hash": "sha256:8e0b9895bd79d2e85fa423d34b4b0b74e754142e3422858e0b172224510b5b59",
+    "shop_declaration_hash": "sha256:77f39940f9a613a34b025bb045e0cda326165a1c44f72e61f54f2d342ef33a07"
+  }
+}

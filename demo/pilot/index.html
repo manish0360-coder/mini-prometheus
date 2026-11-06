@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mini Prometheus Pilot</title>
+<!--
+  Mini Prometheus shop-owner pilot demonstrator (ADR-0023).
+  Static and offline: no backend, no build, no network. It DISPLAYS snapshots/data.js, which holds
+  actual MP-S1 CLI output captured by demo/pilot/capture.py. This page never decides a verdict:
+  every status, reason, machine and fingerprint shown is read from that file. All words live in
+  strings.js.
+-->
+<style>
+/* Layout: machine-plate panels on a graphite floor. A status strip, four numbered stations in the
+   order a shop owner walks through them, then provenance. Dark first; a light theme for daylight. */
+:root{
+  --floor:#0f1416; --plate:#161d20; --plate-2:#1c2528; --edge:#2b373b; --text:#e6ecea; --dim:#94a3a0;
+  --signal:#5fc4d9; --signal-ink:#0f1416; --go:#57c98a; --stop:#ef8a7a; --hold:#e6bf5c; --note:#c9b98a;
+  --display:"Bahnschrift","DIN Alternate","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Segoe UI",system-ui,-apple-system,"Noto Sans","Noto Sans Devanagari",sans-serif;
+  --mono:"Cascadia Mono",ui-monospace,Consolas,"Liberation Mono",monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --floor:#eef2f1; --plate:#ffffff; --plate-2:#f4f7f6; --edge:#cdd7d4; --text:#142022; --dim:#53625f;
+  --signal:#16697c; --signal-ink:#ffffff; --go:#1d7d4c; --stop:#b23a2c; --hold:#8a6200; --note:#6e5d2c; color-scheme:light}}
+:root[data-theme="light"]{
+  --floor:#eef2f1; --plate:#ffffff; --plate-2:#f4f7f6; --edge:#cdd7d4; --text:#142022; --dim:#53625f;
+  --signal:#16697c; --signal-ink:#ffffff; --go:#1d7d4c; --stop:#b23a2c; --hold:#8a6200; --note:#6e5d2c; color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--floor);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;font-weight:600;letter-spacing:.01em;text-wrap:balance}
+h1{font-size:1.9rem} h2{font-size:1.4rem} h3{font-size:1.05rem}
+p{margin:0;max-width:68ch}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.brand{display:grid;gap:4px}.brand p{color:var(--dim)}
+.toolbar{display:flex;gap:8px}
+.banner{border:1px dashed var(--hold);color:var(--text);background:var(--plate);padding:8px 12px;font-size:.92rem;display:flex;gap:10px;align-items:center}
+.banner b{font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;font-size:.75rem;color:var(--hold)}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+nav button{font:inherit;font-family:var(--display);font-size:.95rem;text-align:left;background:var(--plate);color:var(--dim);border:1px solid var(--edge);border-top:3px solid var(--edge);padding:10px 12px;cursor:pointer;display:grid;gap:2px}
+nav button .n{font-family:var(--mono);font-size:.75rem}
+nav button[aria-current="page"]{color:var(--text);border-top-color:var(--signal);background:var(--plate-2)}
+@media (max-width:640px){nav{grid-template-columns:1fr 1fr}}
+.plate{background:var(--plate);border:1px solid var(--edge);padding:16px;display:grid;gap:12px;min-width:0}
+.lead{color:var(--dim)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor;border-radius:2px;width:fit-content}
+.tag.synthetic{color:var(--hold)} .tag.declared{color:var(--note)} .tag.actual{color:var(--signal)} .tag.explanation{color:var(--dim)} .tag.limitation{color:var(--stop)}
+.machines{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.machine{background:var(--plate-2);border:1px solid var(--edge);border-left:4px solid var(--signal);padding:10px 12px;display:grid;gap:6px}
+.machine .id{font-family:var(--mono);font-size:1rem}
+.kv{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:6px 14px}
+.kv dt{color:var(--dim);font-size:.9rem} .kv dd{margin:0}
+ul.plain{margin:0;padding-left:1.1em;display:grid;gap:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.95rem;background:var(--plate-2);color:var(--text);border:1px solid var(--edge);padding:8px 12px;cursor:pointer;border-radius:2px}
+.chip[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 -3px 0 var(--signal)}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.lamp{width:46px;height:46px;border-radius:50%;border:3px solid var(--edge);background:var(--plate-2)}
+.lamp.go{background:var(--go);box-shadow:0 0 18px var(--go)} .lamp.stop{background:var(--stop);box-shadow:0 0 18px var(--stop)} .lamp.hold{background:var(--hold)}
+@media (prefers-reduced-motion:no-preference){.lamp{transition:background .3s}}
+.verdict .answer{font-family:var(--display);font-size:1.45rem}
+.code{font-family:var(--mono);font-size:.82rem;color:var(--dim)}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--edge);vertical-align:top}
+th{font-family:var(--display);font-weight:500;color:var(--dim);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.none{color:var(--stop)}
+details{border:1px solid var(--edge);background:var(--plate-2);padding:10px 12px}
+summary{cursor:pointer;font-family:var(--display)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.78rem;margin:8px 0 0;color:var(--text)}
+button.go-next{font:inherit;font-family:var(--display);background:var(--signal);color:var(--signal-ink);border:0;padding:10px 16px;cursor:pointer;width:fit-content}
+button.small{font:inherit;font-size:.85rem;background:var(--plate);color:var(--text);border:1px solid var(--edge);padding:6px 10px;cursor:pointer}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.limits{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.limits li{background:var(--plate-2);border:1px solid var(--edge);border-left:4px solid var(--stop);padding:10px 12px}
+.limits li.next{border-left-color:var(--go)}
+footer{font-size:.8rem;color:var(--dim);display:grid;gap:4px}
+footer code{font-family:var(--mono);overflow-wrap:anywhere}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1 data-t="app.title"></h1><p data-t="app.subtitle"></p></div>
+    <div class="toolbar">
+      <button type="button" class="small" id="langBtn" hidden></button>
+      <button type="button" class="small" id="themeBtn" aria-label="Switch light or dark">◐</button>
+    </div>
+  </header>
+  <div class="banner" role="note"><b data-t="label.synthetic"></b><span data-t="banner.synthetic"></span></div>
+
+  <nav aria-label="Walk-through">
+    <button type="button" data-view="workshop"><span class="n">01</span><span data-t="nav.workshop"></span></button>
+    <button type="button" data-view="job"><span class="n">02</span><span data-t="nav.job"></span></button>
+    <button type="button" data-view="check"><span class="n">03</span><span data-t="nav.check"></span></button>
+    <button type="button" data-view="limits"><span class="n">04</span><span data-t="nav.limits"></span></button>
+  </nav>
+
+  <main id="view"></main>
+
+  <footer id="provenance"></footer>
+</div>
+
+<script src="strings.js"></script>
+<script src="snapshots/data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var STR = window.MP_PILOT_STRINGS || { en: {}, hi: {} };
+  var DATA = window.MP_PILOT_DATA || null;
+  var lang = "en";
+  var state = { view: "workshop", caseIndex: 0 };
+  try { var saved = localStorage.getItem("mpPilotLang"); if (saved && STR[saved]) lang = saved; } catch (e) {}
+
+  function t(key) {
+    var table = STR[lang] || {};
+    if (Object.prototype.hasOwnProperty.call(table, key)) return table[key];
+    if (Object.prototype.hasOwnProperty.call(STR.en, key)) return STR.en[key];
+    return key; // a missing string shows its key, so gaps are visible
+  }
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k === "class") el.className = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c != null) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  function tag(kind) { return h("span", { class: "tag " + kind, text: t("label." + kind) }); }
+  function words(id) { return String(id).replace(/_/g, " "); }
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t(el.getAttribute("data-t")); });
+    var langBtn = document.getElementById("langBtn");
+    var hasHindi = Object.keys(STR.hi || {}).length > 0;
+    langBtn.hidden = !hasHindi;
+    langBtn.textContent = lang === "en" ? t("lang.switch") : "English";
+  }
+
+  function workshopView() {
+    var shop = DATA.shop.document;
+    var tol = shop.capability_tolerance_mm || {};
+    var machines = h("div", { class: "machines" }, shop.resources.map(function (r) {
+      return h("div", { class: "machine" }, [
+        h("span", { class: "id", text: r.resource_id }),
+        h("ul", { class: "plain" }, r.capabilities.map(function (c) {
+          var line = t("cap." + c);
+          if (tol[c] !== undefined) line += " · ± " + tol[c] + " mm";
+          return h("li", { text: line });
+        }))
+      ]);
+    }));
+    var notIn = (shop.unsupported_ops || []).map(function (op) { return t("op." + op); })
+      .concat((shop.unsupported_capabilities || []).map(function (c) { return t("cap." + c); }));
+    var tolList = Object.keys(tol).map(function (c) { return t("cap." + c) + ": ± " + tol[c] + " mm"; });
+    return h("section", { class: "plate" }, [
+      h("h2", { text: shop.display_name || t("nav.workshop") }),
+      h("div", { class: "chips" }, [tag("synthetic"), tag("declared")]),
+      h("p", { class: "lead", text: t("workshop.lead") }),
+      h("h3", { text: t("workshop.machines") }), machines,
+      h("dl", { class: "kv" }, [
+        h("dt", { text: t("workshop.materials") }), h("dd", { text: shop.supported_materials.join(", ") }),
+        h("dt", { text: t("workshop.tolerance") }), h("dd", { text: tolList.length ? tolList.join("; ") : t("workshop.none") }),
+        h("dt", { text: t("workshop.notInHouse") }), h("dd", { text: notIn.length ? notIn.join(", ") : t("workshop.none") })
+      ]),
+      h("details", null, [
+        h("summary", { text: t("workshop.fingerprint") }),
+        h("p", { class: "lead", text: t("workshop.fingerprintNote") }),
+        h("pre", { text: DATA.shop.shop_declaration_hash })
+      ])
+    ]);
+  }
+
+  function casePicker() {
+    return h("div", { class: "chips", role: "group", "aria-label": t("job.pick") }, DATA.cases.map(function (c, i) {
+      var b = h("button", { type: "button", class: "chip", "aria-pressed": String(i === state.caseIndex), text: t("case." + c.id) });
+      b.addEventListener("click", function () { state.caseIndex = i; render(); });
+      return b;
+    }));
+  }
+
+  function jobView() {
+    var c = DATA.cases[state.caseIndex], r = c.request;
+    var ops = h("ol", { class: "plain" }, r.declared_operations.map(function (o) {
+      return h("li", { text: t("op." + o.op) + (o.target ? " · " + words(o.target) : "") });
+    }));
+    var next = h("button", { type: "button", class: "go-next", text: t("job.next") });
+    next.addEventListener("click", function () { go("check"); });
+    return h("section", { class: "plate" }, [
+      h("p", { class: "lead", text: t("job.lead") }), casePicker(),
+      h("h2", { text: t("case." + c.id) }), tag("synthetic"),
+      h("dl", { class: "kv" }, [
+        h("dt", { text: t("job.material") }), h("dd", { text: r.material }),
+        h("dt", { text: t("job.stock") }), h("dd", { text: t("stock." + r.stock_form) }),
+        h("dt", { text: t("job.quantity") }), h("dd", { text: String(r.quantity) }),
+        h("dt", { text: t("job.tolerance") }), h("dd", { text: r.tolerances ? "± " + r.tolerances.general_tolerance_mm + " mm" : t("workshop.none") }),
+        h("dt", { text: t("job.operations") }), h("dd", null, [ops])
+      ]),
+      next
+    ]);
+  }
+
+  function checkView() {
+    var c = DATA.cases[state.caseIndex];
+    var tone = t("tone." + c.status);
+    var reasons = c.reason_codes.map(function (code) {
+      return h("li", null, [h("span", { text: t("reason." + code) }), " ", h("span", { class: "code", text: "(" + code + ")" })]);
+    });
+    var steps = h("div", { class: "scroll" }, [h("table", null, [
+      h("thead", null, [h("tr", null, [h("th", { text: "#" }), h("th", { text: t("check.operation") }), h("th", { text: t("check.machine") })])]),
+      h("tbody", null, c.steps.map(function (s) {
+        return h("tr", null, [
+          h("td", { text: String(s.index + 1) }),
+          h("td", { text: t("op." + s.op) }),
+          s.resource_id ? h("td", { class: "code", text: s.resource_id }) : h("td", { class: "none", text: t("check.noMachine") })
+        ]);
+      }))
+    ])]);
+    return h("section", { class: "plate" }, [
+      casePicker(),
+      h("h2", { text: t("check.question") + " " + t("case." + c.id) }),
+      tag("actual"),
+      h("div", { class: "verdict" }, [
+        h("div", { class: "lamp " + tone, role: "img", "aria-label": c.status }),
+        h("div", null, [h("div", { class: "answer", text: t("status." + c.status) }), h("div", { class: "code", text: c.status })])
+      ]),
+      reasons.length ? h("div", null, [h("h3", { text: t("check.reasons") }), tag("explanation"), h("ul", { class: "plain" }, reasons)])
+                     : h("p", { class: "lead", text: t("check.meaningYes") }),
+      h("h3", { text: t("check.steps") }), steps,
+      h("details", null, [
+        h("summary", { text: t("check.details") }),
+        h("dl", { class: "kv" }, [
+          h("dt", { text: t("check.trace") }), h("dd", { class: "code", text: c.trace_hash }),
+          h("dt", { text: t("check.plan") }), h("dd", { class: "code", text: c.plan_hash }),
+          h("dt", { text: t("check.declaration") }), h("dd", { class: "code", text: c.shop_declaration_hash })
+        ]),
+        h("p", { class: "lead", text: t("check.command") }), h("pre", { text: c.command }),
+        h("p", { class: "lead", text: t("check.output") }), h("pre", { text: c.stdout })
+      ])
+    ]);
+  }
+
+  function limitsView() {
+    var keys = ["drawings", "size", "materials", "costTime", "live", "declared", "example"];
+    var items = keys.map(function (k) { return h("li", { text: t("limits." + k) }); });
+    items.push(h("li", { class: "next", text: t("limits.next") }));
+    return h("section", { class: "plate" }, [
+      h("p", { class: "lead", text: t("limits.lead") }), tag("limitation"), h("ul", { class: "limits" }, items)
+    ]);
+  }
+
+  function provenance() {
+    var f = document.getElementById("provenance");
+    f.textContent = "";
+    if (!DATA) { f.appendChild(h("p", { text: t("footer.noData") })); return; }
+    f.appendChild(h("p", null, [t("footer.provenance") + " ", h("code", { text: DATA.meta.mp_commit })]));
+    f.appendChild(h("p", null, [t("footer.generator") + " ", h("code", { text: "python " + DATA.meta.generator + " --commit <sha>" })]));
+  }
+
+  function render() {
+    applyStatic();
+    document.querySelectorAll("nav button").forEach(function (b) {
+      if (b.getAttribute("data-view") === state.view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    var view = document.getElementById("view");
+    view.textContent = "";
+    if (!DATA) { view.appendChild(h("section", { class: "plate" }, [h("p", { text: t("footer.noData") })])); }
+    else {
+      var make = { workshop: workshopView, job: jobView, check: checkView, limits: limitsView }[state.view] || workshopView;
+      view.appendChild(make());
+    }
+    provenance();
+  }
+
+  function go(viewName) {
+    state.view = viewName;
+    if (location.hash !== "#" + viewName) location.hash = viewName;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  document.querySelectorAll("nav button").forEach(function (b) {
+    b.addEventListener("click", function () { go(b.getAttribute("data-view")); });
+  });
+  document.getElementById("langBtn").addEventListener("click", function () {
+    lang = lang === "en" ? "hi" : "en";
+    try { localStorage.setItem("mpPilotLang", lang); } catch (e) {}
+    render();
+  });
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var root = document.documentElement;
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark"
+      : !window.matchMedia("(prefers-color-scheme: light)").matches;
+    root.setAttribute("data-theme", dark ? "light" : "dark");
+  });
+  window.addEventListener("hashchange", function () {
+    var v = location.hash.replace("#", "");
+    if (["workshop", "job", "check", "limits"].indexOf(v) >= 0 && v !== state.view) { state.view = v; render(); }
+  });
+  var initial = location.hash.replace("#", "");
+  if (["workshop", "job", "check", "limits"].indexOf(initial) >= 0) state.view = initial;
+  render();
+})();
+</script>
+</body>
+</html>

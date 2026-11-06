@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "d0000000-0000-4000-8000-000000000004",
+  "material": "Aluminum 6061",
+  "stock_form": "plate",
+  "declared_operations": [
+    { "op": "cut_stock" },
+    { "op": "face_mill", "target": "top_face" },
+    { "op": "pocket_mill", "target": "pocket_1" },
+    { "op": "inspect" }
+  ],
+  "quantity": 5,
+  "tolerances": { "general_tolerance_mm": 0.01 }
+}

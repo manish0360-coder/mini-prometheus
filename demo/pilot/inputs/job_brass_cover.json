@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "d0000000-0000-4000-8000-000000000003",
+  "material": "Brass 360",
+  "stock_form": "block",
+  "declared_operations": [
+    { "op": "cut_stock" },
+    { "op": "face_mill", "target": "top_face" },
+    { "op": "drill", "target": "centre_hole" },
+    { "op": "deburr" },
+    { "op": "inspect" }
+  ],
+  "quantity": 10,
+  "tolerances": { "general_tolerance_mm": 0.1 }
+}
