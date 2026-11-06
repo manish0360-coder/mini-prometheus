@@ -23,6 +23,17 @@ wheel is unaffected.
 
 ### Changed
 - `docker/verifier.Dockerfile`: one added line, `COPY demo/ ./demo/`, so the demonstrator gate runs in the verifier.
+- **Pilot demonstrator made demonstration-ready.**
+  - One design system, step navigation (buttons, Back/Next, arrow keys) and a persistent example-data badge.
+  - Phone and desktop layouts.
+  - A "What was compared" panel that places declared inputs side by side without comparing them.
+  - Plain machine names, and `?lang=`, `?job=` and `?theme=` start states.
+  - Complete Hindi text (a first draft that needs review by a native speaker).
+  - Snapshots and manifest hashes are unchanged.
+  - The gate now also requires the same keys in English and Hindi, and a label for every machine, material and
+    target shown.
+- **ADR-0023 record correction.** The approved draft's decision text is restored, and its Handbook citations are
+  checked against `constitution/HANDBOOK_v1.1.md`.
 
 ## [0.13.0] — 2026-11-06 — MP-S1 Declared Shop Capability Model
 

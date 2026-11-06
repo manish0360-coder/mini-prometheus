@@ -45,10 +45,18 @@ def _data() -> dict:
     return json.loads(text[len(prefix):-len(suffix)])
 
 
-def _strings_en() -> dict[str, str]:
+def _strings(lang: str) -> dict[str, str]:
     text = (PILOT / "strings.js").read_text(encoding="utf-8")
-    en = text[text.index("en: {"):text.index("hi: {")]
-    return dict(re.findall(r'"([^"]+)":\s*"((?:[^"\\]|\\.)*)"', en))
+    start = text.index(f"  {lang}: {{")
+    end = text.index("  hi: {") if lang == "en" else text.rindex("};")
+    pairs = re.findall(r'"([^"]+)":\s*"((?:[^"\\]|\\.)*)"', text[start:end])
+    keys = [k for k, _ in pairs]
+    assert len(keys) == len(set(keys)), f"duplicate keys in strings.js {lang}"
+    return dict(pairs)
+
+
+def _strings_en() -> dict[str, str]:
+    return _strings("en")
 
 
 def _capture_module():
@@ -142,6 +150,27 @@ def test_every_code_and_term_shown_has_a_label():
         assert f"op.{op}" in en
     for code in VERDICT_CODES[4:]:
         assert f"reason.{code}" in en
+    # Every machine, material and operation target the screens name has a plain-language label.
+    for resource in doc["resources"]:
+        assert f"machine.{resource['resource_id']}" in en
+    materials = list(doc["supported_materials"]) + [c["request"]["material"] for c in data["cases"]]
+    for material in materials:
+        assert f"material.{material.lower()}" in en
+    for case in data["cases"]:
+        for op in case["request"]["declared_operations"]:
+            if op.get("target"):
+                assert f"target.{op['target']}" in en
+
+
+def test_hindi_and_english_hold_the_same_keys():
+    en, hi = _strings("en"), _strings("hi")
+    assert sorted(hi) == sorted(en)
+    assert all(value.strip() for value in hi.values())
+    for key in en:
+        if key.startswith("tone."):
+            assert hi[key] == en[key], "tone values are lamp colours, not text"
+    page = (PILOT / "index.html").read_text(encoding="utf-8")
+    assert '<script src="strings.js"></script>' in page
 
 
 @pytest.mark.parametrize("path", sorted((PILOT / "inputs").glob("shop.*.json")))

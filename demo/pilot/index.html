@@ -9,95 +9,246 @@
   Static and offline: no backend, no build, no network. It DISPLAYS snapshots/data.js, which holds
   actual MP-S1 CLI output captured by demo/pilot/capture.py. This page never decides a verdict:
   every status, reason, machine and fingerprint shown is read from that file. All words live in
-  strings.js.
+  strings.js (English and Hindi). The "What was compared" panel only places declared inputs side by
+  side; it compares nothing itself.
 -->
 <style>
-/* Layout: machine-plate panels on a graphite floor. A status strip, four numbered stations in the
-   order a shop owner walks through them, then provenance. Dark first; a light theme for daylight. */
+/* Restrained industrial: machine-plate panels on a graphite floor with a faint layout grid, one
+   cyan signal colour, status lamps for results. Dark first; a light theme for daylight. */
 :root{
-  --floor:#0f1416; --plate:#161d20; --plate-2:#1c2528; --edge:#2b373b; --text:#e6ecea; --dim:#94a3a0;
-  --signal:#5fc4d9; --signal-ink:#0f1416; --go:#57c98a; --stop:#ef8a7a; --hold:#e6bf5c; --note:#c9b98a;
+  --floor:#0c1113; --grid:rgba(95,196,217,.045); --plate:#131a1d; --plate-2:#192225; --plate-3:#202b2f;
+  --edge:#2a373b; --edge-2:#3a4a4f; --text:#e7edeb; --dim:#9aa8a5; --faint:#6f7f7c;
+  --signal:#5fc4d9; --signal-soft:rgba(95,196,217,.14); --signal-ink:#0c1113;
+  --go:#5ccf8f; --go-soft:rgba(92,207,143,.12); --stop:#f08c7c; --stop-soft:rgba(240,140,124,.12);
+  --hold:#e6bf5c; --hold-soft:rgba(230,191,92,.12); --note:#cdbd8c;
   --display:"Bahnschrift","DIN Alternate","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
-  --body:"Segoe UI",system-ui,-apple-system,"Noto Sans","Noto Sans Devanagari",sans-serif;
+  --body:"Segoe UI",system-ui,-apple-system,"Noto Sans",sans-serif;
   --mono:"Cascadia Mono",ui-monospace,Consolas,"Liberation Mono",monospace;
+  --track:.08em;
   color-scheme:dark;
 }
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
-  --floor:#eef2f1; --plate:#ffffff; --plate-2:#f4f7f6; --edge:#cdd7d4; --text:#142022; --dim:#53625f;
-  --signal:#16697c; --signal-ink:#ffffff; --go:#1d7d4c; --stop:#b23a2c; --hold:#8a6200; --note:#6e5d2c; color-scheme:light}}
+  --floor:#eef2f1; --grid:rgba(22,105,124,.06); --plate:#ffffff; --plate-2:#f5f8f7; --plate-3:#eaf0ee;
+  --edge:#cfd9d6; --edge-2:#b3c2be; --text:#132022; --dim:#4f5f5c; --faint:#74837f;
+  --signal:#16697c; --signal-soft:rgba(22,105,124,.10); --signal-ink:#ffffff;
+  --go:#1c7a4a; --go-soft:rgba(28,122,74,.09); --stop:#b03a2c; --stop-soft:rgba(176,58,44,.08);
+  --hold:#8a6200; --hold-soft:rgba(138,98,0,.10); --note:#6e5d2c; color-scheme:light}}
 :root[data-theme="light"]{
-  --floor:#eef2f1; --plate:#ffffff; --plate-2:#f4f7f6; --edge:#cdd7d4; --text:#142022; --dim:#53625f;
-  --signal:#16697c; --signal-ink:#ffffff; --go:#1d7d4c; --stop:#b23a2c; --hold:#8a6200; --note:#6e5d2c; color-scheme:light}
+  --floor:#eef2f1; --grid:rgba(22,105,124,.06); --plate:#ffffff; --plate-2:#f5f8f7; --plate-3:#eaf0ee;
+  --edge:#cfd9d6; --edge-2:#b3c2be; --text:#132022; --dim:#4f5f5c; --faint:#74837f;
+  --signal:#16697c; --signal-soft:rgba(22,105,124,.10); --signal-ink:#ffffff;
+  --go:#1c7a4a; --go-soft:rgba(28,122,74,.09); --stop:#b03a2c; --stop-soft:rgba(176,58,44,.08);
+  --hold:#8a6200; --hold-soft:rgba(138,98,0,.10); --note:#6e5d2c; color-scheme:light}
+/* Devanagari: a font with good Hindi shapes, and no letter-spacing (it breaks conjuncts). */
+:root[lang="hi"]{
+  --display:"Nirmala UI","Noto Sans Devanagari","Mangal","Bahnschrift",system-ui,sans-serif;
+  --body:"Nirmala UI","Noto Sans Devanagari","Mangal","Segoe UI",system-ui,sans-serif; --track:0}
+
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--floor);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55}
-.wrap{max-width:980px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
-h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;font-weight:600;letter-spacing:.01em;text-wrap:balance}
-h1{font-size:1.9rem} h2{font-size:1.4rem} h3{font-size:1.05rem}
-p{margin:0;max-width:68ch}
-.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
-.brand{display:grid;gap:4px}.brand p{color:var(--dim)}
-.toolbar{display:flex;gap:8px}
-.banner{border:1px dashed var(--hold);color:var(--text);background:var(--plate);padding:8px 12px;font-size:.92rem;display:flex;gap:10px;align-items:center}
-.banner b{font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;font-size:.75rem;color:var(--hold)}
-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-nav button{font:inherit;font-family:var(--display);font-size:.95rem;text-align:left;background:var(--plate);color:var(--dim);border:1px solid var(--edge);border-top:3px solid var(--edge);padding:10px 12px;cursor:pointer;display:grid;gap:2px}
-nav button .n{font-family:var(--mono);font-size:.75rem}
-nav button[aria-current="page"]{color:var(--text);border-top-color:var(--signal);background:var(--plate-2)}
-@media (max-width:640px){nav{grid-template-columns:1fr 1fr}}
-.plate{background:var(--plate);border:1px solid var(--edge);padding:16px;display:grid;gap:12px;min-width:0}
-.lead{color:var(--dim)}
-.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor;border-radius:2px;width:fit-content}
-.tag.synthetic{color:var(--hold)} .tag.declared{color:var(--note)} .tag.actual{color:var(--signal)} .tag.explanation{color:var(--dim)} .tag.limitation{color:var(--stop)}
-.machines{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.machine{background:var(--plate-2);border:1px solid var(--edge);border-left:4px solid var(--signal);padding:10px 12px;display:grid;gap:6px}
-.machine .id{font-family:var(--mono);font-size:1rem}
-.kv{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:6px 14px}
-.kv dt{color:var(--dim);font-size:.9rem} .kv dd{margin:0}
-ul.plain{margin:0;padding-left:1.1em;display:grid;gap:4px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:.95rem;background:var(--plate-2);color:var(--text);border:1px solid var(--edge);padding:8px 12px;cursor:pointer;border-radius:2px}
-.chip[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 -3px 0 var(--signal)}
-.verdict{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
-.lamp{width:46px;height:46px;border-radius:50%;border:3px solid var(--edge);background:var(--plate-2)}
-.lamp.go{background:var(--go);box-shadow:0 0 18px var(--go)} .lamp.stop{background:var(--stop);box-shadow:0 0 18px var(--stop)} .lamp.hold{background:var(--hold)}
-@media (prefers-reduced-motion:no-preference){.lamp{transition:background .3s}}
-.verdict .answer{font-family:var(--display);font-size:1.45rem}
-.code{font-family:var(--mono);font-size:.82rem;color:var(--dim)}
-table{border-collapse:collapse;width:100%;font-size:.95rem}
-td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--edge);vertical-align:top}
-th{font-family:var(--display);font-weight:500;color:var(--dim);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
-.none{color:var(--stop)}
-details{border:1px solid var(--edge);background:var(--plate-2);padding:10px 12px}
-summary{cursor:pointer;font-family:var(--display)}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.78rem;margin:8px 0 0;color:var(--text)}
-button.go-next{font:inherit;font-family:var(--display);background:var(--signal);color:var(--signal-ink);border:0;padding:10px 16px;cursor:pointer;width:fit-content}
-button.small{font:inherit;font-size:.85rem;background:var(--plate);color:var(--text);border:1px solid var(--edge);padding:6px 10px;cursor:pointer}
+body{background-color:var(--floor);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px;min-height:100vh}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2;font-weight:600;text-wrap:balance}
+h2{font-size:1.65rem} h3{font-size:1.05rem;letter-spacing:.01em}
+p{margin:0;max-width:70ch}
+button{font:inherit;color:inherit}
 button:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
-.limits{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-.limits li{background:var(--plate-2);border:1px solid var(--edge);border-left:4px solid var(--stop);padding:10px 12px}
-.limits li.next{border-left-color:var(--go)}
-footer{font-size:.8rem;color:var(--dim);display:grid;gap:4px}
-footer code{font-family:var(--mono);overflow-wrap:anywhere}
+[tabindex="-1"]:focus{outline:none}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Top bar: brand, the persistent example-data badge, language and theme. */
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--floor) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--edge)}
+.bar .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto}
+.mark{width:34px;height:34px;flex:none;color:var(--signal)}
+.brand .name{font-family:var(--display);font-weight:600;font-size:1.1rem;letter-spacing:var(--track);line-height:1.1}
+.brand .tagline{color:var(--dim);font-size:.85rem;line-height:1.3}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:.78rem;letter-spacing:var(--track);text-transform:uppercase;color:var(--hold);border:1px solid var(--hold);background:var(--hold-soft);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--hold)}
+.tbtn{background:var(--plate);border:1px solid var(--edge-2);padding:6px 12px;cursor:pointer;border-radius:4px;font-size:.9rem;min-height:36px}
+.tbtn:hover{border-color:var(--signal)}
+.tbtn.icon{width:36px;padding:0;display:grid;place-items:center}
+
+/* Steps. */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0 18px;padding:0;list-style:none;counter-reset:step}
+.steps button{width:100%;text-align:left;background:var(--plate);border:1px solid var(--edge);border-radius:4px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--dim);min-height:56px;position:relative;overflow:hidden}
+.steps button:hover{border-color:var(--edge-2);color:var(--text)}
+.steps .num{flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--edge-2);display:grid;place-items:center;font-family:var(--mono);font-size:.8rem}
+.steps .lbl{font-family:var(--display);font-size:.95rem;line-height:1.25;letter-spacing:.01em}
+.steps button.done .num{border-color:var(--signal);color:var(--signal)}
+.steps button[aria-current="step"]{color:var(--text);border-color:var(--signal);background:linear-gradient(180deg,var(--signal-soft),transparent 70%),var(--plate)}
+.steps button[aria-current="step"] .num{background:var(--signal);border-color:var(--signal);color:var(--signal-ink)}
+.steps button[aria-current="step"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--signal)}
+
+/* Screen frame. */
+.screen{display:grid;gap:18px;padding-bottom:8px}
+.head{display:grid;gap:8px}
+.eyebrow{font-family:var(--display);font-size:.8rem;letter-spacing:var(--track);text-transform:uppercase;color:var(--signal)}
+.lead{color:var(--dim);font-size:1.02rem}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:.74rem;letter-spacing:var(--track);text-transform:uppercase;padding:3px 9px;border:1px solid currentColor;border-radius:3px;width:fit-content;line-height:1.4}
+.tag.synthetic{color:var(--hold)} .tag.declared{color:var(--note)} .tag.actual{color:var(--signal)} .tag.explanation{color:var(--dim)} .tag.limitation{color:var(--stop)}
+.plate{position:relative;background:var(--plate);border:1px solid var(--edge);border-radius:4px;padding:18px;display:grid;gap:14px;min-width:0}
+.plate::before{content:"";position:absolute;left:-1px;top:-1px;width:18px;height:18px;border-left:2px solid var(--signal);border-top:2px solid var(--signal);border-top-left-radius:4px;opacity:.7}
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.muted{color:var(--dim);font-size:.9rem}
+.code{font-family:var(--mono);font-size:.82rem;color:var(--dim);overflow-wrap:anywhere}
+
+/* Workshop. */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.tile{background:var(--plate-2);border:1px solid var(--edge);border-radius:4px;padding:14px;display:grid;gap:8px;align-content:start}
+.tile h3{font-size:.82rem;letter-spacing:var(--track);text-transform:uppercase;color:var(--dim);font-weight:500}
+.tile ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.tile li{font-size:1.02rem}
+.tile.warn{border-color:color-mix(in srgb,var(--stop) 45%,var(--edge))}
+.machines{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.machine{background:var(--plate-2);border:1px solid var(--edge);border-radius:4px;padding:14px;display:grid;gap:10px;align-content:start}
+.machine .top{display:flex;justify-content:space-between;align-items:baseline;gap:4px 8px;flex-wrap:wrap}
+.machine .top .code{white-space:nowrap}
+.machine .mname{font-family:var(--display);font-size:1.05rem;font-weight:600}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--signal-soft);border:1px solid color-mix(in srgb,var(--signal) 35%,transparent);border-radius:999px;padding:3px 10px;font-size:.88rem}
+.pill .tol{font-family:var(--mono);font-size:.8rem;color:var(--signal)}
+
+/* Job. */
+.jobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.jobcard{text-align:left;background:var(--plate);border:1px solid var(--edge);border-radius:4px;padding:12px 14px;cursor:pointer;display:grid;gap:4px;min-height:64px}
+.jobcard:hover{border-color:var(--edge-2)}
+.jobcard .jname{font-family:var(--display);font-size:1.02rem;font-weight:600}
+.jobcard .jmeta{color:var(--dim);font-size:.86rem}
+.jobcard[aria-pressed="true"]{border-color:var(--signal);background:linear-gradient(180deg,var(--signal-soft),transparent 80%),var(--plate);box-shadow:inset 3px 0 0 var(--signal)}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.spec div{background:var(--plate-2);border:1px solid var(--edge);border-radius:4px;padding:10px 12px}
+.spec dt{color:var(--dim);font-size:.82rem}
+.spec dd{margin:2px 0 0;font-family:var(--display);font-size:1.15rem}
+.route{margin:0;padding:0;list-style:none;display:grid;gap:0;counter-reset:op}
+.route li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;position:relative;padding-bottom:12px}
+.route li:last-child{padding-bottom:0}
+.route li::before{counter-increment:op;content:counter(op);width:30px;height:30px;border-radius:50%;border:1px solid var(--signal);color:var(--signal);display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;background:var(--plate)}
+.route li:not(:last-child)::after{content:"";position:absolute;left:15px;top:30px;bottom:0;width:1px;background:var(--edge-2)}
+.route .opname{font-weight:600;padding-top:3px}
+.route .opsub{color:var(--dim);font-size:.9rem}
+dl{margin:0}
+
+/* Check. */
+.switch{display:flex;flex-wrap:wrap;gap:6px}
+.switch button{background:var(--plate);border:1px solid var(--edge);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.92rem;min-height:36px}
+.switch button[aria-pressed="true"]{border-color:var(--signal);background:var(--signal-soft);color:var(--text)}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;border-left:6px solid var(--edge-2)}
+.verdict.go{border-left-color:var(--go);background:linear-gradient(90deg,var(--go-soft),transparent 60%),var(--plate)}
+.verdict.stop{border-left-color:var(--stop);background:linear-gradient(90deg,var(--stop-soft),transparent 60%),var(--plate)}
+.verdict.hold{border-left-color:var(--hold);background:linear-gradient(90deg,var(--hold-soft),transparent 60%),var(--plate)}
+.verdict::before{display:none}
+.lamp{width:58px;height:58px;border-radius:50%;border:3px solid var(--edge-2);background:var(--plate-3);position:relative}
+.lamp::after{content:"";position:absolute;inset:12px;border-radius:50%;background:rgba(255,255,255,.35);filter:blur(6px)}
+.lamp.go{background:var(--go);border-color:color-mix(in srgb,var(--go) 60%,#000);box-shadow:0 0 26px color-mix(in srgb,var(--go) 70%,transparent)}
+.lamp.stop{background:var(--stop);border-color:color-mix(in srgb,var(--stop) 60%,#000);box-shadow:0 0 26px color-mix(in srgb,var(--stop) 70%,transparent)}
+.lamp.hold{background:var(--hold)}
+.verdict .q{color:var(--dim);font-size:.95rem}
+.verdict .answer{font-family:var(--display);font-size:1.6rem;line-height:1.2;font-weight:600}
+.reasons{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.reasons li{background:var(--stop-soft);border:1px solid color-mix(in srgb,var(--stop) 40%,var(--edge));border-radius:4px;padding:12px 14px;font-size:1.05rem}
+.cmp{display:grid;gap:0;border:1px solid var(--edge);border-radius:4px;overflow:hidden}
+.cmp .row{display:grid;grid-template-columns:150px 1fr 1fr}
+.cmp .row > div{padding:10px 12px;border-top:1px solid var(--edge)}
+.cmp .row:first-child > div{border-top:0}
+.cmp .row.headrow > div{background:var(--plate-2);font-family:var(--display);font-size:.8rem;letter-spacing:var(--track);text-transform:uppercase;color:var(--dim)}
+.cmp .rl{color:var(--dim);font-size:.9rem;background:var(--plate-2)}
+.cmp .row > div + div{border-left:1px solid var(--edge)}
+table{border-collapse:collapse;width:100%;font-size:.98rem}
+td,th{text-align:left;padding:9px 10px;border-bottom:1px solid var(--edge);vertical-align:top}
+th{font-family:var(--display);font-weight:500;color:var(--dim);font-size:.8rem;letter-spacing:var(--track);text-transform:uppercase}
+td.n{font-family:var(--mono);color:var(--dim);width:36px}
+td .sub{display:block;color:var(--dim);font-size:.85rem}
+td.none{color:var(--stop);font-weight:600}
+tr.missing td{background:var(--stop-soft)}
 .scroll{overflow-x:auto}
+details{border:1px solid var(--edge);border-radius:4px;background:var(--plate-2);padding:12px 14px}
+summary{cursor:pointer;font-family:var(--display);font-size:.98rem}
+details[open] summary{margin-bottom:10px}
+.kv{display:grid;grid-template-columns:minmax(150px,max-content) 1fr;gap:6px 14px}
+.kv dt{color:var(--dim);font-size:.88rem}
+.kv dd{margin:0;min-width:0}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.78rem;margin:6px 0 10px;color:var(--text);background:var(--plate);border:1px solid var(--edge);border-radius:3px;padding:10px}
+
+/* Limits. */
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:0;padding:0;list-style:none;counter-reset:lim}
+.limits li{background:var(--plate);border:1px solid var(--edge);border-left:4px solid var(--stop);border-radius:4px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.limits li::before{counter-increment:lim;content:counter(lim);font-family:var(--mono);font-size:.8rem;color:var(--stop);padding-top:2px}
+.callout{border-left:4px solid var(--go);background:linear-gradient(90deg,var(--go-soft),transparent 70%),var(--plate)}
+.callout::before{display:none}
+
+/* Pager and footer. */
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--edge)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:4px;padding:10px 18px;cursor:pointer;font-family:var(--display);font-size:1rem;min-height:44px;border:1px solid var(--edge-2);background:var(--plate)}
+.btn:hover{border-color:var(--signal)}
+.btn.primary{background:var(--signal);color:var(--signal-ink);border-color:var(--signal);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.spacer{flex:1}
+footer{font-size:.8rem;color:var(--faint);display:grid;gap:4px;padding:22px 0 40px}
+footer code{font-family:var(--mono);overflow-wrap:anywhere}
+
+@media (max-width:720px){
+  h2{font-size:1.4rem}
+  .bar .wrap{flex-wrap:nowrap;gap:8px;padding-block:8px}
+  .brand{flex:0 1 auto}
+  .brand .name,.brand .tagline{display:none}
+  .mark{width:30px;height:30px}
+  .tools{flex:1 1 auto;justify-content:flex-end;flex-wrap:nowrap;gap:6px}
+  .badge{font-size:.7rem;padding:4px 8px}
+  .tbtn{padding:6px 10px}
+  .steps{gap:6px;margin:14px 0}
+  .steps button{flex-direction:column;align-items:flex-start;gap:6px;padding:8px;min-height:72px}
+  .steps .lbl{font-size:.8rem}
+  .cmp .row{grid-template-columns:1fr 1fr}
+  .cmp .row > .rl{grid-column:1 / -1;border-left:0}
+  .cmp .row.headrow > div:first-child{display:none}
+  .cmp .row > div:nth-child(2){border-left:0}
+  .verdict{gap:14px}
+  .lamp{width:46px;height:46px}
+  .verdict .answer{font-size:1.3rem}
+  .kv{grid-template-columns:1fr}
+  .btn{flex:1 1 auto;justify-content:center}
+  .spacer{display:none}
+}
+@media (prefers-reduced-motion:no-preference){
+  .screen{animation:rise .25s ease-out}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand"><h1 data-t="app.title"></h1><p data-t="app.subtitle"></p></div>
-    <div class="toolbar">
-      <button type="button" class="small" id="langBtn" hidden></button>
-      <button type="button" class="small" id="themeBtn" aria-label="Switch light or dark">◐</button>
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 34 34" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="1.5" y="1.5" width="31" height="31" rx="4"/>
+        <circle cx="17" cy="17" r="7.5"/>
+        <path d="M17 4.5v5M17 24.5v5M4.5 17h5M24.5 17h5"/>
+        <circle cx="17" cy="17" r="2.2" fill="currentColor" stroke="none"/>
+      </svg>
+      <div><div class="name" data-t="app.title"></div><div class="tagline" data-t="app.tagline"></div></div>
     </div>
-  </header>
-  <div class="banner" role="note"><b data-t="label.synthetic"></b><span data-t="banner.synthetic"></span></div>
+    <div class="tools">
+      <span class="badge" role="note" data-t="label.synthetic" id="exampleBadge"></span>
+      <button type="button" class="tbtn" id="langBtn" hidden></button>
+      <button type="button" class="tbtn icon" id="themeBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
 
-  <nav aria-label="Walk-through">
-    <button type="button" data-view="workshop"><span class="n">01</span><span data-t="nav.workshop"></span></button>
-    <button type="button" data-view="job"><span class="n">02</span><span data-t="nav.job"></span></button>
-    <button type="button" data-view="check"><span class="n">03</span><span data-t="nav.check"></span></button>
-    <button type="button" data-view="limits"><span class="n">04</span><span data-t="nav.limits"></span></button>
+<div class="wrap">
+  <nav id="steps" aria-label="Walk-through">
+    <ol class="steps">
+      <li><button type="button" data-view="workshop"><span class="num">1</span><span class="lbl" data-t="nav.workshop"></span></button></li>
+      <li><button type="button" data-view="job"><span class="num">2</span><span class="lbl" data-t="nav.job"></span></button></li>
+      <li><button type="button" data-view="check"><span class="num">3</span><span class="lbl" data-t="nav.check"></span></button></li>
+      <li><button type="button" data-view="limits"><span class="num">4</span><span class="lbl" data-t="nav.limits"></span></button></li>
+    </ol>
   </nav>
 
   <main id="view"></main>
@@ -112,16 +263,33 @@ footer code{font-family:var(--mono);overflow-wrap:anywhere}
   "use strict";
   var STR = window.MP_PILOT_STRINGS || { en: {}, hi: {} };
   var DATA = window.MP_PILOT_DATA || null;
+  var VIEWS = ["workshop", "job", "check", "limits"];
   var lang = "en";
   var state = { view: "workshop", caseIndex: 0 };
-  try { var saved = localStorage.getItem("mpPilotLang"); if (saved && STR[saved]) lang = saved; } catch (e) {}
+  function usable(l) { return !!(l && STR[l] && Object.keys(STR[l]).length); }
+  try { var saved = localStorage.getItem("mpPilotLang"); if (usable(saved)) lang = saved; } catch (e) {}
+  /* Optional start state for a presenter's bookmark: index.html?lang=hi&job=turned_shaft#check */
+  var params = new URLSearchParams(location.search);
+  if (usable(params.get("lang"))) lang = params.get("lang");
+  if (params.get("theme") === "light" || params.get("theme") === "dark") document.documentElement.setAttribute("data-theme", params.get("theme"));
+  if (DATA && params.get("job")) DATA.cases.forEach(function (c, i) { if (c.id === params.get("job")) state.caseIndex = i; });
 
+  /* ---- text ---- */
+  function has(table, key) { return !!table && Object.prototype.hasOwnProperty.call(table, key); }
   function t(key) {
-    var table = STR[lang] || {};
-    if (Object.prototype.hasOwnProperty.call(table, key)) return table[key];
-    if (Object.prototype.hasOwnProperty.call(STR.en, key)) return STR.en[key];
+    if (has(STR[lang], key)) return STR[lang][key];
+    if (has(STR.en, key)) return STR.en[key];
     return key; // a missing string shows its key, so gaps are visible
   }
+  function tOr(key, fallback) { return has(STR[lang], key) || has(STR.en, key) ? t(key) : fallback; }
+  function fmt(key, n) { return t(key).replace("{n}", String(n)); }
+  function words(id) { return String(id).replace(/_/g, " "); }
+  function material(m) { return tOr("material." + String(m).toLowerCase(), m); }
+  function machine(id) { return tOr("machine." + id, id); }
+  function target(x) { return tOr("target." + x, words(x)); }
+  function mm(v) { return "± " + v + " mm"; }
+
+  /* ---- DOM ---- */
   function h(tag, attrs, kids) {
     var el = document.createElement(tag);
     if (attrs) Object.keys(attrs).forEach(function (k) {
@@ -133,160 +301,263 @@ footer code{font-family:var(--mono);overflow-wrap:anywhere}
     return el;
   }
   function tag(kind) { return h("span", { class: "tag " + kind, text: t("label." + kind) }); }
-  function words(id) { return String(id).replace(/_/g, " "); }
+  function list(items, cls) { return h("ul", cls ? { class: cls } : null, items.map(function (x) { return h("li", { text: x }); })); }
 
-  function applyStatic() {
-    document.documentElement.lang = lang;
-    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t(el.getAttribute("data-t")); });
-    var langBtn = document.getElementById("langBtn");
-    var hasHindi = Object.keys(STR.hi || {}).length > 0;
-    langBtn.hidden = !hasHindi;
-    langBtn.textContent = lang === "en" ? t("lang.switch") : "English";
+  function header(n, titleText, leadText, tags) {
+    return h("div", { class: "head" }, [
+      h("div", { class: "eyebrow", text: fmt("pager.step", n) }),
+      h("h2", { text: titleText, tabindex: "-1", id: "screenTitle" }),
+      leadText ? h("p", { class: "lead", text: leadText }) : null,
+      tags && tags.length ? h("div", { class: "tags" }, tags) : null
+    ]);
+  }
+  function pager() {
+    var i = VIEWS.indexOf(state.view);
+    var back = null, next;
+    if (i > 0) { back = h("button", { type: "button", class: "btn", text: "← " + t("pager.back") }); back.addEventListener("click", function () { go(VIEWS[i - 1]); }); }
+    if (i < VIEWS.length - 1) {
+      var label = state.view === "job" ? t("job.next") : t("pager.next") + ": " + t("nav." + VIEWS[i + 1]);
+      next = h("button", { type: "button", class: "btn primary", text: label + " →" });
+      next.addEventListener("click", function () { go(VIEWS[i + 1]); });
+    } else {
+      next = h("button", { type: "button", class: "btn", text: "↺ " + t("pager.restart") });
+      next.addEventListener("click", function () { state.caseIndex = 0; go(VIEWS[0]); });
+    }
+    return h("div", { class: "pager" }, [back || h("span", { class: "spacer" }), next]);
   }
 
+  /* ---- shared facts (declared inputs, shown as written) ---- */
+  function shopDoc() { return DATA.shop.document; }
+  function shopTolerances() {
+    var tol = shopDoc().capability_tolerance_mm || {};
+    return Object.keys(tol).map(function (c) { return t("cap." + c) + " " + mm(tol[c]); });
+  }
+  function shopNotInHouse() {
+    var s = shopDoc();
+    return (s.unsupported_ops || []).map(function (op) { return t("op." + op); })
+      .concat((s.unsupported_capabilities || []).map(function (c) { return t("cap." + c); }));
+  }
+  function shopCapabilities() {
+    var seen = [];
+    shopDoc().resources.forEach(function (r) { r.capabilities.forEach(function (c) { if (seen.indexOf(c) < 0) seen.push(c); }); });
+    return seen.map(function (c) { return t("cap." + c); });
+  }
+  function jobTolerance(r) { return r.tolerances && r.tolerances.general_tolerance_mm !== undefined ? mm(r.tolerances.general_tolerance_mm) : t("workshop.none"); }
+  function opLabel(o) { return t("op." + o.op) + (o.target ? " · " + target(o.target) : ""); }
+
+  /* ---- 1. workshop ---- */
   function workshopView() {
-    var shop = DATA.shop.document;
-    var tol = shop.capability_tolerance_mm || {};
-    var machines = h("div", { class: "machines" }, shop.resources.map(function (r) {
+    var s = shopDoc(), tol = s.capability_tolerance_mm || {};
+    var tolList = shopTolerances(), notIn = shopNotInHouse();
+    var machines = h("div", { class: "machines" }, s.resources.map(function (r) {
       return h("div", { class: "machine" }, [
-        h("span", { class: "id", text: r.resource_id }),
-        h("ul", { class: "plain" }, r.capabilities.map(function (c) {
-          var line = t("cap." + c);
-          if (tol[c] !== undefined) line += " · ± " + tol[c] + " mm";
-          return h("li", { text: line });
+        h("div", { class: "top" }, [h("span", { class: "mname", text: machine(r.resource_id) }), h("span", { class: "code", text: r.resource_id })]),
+        h("div", { class: "pills" }, r.capabilities.map(function (c) {
+          return h("span", { class: "pill" }, [t("cap." + c), tol[c] !== undefined ? h("span", { class: "tol", text: mm(tol[c]) }) : null]);
         }))
       ]);
     }));
-    var notIn = (shop.unsupported_ops || []).map(function (op) { return t("op." + op); })
-      .concat((shop.unsupported_capabilities || []).map(function (c) { return t("cap." + c); }));
-    var tolList = Object.keys(tol).map(function (c) { return t("cap." + c) + ": ± " + tol[c] + " mm"; });
-    return h("section", { class: "plate" }, [
-      h("h2", { text: shop.display_name || t("nav.workshop") }),
-      h("div", { class: "chips" }, [tag("synthetic"), tag("declared")]),
-      h("p", { class: "lead", text: t("workshop.lead") }),
-      h("h3", { text: t("workshop.machines") }), machines,
-      h("dl", { class: "kv" }, [
-        h("dt", { text: t("workshop.materials") }), h("dd", { text: shop.supported_materials.join(", ") }),
-        h("dt", { text: t("workshop.tolerance") }), h("dd", { text: tolList.length ? tolList.join("; ") : t("workshop.none") }),
-        h("dt", { text: t("workshop.notInHouse") }), h("dd", { text: notIn.length ? notIn.join(", ") : t("workshop.none") })
+    return h("section", { class: "screen" }, [
+      header(1, t("workshop.title"), t("workshop.lead"), [tag("synthetic"), tag("declared")]),
+      h("div", { class: "tiles" }, [
+        h("div", { class: "tile" }, [h("h3", { text: t("workshop.materials") }), list(s.supported_materials.map(material))]),
+        h("div", { class: "tile" }, [h("h3", { text: t("workshop.tolerance") }), tolList.length ? list(tolList) : h("p", { text: t("workshop.none") })]),
+        h("div", { class: "tile" + (notIn.length ? " warn" : "") }, [h("h3", { text: t("workshop.notInHouse") }), notIn.length ? list(notIn) : h("p", { text: t("workshop.none") })])
+      ]),
+      h("div", { class: "plate" }, [
+        h("div", { class: "sec-title" }, [h("h3", { text: t("workshop.machines") }), h("span", { class: "muted", text: fmt("workshop.machineCount", s.resources.length) })]),
+        machines
       ]),
       h("details", null, [
         h("summary", { text: t("workshop.fingerprint") }),
-        h("p", { class: "lead", text: t("workshop.fingerprintNote") }),
-        h("pre", { text: DATA.shop.shop_declaration_hash })
-      ])
+        h("p", { class: "muted", text: t("workshop.fingerprintNote") }),
+        h("pre", { text: DATA.shop.shop_declaration_hash }),
+        h("dl", { class: "kv" }, [h("dt", { text: t("workshop.declaredName") }), h("dd", { text: s.display_name || "" })])
+      ]),
+      pager()
     ]);
   }
 
-  function casePicker() {
-    return h("div", { class: "chips", role: "group", "aria-label": t("job.pick") }, DATA.cases.map(function (c, i) {
-      var b = h("button", { type: "button", class: "chip", "aria-pressed": String(i === state.caseIndex), text: t("case." + c.id) });
+  /* ---- 2. a job ---- */
+  function jobCards() {
+    return h("div", { class: "jobs", role: "group", "aria-label": t("job.pick") }, DATA.cases.map(function (c, i) {
+      var r = c.request;
+      var b = h("button", { type: "button", class: "jobcard", "aria-pressed": String(i === state.caseIndex) }, [
+        h("span", { class: "jname", text: t("case." + c.id) }),
+        h("span", { class: "jmeta", text: material(r.material) + " · " + fmt("job.pieces", r.quantity) })
+      ]);
       b.addEventListener("click", function () { state.caseIndex = i; render(); });
       return b;
     }));
   }
-
   function jobView() {
     var c = DATA.cases[state.caseIndex], r = c.request;
-    var ops = h("ol", { class: "plain" }, r.declared_operations.map(function (o) {
-      return h("li", { text: t("op." + o.op) + (o.target ? " · " + words(o.target) : "") });
+    var route = h("ol", { class: "route" }, r.declared_operations.map(function (o) {
+      return h("li", null, [h("div", null, [
+        h("div", { class: "opname", text: t("op." + o.op) }),
+        o.target ? h("div", { class: "opsub", text: target(o.target) }) : null
+      ])]);
     }));
-    var next = h("button", { type: "button", class: "go-next", text: t("job.next") });
-    next.addEventListener("click", function () { go("check"); });
-    return h("section", { class: "plate" }, [
-      h("p", { class: "lead", text: t("job.lead") }), casePicker(),
-      h("h2", { text: t("case." + c.id) }), tag("synthetic"),
-      h("dl", { class: "kv" }, [
-        h("dt", { text: t("job.material") }), h("dd", { text: r.material }),
-        h("dt", { text: t("job.stock") }), h("dd", { text: t("stock." + r.stock_form) }),
-        h("dt", { text: t("job.quantity") }), h("dd", { text: String(r.quantity) }),
-        h("dt", { text: t("job.tolerance") }), h("dd", { text: r.tolerances ? "± " + r.tolerances.general_tolerance_mm + " mm" : t("workshop.none") }),
-        h("dt", { text: t("job.operations") }), h("dd", null, [ops])
+    return h("section", { class: "screen" }, [
+      header(2, t("nav.job"), t("job.lead"), null),
+      h("div", null, [h("h3", { class: "muted", text: t("job.pick"), style: "margin-bottom:8px" }), jobCards()]),
+      h("div", { class: "plate" }, [
+        h("div", { class: "sec-title" }, [h("h3", { text: t("case." + c.id), style: "font-size:1.3rem" }), tag("synthetic")]),
+        h("dl", { class: "spec" }, [
+          h("div", null, [h("dt", { text: t("job.material") }), h("dd", { text: material(r.material) })]),
+          h("div", null, [h("dt", { text: t("job.stock") }), h("dd", { text: t("stock." + r.stock_form) })]),
+          h("div", null, [h("dt", { text: t("job.quantity") }), h("dd", { text: fmt("job.pieces", r.quantity) })]),
+          h("div", null, [h("dt", { text: t("job.tolerance") }), h("dd", { text: jobTolerance(r) })])
+        ]),
+        h("h3", { text: t("job.operations") }),
+        route
       ]),
-      next
+      pager()
     ]);
   }
 
+  /* ---- 3. the check ---- */
+  function caseSwitch() {
+    return h("div", { class: "switch", role: "group", "aria-label": t("job.pick") }, DATA.cases.map(function (c, i) {
+      var b = h("button", { type: "button", "aria-pressed": String(i === state.caseIndex), text: t("case." + c.id) });
+      b.addEventListener("click", function () { state.caseIndex = i; render(); });
+      return b;
+    }));
+  }
+  function compareRow(label, jobText, shopText) {
+    return h("div", { class: "row" }, [h("div", { class: "rl", text: label }), h("div", { text: jobText }), h("div", { text: shopText })]);
+  }
   function checkView() {
-    var c = DATA.cases[state.caseIndex];
+    var c = DATA.cases[state.caseIndex], r = c.request;
     var tone = t("tone." + c.status);
-    var reasons = c.reason_codes.map(function (code) {
-      return h("li", null, [h("span", { text: t("reason." + code) }), " ", h("span", { class: "code", text: "(" + code + ")" })]);
-    });
-    var steps = h("div", { class: "scroll" }, [h("table", null, [
-      h("thead", null, [h("tr", null, [h("th", { text: "#" }), h("th", { text: t("check.operation") }), h("th", { text: t("check.machine") })])]),
-      h("tbody", null, c.steps.map(function (s) {
-        return h("tr", null, [
-          h("td", { text: String(s.index + 1) }),
-          h("td", { text: t("op." + s.op) }),
-          s.resource_id ? h("td", { class: "code", text: s.resource_id }) : h("td", { class: "none", text: t("check.noMachine") })
+    var notIn = shopNotInHouse();
+    var why = c.reason_codes.length
+      ? h("div", { class: "plate" }, [
+          h("div", { class: "sec-title" }, [h("h3", { text: t("check.reasons") }), tag("explanation")]),
+          h("ul", { class: "reasons" }, c.reason_codes.map(function (code) { return h("li", { text: t("reason." + code) }); })),
+          h("p", { class: "muted", text: t("check.meaningNo") })
+        ])
+      : h("div", { class: "plate" }, [
+          h("div", { class: "sec-title" }, [h("h3", { text: t("check.reasons") }), tag("explanation")]),
+          h("p", { text: t("check.meaningYes") })
         ]);
-      }))
-    ])]);
-    return h("section", { class: "plate" }, [
-      casePicker(),
-      h("h2", { text: t("check.question") + " " + t("case." + c.id) }),
-      tag("actual"),
-      h("div", { class: "verdict" }, [
-        h("div", { class: "lamp " + tone, role: "img", "aria-label": c.status }),
-        h("div", null, [h("div", { class: "answer", text: t("status." + c.status) }), h("div", { class: "code", text: c.status })])
-      ]),
-      reasons.length ? h("div", null, [h("h3", { text: t("check.reasons") }), tag("explanation"), h("ul", { class: "plain" }, reasons)])
-                     : h("p", { class: "lead", text: t("check.meaningYes") }),
-      h("h3", { text: t("check.steps") }), steps,
-      h("details", null, [
-        h("summary", { text: t("check.details") }),
-        h("dl", { class: "kv" }, [
-          h("dt", { text: t("check.trace") }), h("dd", { class: "code", text: c.trace_hash }),
-          h("dt", { text: t("check.plan") }), h("dd", { class: "code", text: c.plan_hash }),
-          h("dt", { text: t("check.declaration") }), h("dd", { class: "code", text: c.shop_declaration_hash })
-        ]),
-        h("p", { class: "lead", text: t("check.command") }), h("pre", { text: c.command }),
-        h("p", { class: "lead", text: t("check.output") }), h("pre", { text: c.stdout })
+    var compare = h("div", { class: "plate" }, [
+      h("h3", { text: t("check.compare") }),
+      h("div", { class: "cmp" }, [
+        h("div", { class: "row headrow" }, [h("div"), h("div", { text: t("check.jobSide") }), h("div", { text: t("check.shopSide") })]),
+        compareRow(t("job.material"), material(r.material), shopDoc().supported_materials.map(material).join(", ")),
+        compareRow(t("job.tolerance"), jobTolerance(r), shopTolerances().join("; ") || t("workshop.none")),
+        compareRow(t("check.opsRow"), r.declared_operations.map(function (o) { return t("op." + o.op); }).join(", "),
+          t("workshop.can") + ": " + shopCapabilities().join(", ") + (notIn.length ? ". " + t("workshop.notInHouse") + ": " + notIn.join(", ") : ""))
       ])
     ]);
-  }
-
-  function limitsView() {
-    var keys = ["drawings", "size", "materials", "costTime", "live", "declared", "example"];
-    var items = keys.map(function (k) { return h("li", { text: t("limits." + k) }); });
-    items.push(h("li", { class: "next", text: t("limits.next") }));
-    return h("section", { class: "plate" }, [
-      h("p", { class: "lead", text: t("limits.lead") }), tag("limitation"), h("ul", { class: "limits" }, items)
+    var ops = r.declared_operations;
+    var steps = h("div", { class: "plate" }, [
+      h("h3", { text: t("check.steps") }),
+      h("div", { class: "scroll" }, [h("table", null, [
+        h("thead", null, [h("tr", null, [h("th", { text: "#" }), h("th", { text: t("check.operation") }), h("th", { text: t("check.machine") })])]),
+        h("tbody", null, c.steps.map(function (s) {
+          var o = ops[s.index] || {};
+          return h("tr", s.resource_id ? null : { class: "missing" }, [
+            h("td", { class: "n", text: String(s.index + 1) }),
+            h("td", null, [t("op." + s.op), o.target ? h("span", { class: "sub", text: target(o.target) }) : null]),
+            s.resource_id
+              ? h("td", null, [machine(s.resource_id), h("span", { class: "sub code", text: s.resource_id })])
+              : h("td", { class: "none", text: t("check.noMachine") })
+          ]);
+        }))
+      ])])
+    ]);
+    var details = h("details", null, [
+      h("summary", { text: t("check.details") }),
+      h("dl", { class: "kv" }, [
+        h("dt", { text: t("check.status") }), h("dd", { class: "code", text: c.status + (c.reason_codes.length ? " [" + c.reason_codes.join(", ") + "]" : " []") }),
+        h("dt", { text: t("check.trace") }), h("dd", { class: "code", text: c.trace_hash }),
+        h("dt", { text: t("check.plan") }), h("dd", { class: "code", text: c.plan_hash }),
+        h("dt", { text: t("check.declaration") }), h("dd", { class: "code", text: c.shop_declaration_hash })
+      ]),
+      h("p", { class: "muted", text: t("check.command"), style: "margin-top:10px" }), h("pre", { text: c.command }),
+      h("p", { class: "muted", text: t("check.output") }), h("pre", { text: c.stdout })
+    ]);
+    return h("section", { class: "screen" }, [
+      header(3, t("nav.check"), null, null),
+      caseSwitch(),
+      h("div", { class: "plate verdict " + tone, role: "status" }, [
+        h("div", { class: "lamp " + tone, role: "img", "aria-label": t("status." + c.status) }),
+        h("div", { style: "display:grid;gap:8px" }, [
+          h("div", { class: "q", text: t("check.question") + " " + t("case." + c.id) }),
+          h("div", { class: "answer", text: t("status." + c.status) }),
+          tag("actual")
+        ])
+      ]),
+      why, steps, compare, details,
+      pager()
     ]);
   }
 
+  /* ---- 4. what it does not know ---- */
+  function limitsView() {
+    var keys = ["drawings", "size", "materials", "costTime", "live", "declared", "example"];
+    return h("section", { class: "screen" }, [
+      header(4, t("nav.limits"), t("limits.lead"), [tag("limitation")]),
+      h("ul", { class: "limits" }, keys.map(function (k) { return h("li", null, [h("span", { text: t("limits." + k) })]); })),
+      h("div", { class: "plate callout" }, [h("h3", { text: t("limits.nextTitle") }), h("p", { text: t("limits.next") })]),
+      h("details", null, [
+        h("summary", { text: t("limits.evidenceTitle") }),
+        h("p", { text: t("limits.evidence") }),
+        h("dl", { class: "kv", style: "margin-top:10px" }, [
+          h("dt", { text: t("footer.provenance") }), h("dd", { class: "code", text: DATA.meta.mp_commit }),
+          h("dt", { text: t("footer.generator") }), h("dd", { class: "code", text: "python " + DATA.meta.generator + " --commit <sha>" }),
+          h("dt", { text: t("check.declaration") }), h("dd", { class: "code", text: DATA.shop.shop_declaration_hash })
+        ])
+      ]),
+      pager()
+    ]);
+  }
+
+  /* ---- frame ---- */
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t(el.getAttribute("data-t")); });
+    document.getElementById("exampleBadge").title = t("banner.synthetic");
+    document.getElementById("steps").setAttribute("aria-label", t("nav.label"));
+    var langBtn = document.getElementById("langBtn");
+    langBtn.hidden = !(STR.hi && Object.keys(STR.hi).length);
+    langBtn.textContent = t("lang.switch");
+    langBtn.setAttribute("aria-label", t("lang.label") + ": " + t("lang.switch"));
+    langBtn.setAttribute("lang", lang === "en" ? "hi" : "en");
+    var themeBtn = document.getElementById("themeBtn");
+    themeBtn.setAttribute("aria-label", t("theme.label")); themeBtn.title = t("theme.label");
+    var i = VIEWS.indexOf(state.view);
+    document.querySelectorAll("#steps button").forEach(function (b, j) {
+      if (j === i) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+      b.classList.toggle("done", j < i);
+    });
+  }
   function provenance() {
     var f = document.getElementById("provenance");
     f.textContent = "";
+    f.appendChild(h("p", { text: t("banner.synthetic") }));
     if (!DATA) { f.appendChild(h("p", { text: t("footer.noData") })); return; }
     f.appendChild(h("p", null, [t("footer.provenance") + " ", h("code", { text: DATA.meta.mp_commit })]));
-    f.appendChild(h("p", null, [t("footer.generator") + " ", h("code", { text: "python " + DATA.meta.generator + " --commit <sha>" })]));
   }
-
-  function render() {
+  function render(focusTitle) {
     applyStatic();
-    document.querySelectorAll("nav button").forEach(function (b) {
-      if (b.getAttribute("data-view") === state.view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
-    });
     var view = document.getElementById("view");
     view.textContent = "";
-    if (!DATA) { view.appendChild(h("section", { class: "plate" }, [h("p", { text: t("footer.noData") })])); }
-    else {
-      var make = { workshop: workshopView, job: jobView, check: checkView, limits: limitsView }[state.view] || workshopView;
-      view.appendChild(make());
-    }
+    if (!DATA) view.appendChild(h("section", { class: "plate" }, [h("p", { text: t("footer.noData") })]));
+    else view.appendChild(({ workshop: workshopView, job: jobView, check: checkView, limits: limitsView })[state.view]());
     provenance();
+    if (focusTitle) { var tt = document.getElementById("screenTitle"); if (tt) tt.focus({ preventScroll: true }); }
   }
-
   function go(viewName) {
     state.view = viewName;
-    if (location.hash !== "#" + viewName) location.hash = viewName;
-    render();
+    if (location.hash !== "#" + viewName) location.hash = viewName; // keeps the browser Back button working
+    render(true);
     window.scrollTo(0, 0);
   }
 
-  document.querySelectorAll("nav button").forEach(function (b) {
+  document.querySelectorAll("#steps button").forEach(function (b) {
     b.addEventListener("click", function () { go(b.getAttribute("data-view")); });
   });
   document.getElementById("langBtn").addEventListener("click", function () {
@@ -300,12 +571,20 @@ footer code{font-family:var(--mono);overflow-wrap:anywhere}
       : !window.matchMedia("(prefers-color-scheme: light)").matches;
     root.setAttribute("data-theme", dark ? "light" : "dark");
   });
+  document.addEventListener("keydown", function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var tagName = (e.target && e.target.tagName) || "";
+    if (tagName === "INPUT" || tagName === "TEXTAREA") return;
+    var i = VIEWS.indexOf(state.view);
+    if (e.key === "ArrowRight" && i < VIEWS.length - 1) go(VIEWS[i + 1]);
+    else if (e.key === "ArrowLeft" && i > 0) go(VIEWS[i - 1]);
+  });
   window.addEventListener("hashchange", function () {
     var v = location.hash.replace("#", "");
-    if (["workshop", "job", "check", "limits"].indexOf(v) >= 0 && v !== state.view) { state.view = v; render(); }
+    if (VIEWS.indexOf(v) >= 0 && v !== state.view) { state.view = v; render(true); }
   });
   var initial = location.hash.replace("#", "");
-  if (["workshop", "job", "check", "limits"].indexOf(initial) >= 0) state.view = initial;
+  if (VIEWS.indexOf(initial) >= 0) state.view = initial;
   render();
 })();
 </script>

@@ -8,14 +8,36 @@ MP-S1 CLI output on that example data; the page itself calculates nothing.
 
 ## Open it
 
-Open `index.html` in a browser. It needs no server, build step or network connection.
+Double-click `index.html`, or open it in any current browser. It needs no server, build step or network connection.
+
+The page has four steps:
+1. The workshop.
+2. A job (pick one of four).
+3. The check.
+4. What it does not know.
+
+Move between them with the step buttons, Back/Next, or the left and right arrow keys. The top bar always shows the
+**Example data** badge, a language switch (English / हिन्दी) and a light/dark switch.
+
+To start a visit from a fixed point, add parameters to the address:
+
+```
+index.html?lang=hi&job=turned_shaft#check
+```
+
+| Parameter | Values |
+|---|---|
+| `lang` | `en`, `hi` |
+| `job` | `bracket`, `turned_shaft`, `brass_cover`, `precision_plate` |
+| `theme` | `light`, `dark` |
+| `#…` (the step) | `#workshop`, `#job`, `#check`, `#limits` |
 
 ## What is in this folder
 
 | Path | What it is |
 |---|---|
-| `index.html` | The four screens: the workshop, a job, the check, what it does not know. Display only. |
-| `strings.js` | Every visible word, keyed. `en` is complete; `hi` is empty. |
+| `index.html` | The four screens. Display only: every status and reason is read from `snapshots/data.js`. |
+| `strings.js` | Every visible word, keyed, in English (`en`) and Hindi (`hi`), with the same keys in both. |
 | `inputs/shop.example_workshop.json` | Synthetic shop declaration (`evidence_class: synthetic`). |
 | `inputs/job_*.json` | Four synthetic job requests. |
 | `capture.py` | Runs the shipped CLI for each job and writes `snapshots/`. Orchestration only. |
@@ -35,13 +57,20 @@ python demo/pilot/capture.py --commit "$(git rev-parse HEAD)"
 python -m mini_prometheus.orchestration.runner demo/pilot/inputs/<job>.json --capability-model-file demo/pilot/inputs/shop.example_workshop.json
 ```
 
-`tests/boundary/test_demo_pilot.py` re-runs the capture and fails if any snapshot differs, if a displayed verdict
-differs from the CLI output, or if a shown code has no label. Review a re-capture before committing it.
+`tests/boundary/test_demo_pilot.py` fails if any of these happens:
+- a re-captured snapshot differs from the committed one;
+- a displayed verdict differs from the CLI output;
+- a code, machine, material or target shown has no label;
+- English and Hindi hold different keys.
 
-## Add Hindi
+Review a re-capture before committing it.
 
-Fill `hi` in `strings.js` with the same keys as `en`. Any key left out falls back to English. The language switch
-appears as soon as `hi` has a key. Have a native speaker check the text with a shop owner.
+## Hindi
+
+The Hindi text is a **first draft**. Before it is shown to a shop owner, a Hindi-speaking person should read it on
+the screen. Machine words that owners usually say in English (milling, drilling, CNC) are written that way in
+Devanagari on purpose. To change a word, edit `hi` in `strings.js`. To add a language, add a table with the same
+keys.
 
 ## Limits
 
