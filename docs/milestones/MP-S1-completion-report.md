@@ -96,6 +96,10 @@ These are recorded in full in ADR-0022:
 5. Scheduling imports the ref type through `mini_prometheus`.
 6. `contracts/schemas/manufacturing/README.md` is not updated, because it is a frozen 0.4.0 file.
 
+The post-implementation acceptance audit (2026-11-06) found three more unrecorded items: a stricter material
+whitespace rule, a renamed CHANGELOG heading, and a file missing from the spec's §5.1 table. None changes
+behaviour. They are recorded in the ADR-0022 addendum (items 7–9).
+
 ## 5. Verification
 
 The Docker verifier (`mini-prometheus-verifier:rm4`, Python 3.11.18) ran on an exact export of the committed

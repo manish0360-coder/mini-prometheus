@@ -130,3 +130,22 @@ These are listed in spec §5:
 - a single hash;
 - hashing the code models;
 - retrieval filtering in frozen RM3/RM4.
+
+## Addendum (2026-11-06): post-implementation acceptance audit
+
+Appended after the read-only acceptance audit of `7252475`, which the Research Director requested. Nothing above is
+edited. The audit found three items that the deviation list above did not record. None changes behaviour,
+contracts, tests or gates.
+
+7. **Stricter material rule.** The shop schema refuses a `supported_materials` entry with leading or trailing
+   whitespace (`^\S(.*\S)?$`). Spec §3.1 asked only for non-empty strings that are unique case-insensitively. The
+   stricter rule prevents a silent mismatch: `material_supported` strips the request's material but compares the
+   model's materials untrimmed, so `" steel"` could never match.
+8. **CHANGELOG heading.** The Stage 0 entry's heading `[Unreleased]` was renamed `[0.12.0 + docs]` when the
+   `[0.13.0]` entry was added above it. Its text is unchanged. This is cosmetic.
+9. **Spec file table.** `orchestration/shop_model_file.py` (strict JSON file reading for the CLIs) is missing from
+   spec §5.1's file table. Spec §3.5 already places file reading and JSON parsing in `orchestration/`.
+
+The same audit discarded the untracked `uv.lock` (2026-08-03, never committed). It described the project at `0.3.0`
+and resolved pytest 9.1.1, ruff 0.16.1 and mypy 2.3.0, which contradict the pinned toolchain (pytest 8.3.3, ruff
+0.6.9, mypy 1.11.2). Nothing referenced it. The authoritative environment is the Docker verifier.
