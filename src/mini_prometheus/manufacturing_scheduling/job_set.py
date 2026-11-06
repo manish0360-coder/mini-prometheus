@@ -45,6 +45,10 @@ from mini_prometheus.manufacturing_scheduling.earliest_start import (
     earliest_start_v1,
     earliest_start_v1_most_work_remaining,
 )
+from mini_prometheus.shop_declaration.shop_model import (
+    capability_model_ref_for,
+    require_plan_shop_identity,
+)
 from mini_prometheus.manufacturing_scheduling.model import (
     SCHEDULING_RULE,
     SCHEDULING_RULE_MOST_WORK_REMAINING,
@@ -71,6 +75,13 @@ def job_prerequisite_refusals(
     refusals: list[Refusal] = []
     if verdict.status != MANUFACTURABLE:
         found = f"{verdict.status} [{', '.join(verdict.reason_codes)}]"
+        ref = plan.capability_model_ref
+        if ref is not None:  # MP-S1 §3.8: trace a declared-shop job verdict (no episode by design)
+            found += (
+                f" [plan {plan.content_hash}; shop {ref.shop_declaration_hash} "
+                f"({ref.evidence_class}, not independently verified); "
+                "no episode: scheduling is read-only]"
+            )
         refusals.append(
             Refusal(
                 RefusalReason.JOB_NOT_MANUFACTURABLE,
@@ -143,6 +154,7 @@ def schedule_job_set(
     jobs: list[SchedulingJob] = []
     for job_input in job_inputs:
         task, plan = planner.plan(job_input.design_input, capability_model, produced_at=produced_at)
+        require_plan_shop_identity(plan, capability_model)  # MP-S1 G2, per job
         verdict = oracle.verify(plan, capability_model)
         failed = job_prerequisite_refusals(
             job_input.request_id, job_input.design_input, plan, verdict
@@ -155,6 +167,7 @@ def schedule_job_set(
             ScheduleStatus.NOT_SCHEDULED, None, tuple(sorted(refusals, key=_refusal_key))
         )
 
+    shop_ref = capability_model_ref_for(capability_model)  # MP-S1 G5: None for code models
     relevant = relevant_downtime(canonical, jobs)
     generate = (
         earliest_start_v1_most_work_remaining
@@ -162,7 +175,12 @@ def schedule_job_set(
         else earliest_start_v1
     )
     try:
-        if relevant or canonical_setup:
+        if shop_ref is not None:  # MP-S1: a declared shop; the code-model calls below are unchanged
+            schedule = generate(
+                jobs, capability_model.version, downtime=relevant, setup_rules=canonical_setup,
+                shop_model_ref=shop_ref,
+            )
+        elif relevant or canonical_setup:
             schedule = generate(
                 jobs, capability_model.version, downtime=relevant, setup_rules=canonical_setup
             )
@@ -181,9 +199,15 @@ def schedule_job_set(
         return ScheduleOutcome(
             ScheduleStatus.NOT_SCHEDULED, None, tuple(sorted(undeclared, key=_refusal_key))
         )
-    issues = schedule_issues(
-        schedule, jobs, capability_model.version, downtime=downtime, setup_rules=setup_rules
-    )
+    if shop_ref is not None:  # MP-S1 G5; the code-model call below is unchanged
+        issues = schedule_issues(
+            schedule, jobs, capability_model.version, downtime=downtime, setup_rules=setup_rules,
+            shop_model_ref=shop_ref,
+        )
+    else:
+        issues = schedule_issues(
+            schedule, jobs, capability_model.version, downtime=downtime, setup_rules=setup_rules
+        )
     if issues:
         raise ScheduleIntegrityError("; ".join(f"{issue.code}: {issue.detail}" for issue in issues))
     return ScheduleOutcome(ScheduleStatus.SCHEDULED, schedule, ())

@@ -1,6 +1,6 @@
 [project]
 name = "mini-prometheus"
-version = "0.12.0"
+version = "0.13.0"
 description = "Mini Prometheus — manufacturing intelligence (Layer 4): planning, manufacturability verification and scheduling. Designed to consume Velith and Noetica as pinned packages (not yet published)."
 requires-python = ">=3.11"
 
@@ -106,6 +106,27 @@ forbidden_modules = [
     "mini_prometheus.orchestration",
     "mini_prometheus.integrations",
     "mini_prometheus.intake",
+]
+
+# MP-S1 (ADR-0022, spec §3.7 guarantee 1): precedent can never influence a manufacturability verdict.
+# No module on a verdict path may import RM3 precedent or RM4 judgment, directly or indirectly.
+[[tool.importlinter.contracts]]
+name = "MP-S1 verdict paths never import precedent or judgment (cross-shop precedent cannot reach a verdict)"
+type = "forbidden"
+source_modules = [
+    "mini_prometheus.manufacturing_constraints",
+    "mini_prometheus.manufacturing_planning",
+    "mini_prometheus.manufacturing_scheduling",
+    "mini_prometheus.orchestration.runner",
+    "mini_prometheus.orchestration.reuse_runner",
+    "mini_prometheus.orchestration.schedule_runner",
+    "mini_prometheus.shop_declaration",
+]
+forbidden_modules = [
+    "mini_prometheus.precedent",
+    "mini_prometheus.judgment",
+    "mini_prometheus.orchestration.precedent_runner",
+    "mini_prometheus.orchestration.judgment_runner",
 ]
 
 [[tool.importlinter.contracts]]

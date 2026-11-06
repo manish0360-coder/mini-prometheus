@@ -34,6 +34,11 @@ from mini_prometheus._contracts import (
     Verdict,
 )
 from mini_prometheus.orchestration.episode_store import DEFAULT_STORE
+from mini_prometheus.shop_declaration.shop_model import (
+    PLAN_SCHEMA_VERSION_WITH_REF,
+    CapabilityModelRef,
+    EvidenceClass,
+)
 
 
 class EpisodeIntegrityError(ValueError):
@@ -93,6 +98,14 @@ def _assignment(d: dict) -> ResourceAssignment:
     )
 
 
+def _capability_model_ref(d: dict) -> CapabilityModelRef:
+    return CapabilityModelRef(
+        shop_content_hash=d["shop_content_hash"],
+        shop_declaration_hash=d["shop_declaration_hash"],
+        evidence_class=EvidenceClass(d["evidence_class"]),  # enum conversion
+    )
+
+
 def _plan(d: dict) -> ProductionPlan:
     return ProductionPlan(
         schema_version=d["schema_version"],
@@ -103,6 +116,9 @@ def _plan(d: dict) -> ProductionPlan:
         capability_model_version=d["capability_model_version"],
         content_hash=d["content_hash"],
         provenance=_provenance(d["provenance"]),
+        capability_model_ref=_capability_model_ref(d["capability_model_ref"])
+        if d.get("capability_model_ref") is not None
+        else None,
     )
 
 
@@ -177,6 +193,26 @@ def _episode(d: dict) -> ManufacturingEpisode:
     )
 
 
+def _verify_shop_identity(lineno: int, plan: ProductionPlan) -> None:
+    """MP-S1 G3 (ADR-0022): a plan that carries a shop identity (or claims schema_version 1.1.0) must
+    carry both, and its content_hash must re-derive. The episode identity uses the STORED plan hash,
+    so without this a ref-only edit or deletion would pass silently. Legacy plans are untouched."""
+    has_ref = plan.capability_model_ref is not None
+    if not has_ref and plan.schema_version != PLAN_SCHEMA_VERSION_WITH_REF:
+        return
+    if not has_ref or plan.schema_version != PLAN_SCHEMA_VERSION_WITH_REF:
+        raise EpisodeIntegrityError(
+            f"line {lineno}: plan schema_version {plan.schema_version} is inconsistent with its "
+            f"shop identity (present: {has_ref})"
+        )
+    recomputed = h.content_hash(h.plan_identity(plan))
+    if recomputed != plan.content_hash:
+        raise EpisodeIntegrityError(
+            f"line {lineno}: plan content_hash mismatch (stored={plan.content_hash}, "
+            f"recomputed={recomputed}); its shop identity was lost or altered"
+        )
+
+
 def load(store_path: str | Path | None = None) -> list[ManufacturingEpisode]:
     """Read the JSONL episode store; reconstruct and integrity-verify each episode.
 
@@ -205,5 +241,6 @@ def load(store_path: str | Path | None = None) -> list[ManufacturingEpisode]:
             raise EpisodeIntegrityError(
                 f"line {lineno}: content_hash mismatch (stored={data.get('content_hash')}, recomputed={recomputed})"
             )
+        _verify_shop_identity(lineno, episode.plan)  # MP-S1 G3
         episodes.append(episode)
     return episodes

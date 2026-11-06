@@ -27,6 +27,11 @@ start_i = end_(i-1), end_i = start_i + duration_i) and, on the final step only,
 Otherwise no timeline value of any kind is written (no default, estimate or partial timeline); the
 missing prerequisites are reported by ``timeline_issues``. Start/end values supplied in a request
 are never read. Requests that declare no duration are unchanged.
+
+MP-S1 (G1, ADR-0022): under a LOADED shop declaration (``capability_model.source`` set) the plan
+carries ``capability_model_ref`` (shop content hash, declaration hash, evidence class) inside its
+identity, and its schema_version is 1.1.0. The built-in code models set no ref, so their plans are
+byte-identical to RM14.
 """
 from __future__ import annotations
 
@@ -58,6 +63,10 @@ from mini_prometheus.manufacturing_constraints.oracle import (
     SCHEDULE_LEAD_TIME_PARAM,
     SCHEDULE_START_PARAM,
     UNAVAILABLE_RESOURCES_PARAM,
+)
+from mini_prometheus.shop_declaration.shop_model import (
+    PLAN_SCHEMA_VERSION_WITH_REF,
+    capability_model_ref_for,
 )
 
 SCHEMA_VERSION = "1.0.0"
@@ -232,8 +241,9 @@ def plan(
     else:
         rule_version = RULE_VERSION_TOLERANCE if tolerance_introduced else RULE_VERSION
 
+    shop_ref = capability_model_ref_for(capability_model)  # MP-S1 G1: None for code models
     production_plan = ProductionPlan(
-        schema_version=SCHEMA_VERSION,
+        schema_version=SCHEMA_VERSION if shop_ref is None else PLAN_SCHEMA_VERSION_WITH_REF,
         plan_id="",
         task_ref=task_ref,
         steps=steps,
@@ -249,6 +259,7 @@ def plan(
             component="manufacturing-planner",
             component_version="1.0.0",
         ),
+        capability_model_ref=shop_ref,
     )
     plan_hash = h.content_hash(h.plan_identity(production_plan))
     production_plan.content_hash = plan_hash

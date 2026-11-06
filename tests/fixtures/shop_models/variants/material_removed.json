@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "model_version": "1.0.0",
+  "display_name": "RM1 default model (synthetic mirror)",
+  "evidence_class": "synthetic",
+  "declaration": {
+    "declared_by": "Mini Prometheus test suite",
+    "declared_on": "2026-11-06"
+  },
+  "notes": "Expresses default_model() exactly. Synthetic: describes no real shop.",
+  "resources": [
+    {
+      "resource_id": "bench01",
+      "capabilities": [
+        "cap.bench"
+      ]
+    },
+    {
+      "resource_id": "cmm01",
+      "capabilities": [
+        "cap.cmm"
+      ]
+    },
+    {
+      "resource_id": "lathe01",
+      "capabilities": [
+        "cap.lathe"
+      ]
+    },
+    {
+      "resource_id": "mill01",
+      "capabilities": [
+        "cap.mill",
+        "cap.drill"
+      ]
+    },
+    {
+      "resource_id": "saw01",
+      "capabilities": [
+        "cap.saw"
+      ]
+    }
+  ],
+  "op_capability": {
+    "cut_stock": "cap.saw",
+    "face_mill": "cap.mill",
+    "drill": "cap.drill",
+    "pocket_mill": "cap.mill",
+    "turn": "cap.lathe",
+    "deburr": "cap.bench",
+    "inspect": "cap.cmm"
+  },
+  "supported_materials": [
+    "steel",
+    "steel 1018",
+    "brass",
+    "brass 360"
+  ]
+}

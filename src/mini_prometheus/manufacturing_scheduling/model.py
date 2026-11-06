@@ -25,6 +25,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 
+from mini_prometheus.shop_declaration.shop_model import CapabilityModelRef
 from mini_prometheus import _hashing as h
 from mini_prometheus._contracts import DesignInput, ProductionPlan
 
@@ -322,6 +323,9 @@ class MultiJobSchedule:
     # Changeovers are in canonical (start_min, request_id, step_index) order.
     setup_rules: SetupRules = ()
     setups: tuple[ScheduledSetup, ...] = ()
+    # MP-S1 (ADR-0022): the declared shop every job was planned under; set only for a LOADED shop
+    # declaration, so a code-model artifact (identity and digest) is exactly RM14's.
+    shop_model_ref: CapabilityModelRef | None = None
 
 
 @dataclass(frozen=True)
@@ -365,6 +369,7 @@ def schedule_input_identity(
     jobs: Sequence[tuple[str, str]],
     downtime: Downtime = (),
     setup_rules: SetupRules = (),
+    shop_model_ref: CapabilityModelRef | None = None,
 ) -> str:
     """Identity of the scheduling problem + rule. ``jobs`` = (request_id, plan content hash)
     pairs, in any order (canonicalized here). Never includes a derived output such as makespan.
@@ -380,6 +385,8 @@ def schedule_input_identity(
         view["downtime"] = downtime_view(downtime)
     if setup_rules:
         view["setup_rules"] = setup_rules_view(setup_rules)
+    if shop_model_ref is not None:  # MP-S1: only for a declared shop
+        view["shop_model_ref"] = h.to_contract_dict(shop_model_ref)
     return h.content_hash(view)
 
 
@@ -412,6 +419,8 @@ def schedule_view(schedule: MultiJobSchedule) -> dict[str, object]:
     if schedule.setup_rules:
         view["setup_rules"] = setup_rules_view(schedule.setup_rules)
         view["setups"] = [dataclasses.asdict(setup) for setup in schedule.setups]
+    if schedule.shop_model_ref is not None:  # MP-S1: only for a declared shop
+        view["shop_model_ref"] = h.to_contract_dict(schedule.shop_model_ref)
     return view
 
 

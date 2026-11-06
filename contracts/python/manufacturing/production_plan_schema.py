@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .. import common_schema
-from . import manufacturing_request_schema
+from . import manufacturing_request_schema, shop_capability_model_schema
 
 
 @dataclass
@@ -27,6 +27,17 @@ class ResourceAssignment:
 
 
 @dataclass
+class CapabilityModelRef:
+    """
+    MP-S1 (ADR-0022, contracts 0.5.0, additive). OPTIONAL: present only when the plan was made under a loaded ShopCapabilityModel declaration (then the plan schema_version is 1.1.0); absent for the built-in code models. Part of the plan identity. shop_content_hash identifies the capability basis; shop_declaration_hash identifies that basis together with its evidence class and declaration provenance; evidence_class is the declarer's assertion, never independent verification.
+    """
+
+    shop_content_hash: common_schema.ContentHash
+    shop_declaration_hash: common_schema.ContentHash
+    evidence_class: shop_capability_model_schema.EvidenceClass
+
+
+@dataclass
 class ProductionPlan:
     """
     The tangible manufacturing artifact: an ordered, resource-assigned process routing (package §3.4). schema_version 1.0.0. plan_id is deterministic = uuid5(NS_MP, content_hash). Identity view excludes plan_id, content_hash (self), and provenance timing.
@@ -40,3 +51,4 @@ class ProductionPlan:
     capability_model_version: common_schema.SemVer
     content_hash: common_schema.ContentHash
     provenance: common_schema.Provenance
+    capability_model_ref: CapabilityModelRef | None = None

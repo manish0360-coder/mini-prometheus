@@ -15,6 +15,7 @@ import json
 
 import rm8_behavior_probe as probe
 import support
+from contracts_manifest_check import assert_0_4_0_contracts_intact
 
 GOLDEN_PATH = support.FIXTURES / "rm8_default_behavior_golden.json"
 GOLDEN_SHA256 = "f36c5d4be10da83d8669c5036ecf36d607e699b3129e9075f14426ac606ffa02"
@@ -47,7 +48,9 @@ def test_probe_is_the_one_that_generated_the_golden():
 def test_default_model_behavior_is_byte_identical_to_rm5_complete():
     expected = _golden()["fingerprint"]
     actual = probe.fingerprint()
-    assert actual["contracts_digest"] == expected["contracts_digest"], "contracts/ changed"
+    # MP-S1 (ADR-0022): the whole-tree contracts digest is replaced by the file-by-file 0.4.0 manifest
+    # check (one additive property allowed). The library and legacy-CLI behaviour pins are unchanged.
+    assert_0_4_0_contracts_intact()
     for section in ("library", "cli_default"):
         exp_rows, act_rows = expected[section]["rows"], actual[section]["rows"]
         assert len(act_rows) == len(exp_rows), f"{section}: case count changed"
@@ -55,4 +58,5 @@ def test_default_model_behavior_is_byte_identical_to_rm5_complete():
         assert first is None, (f"{section}: default-model behavior differs from rm5-complete at case "
                                f"{exp_rows[first]['case']}: expected {exp_rows[first]}, got {act_rows[first]}")
         assert actual[section]["digest"] == expected[section]["digest"]
-    assert actual == expected
+    without_contracts = lambda fp: {k: v for k, v in fp.items() if k != "contracts_digest"}  # noqa: E731
+    assert without_contracts(actual) == without_contracts(expected)

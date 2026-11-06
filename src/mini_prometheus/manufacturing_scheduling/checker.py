@@ -52,6 +52,7 @@ import itertools
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TypeGuard, cast
 
+from mini_prometheus.shop_declaration.shop_model import CapabilityModelRef
 from mini_prometheus.manufacturing_constraints.oracle import DURATION_PARAM
 from mini_prometheus.manufacturing_scheduling.model import (
     MODEL_ASSUMPTIONS,
@@ -230,9 +231,13 @@ def schedule_issues(
     capability_model_version: str,
     downtime: Mapping[str, Iterable[object]] | None = None,
     setup_rules: Iterable[object] | None = None,
+    *,
+    shop_model_ref: CapabilityModelRef | None = None,
 ) -> list[ScheduleIssue]:
     """``downtime`` is the raw downtime input of the run (RM12) and ``setup_rules`` its raw setup
-    rules (RM14); None or empty means none."""
+    rules (RM14); None or empty means none. MP-S1 G5: ``shop_model_ref`` is the shop identity of the
+    capability model in force (None for a code model); the schedule and every job plan must carry
+    exactly it."""
     issues: list[ScheduleIssue] = []
 
     def add(code: IssueCode | DowntimeIssueCode | SetupIssueCode, detail: str) -> None:
@@ -275,6 +280,15 @@ def schedule_issues(
                 IssueCode.METADATA_MISMATCH,
                 f"{job.request_id}: planned under model {job.plan.capability_model_version}",
             )
+    # --- MP-S1 G5: one declared shop identity, on the schedule and on every job plan ---------
+    if schedule.shop_model_ref != shop_model_ref:
+        add(IssueCode.METADATA_MISMATCH, f"shop model ref {schedule.shop_model_ref!r}")
+    for job in jobs:
+        if job.plan.capability_model_ref != shop_model_ref:
+            add(
+                IssueCode.METADATA_MISMATCH,
+                f"{job.request_id}: planned under shop {job.plan.capability_model_ref!r}",
+            )
     expected_identity = schedule_input_identity(
         schedule.scheduling_rule,
         schedule.scheduling_rule_version,
@@ -282,6 +296,7 @@ def schedule_issues(
         [(job.request_id, job.plan.content_hash) for job in jobs],
         relevant,
         relevant_setup,
+        shop_model_ref,
     )
     if schedule.schedule_input_identity != expected_identity:
         add(IssueCode.METADATA_MISMATCH, "schedule_input_identity does not match the inputs")

@@ -46,6 +46,8 @@ from mini_prometheus.manufacturing_scheduling.model import (
     ScheduleStatus,
     SetupRule,
 )
+from mini_prometheus.orchestration.shop_model_file import read_shop_model, refusal_message
+from mini_prometheus.shop_declaration.shop_model import InvalidShopModelError, shop_identity_line
 
 _OPTIMAL = "(makespan equals the lower bound: PROVABLY OPTIMAL under the RM11 model)"
 _OPTIMAL_DOWNTIME = (
@@ -239,7 +241,15 @@ def _main(argv: list[str] | None = None) -> int:
         nargs="+",
         help="ManufacturingRequest JSON files, one job each; their order is irrelevant",
     )
-    parser.add_argument(
+    model_choice = parser.add_mutually_exclusive_group()
+    model_choice.add_argument(
+        "--capability-model-file",
+        metavar="PATH",
+        help="MP-S1: a declared ShopCapabilityModel JSON file (mutually exclusive with "
+        "--capability-model). Every job is planned under it; its evidence class is the declarer's "
+        "assertion and is not independently verified. An invalid file exits 2 and nothing is run.",
+    )
+    model_choice.add_argument(
         "--capability-model",
         choices=("default", "constrained"),
         default="default",
@@ -289,7 +299,19 @@ def _main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     constrained = args.capability_model == "constrained"
-    model = constrained_model() if constrained else default_model()
+    declared = None  # MP-S1: a loaded shop declaration; never a built-in fallback
+    if args.capability_model_file is not None:
+        try:
+            declared = read_shop_model(args.capability_model_file)
+        except OSError as exc:
+            parser.exit(2, f"error: cannot read shop capability model: {exc}\n")
+        except InvalidShopModelError as exc:
+            parser.exit(2, refusal_message(exc))
+    if declared is not None:
+        model = declared
+    else:
+        model = constrained_model() if constrained else default_model()
+    reads_tolerances = constrained or bool(declared and declared.capability_tolerance_mm)
     if args.unavailable_resource:
         try:
             model = with_unavailable_resources(model, args.unavailable_resource)
@@ -308,7 +330,7 @@ def _main(argv: list[str] | None = None) -> int:
     requests = []
     for path in args.request_json:
         with open(path, encoding="utf-8") as handle:
-            requests.append(_request_from_json(json.load(handle), constrained))
+            requests.append(_request_from_json(json.load(handle), reads_tolerances))
     try:
         outcome = schedule_requests(
             requests,
@@ -322,6 +344,8 @@ def _main(argv: list[str] | None = None) -> int:
         return 1
     for line in render(outcome):
         print(line)
+    if declared is not None:  # MP-S1: the declared shop every job was planned under
+        print(shop_identity_line(model))
     return 0
 
 

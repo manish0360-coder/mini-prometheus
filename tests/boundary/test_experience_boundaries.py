@@ -10,6 +10,7 @@ from __future__ import annotations
 import ast
 import pathlib
 import re
+from contracts_manifest_check import assert_0_4_0_contracts_intact
 
 _REPO = pathlib.Path(__file__).resolve().parents[2]
 _SRC = _REPO / "src" / "mini_prometheus"
@@ -63,4 +64,6 @@ def test_no_lifecycle_framework_symbols():
 
 
 def test_contracts_frozen_at_0_4_0():
-    assert (_REPO / "contracts" / "VERSION").read_text(encoding="utf-8").strip() == "0.4.0"
+    # MP-S1 (ADR-0022): the suite moved to 0.5.0 additively. This milestone still added no contract,
+    # and the 0.4.0 contracts it relied on are intact, checked file by file against the frozen manifest.
+    assert_0_4_0_contracts_intact()

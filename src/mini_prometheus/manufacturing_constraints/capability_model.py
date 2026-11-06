@@ -39,6 +39,24 @@ MODEL_VERSION_CONSTRAINED = "1.1.0"
 
 
 @dataclass(frozen=True)
+class ShopModelSource:
+    """MP-S1 (ADR-0022): where a LOADED model came from — set ONLY by ``shop_model.load_shop_model``.
+
+    ``shop_content_hash`` identifies the semantic capability basis; ``shop_declaration_hash`` that
+    basis plus its evidence class and declaration provenance (the identity reuse and every binding
+    check use). ``evidence_class`` is the declarer's assertion, never verification. The display
+    fields are carried for presentation only and are in no identity.
+    """
+
+    shop_content_hash: str
+    shop_declaration_hash: str
+    evidence_class: str
+    declared_by: str
+    declared_on: str
+    display_name: str | None = None
+
+
+@dataclass(frozen=True)
 class ProcessCapabilityModel:
     version: str
     op_capability: dict[ProcessOp, str]          # op -> required capability id
@@ -53,6 +71,9 @@ class ProcessCapabilityModel:
     ordering_constraints: frozenset[tuple[ProcessOp, ProcessOp]] = field(default_factory=frozenset)
     # --- RM9: known resources declared unavailable for this snapshot (empty => all available) ---
     unavailable_resources: frozenset[str] = field(default_factory=frozenset)
+    # --- MP-S1: the declaration a LOADED model came from (None for the built-in code models) ---
+    # with_unavailable_resources() keeps it: availability is a per-run input, not the declaration.
+    source: ShopModelSource | None = None
 
 
 def default_model() -> ProcessCapabilityModel:

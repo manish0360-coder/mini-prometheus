@@ -32,12 +32,14 @@ jobs:
           git diff --exit-code -- contracts/python \
             || (echo "contracts/python is stale — regenerate from schemas" && exit 1)
 
-      - name: Contract suite frozen at the ratified version (RM3 is additive)
+      - name: Contract suite frozen at the ratified version (MP-S1 is additive)
         # 0.4.0 = RM2's 0.2.0 + the RM3-additive PrecedentReport set + the ratified RM1 correction
-        # (optional design_input on ManufacturingEpisode). RM3-M2..M6 must not move it.
+        # (optional design_input on ManufacturingEpisode). 0.5.0 (MP-S1, ADR-0022) = 0.4.0 + the
+        # ShopCapabilityModel schema + one optional ProductionPlan property; every 0.4.0 file is
+        # otherwise unchanged (tests/boundary/test_mp_s1_gates.py, against the frozen manifest).
         run: |
-          test "$(cat contracts/VERSION)" = "0.4.0" \
-            || (echo "contracts/VERSION drifted from the frozen suite version 0.4.0" && exit 1)
+          test "$(cat contracts/VERSION)" = "0.5.0" \
+            || (echo "contracts/VERSION drifted from the frozen suite version 0.5.0" && exit 1)
 
       - name: RM1/RM2 behavioral core unchanged (zero-diff vs rm2-complete)
         # RM3 must not modify RM1/RM2. This diffs the RM1/RM2 behavioral core that is byte-frozen at
@@ -49,6 +51,9 @@ jobs:
         # oracle.py, planner.py and orchestration/runner.py — leave this byte-diff set and are guarded instead
         # by the RM8 behavioral zero-diff gate below. The directories stay in the set (a new file there is
         # still caught); only those exact files are excluded. Nothing else in this set changed.
+        # MP-S1 (ADR-0022): orchestration/reuse_runner.py leaves this set (its reuse key gains the shop
+        # declaration hash). It is re-frozen at its ratified content by a pinned digest in
+        # tests/boundary/test_mp_s1_gates.py; ADR-0022 records its exact diff from rm2-complete.
         run: |
           git diff --exit-code rm2-complete -- \
             src/mini_prometheus/_contracts.py \
@@ -62,7 +67,6 @@ jobs:
             src/mini_prometheus/manufacturing_state \
             src/mini_prometheus/manufacturing_twin \
             src/mini_prometheus/orchestration/__init__.py \
-            src/mini_prometheus/orchestration/reuse_runner.py \
             ':(exclude)src/mini_prometheus/manufacturing_constraints/capability_model.py' \
             ':(exclude)src/mini_prometheus/manufacturing_constraints/oracle.py' \
             ':(exclude)src/mini_prometheus/manufacturing_planning/planner.py' \

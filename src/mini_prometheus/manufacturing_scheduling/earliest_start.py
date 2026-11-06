@@ -62,6 +62,7 @@ import dataclasses
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+from mini_prometheus.shop_declaration.shop_model import CapabilityModelRef
 from mini_prometheus.manufacturing_constraints.oracle import DURATION_PARAM
 from mini_prometheus.manufacturing_scheduling.changeover import relevant_setup_rules
 from mini_prometheus.manufacturing_scheduling.lower_bound import (
@@ -201,13 +202,16 @@ def earliest_start_v1(
     capability_model_version: str,
     downtime: Downtime = (),
     setup_rules: SetupRules = (),
+    *,
+    shop_model_ref: CapabilityModelRef | None = None,
 ) -> MultiJobSchedule:
     """Schedule a non-empty set of schedulable jobs with unique request_ids (module rule).
     ``downtime`` is the relevant canonical downtime (RM12) and ``setup_rules`` the declared
     canonical setup rules (RM14; only the relevant ones are recorded); both empty means exactly
     RM11."""
     return _earliest_start(
-        jobs, capability_model_version, downtime, setup_rules, most_work_remaining=False
+        jobs, capability_model_version, downtime, setup_rules, most_work_remaining=False,
+        shop_model_ref=shop_model_ref,
     )
 
 
@@ -216,6 +220,8 @@ def earliest_start_v1_most_work_remaining(
     capability_model_version: str,
     downtime: Downtime = (),
     setup_rules: SetupRules = (),
+    *,
+    shop_model_ref: CapabilityModelRef | None = None,
 ) -> MultiJobSchedule:
     """RM13 opt-in rule (ADR-0016): exactly earliest_start_v1 — same earliest feasible start
     (RM12 downtime fit included), same append-only placement, same machines — except that among
@@ -224,7 +230,8 @@ def earliest_start_v1_most_work_remaining(
     of every later unscheduled operation of that job (RM10 durations only: no downtime, waiting,
     idle, calendar or setup time). Further ties: request_id, then step_index."""
     return _earliest_start(
-        jobs, capability_model_version, downtime, setup_rules, most_work_remaining=True
+        jobs, capability_model_version, downtime, setup_rules, most_work_remaining=True,
+        shop_model_ref=shop_model_ref,
     )
 
 
@@ -235,6 +242,7 @@ def _earliest_start(
     setup_rules: SetupRules,
     *,
     most_work_remaining: bool,
+    shop_model_ref: CapabilityModelRef | None = None,
 ) -> MultiJobSchedule:
     blocked = dict(downtime)
     rules = _machine_rules(setup_rules)
@@ -355,6 +363,7 @@ def _earliest_start(
             [(job.request_id, job.plan.content_hash) for job in jobs],
             downtime,
             recorded,
+            shop_model_ref,
         ),
         jobs=tuple(
             JobCompletion(
@@ -379,5 +388,6 @@ def _earliest_start(
         window_aware_lower_bound_binding_resource_ids=window.binding_resource_ids if window else (),
         setup_rules=recorded,
         setups=tuple(sorted(setups, key=lambda c: (c.start_min, c.request_id, c.step_index))),
+        shop_model_ref=shop_model_ref,
     )
     return dataclasses.replace(schedule, schedule_digest=schedule_digest(schedule))

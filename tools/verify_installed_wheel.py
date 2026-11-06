@@ -13,7 +13,10 @@ environment and, from a neutral working directory with no repository path on ``s
   the repository source);
 - RM14: runs it with ``--setup-default saw01:2 --setup-default mill01:6 --setup
   mill01:face_mill:drill:3`` (makespan 77, digest equal to the repository source) and rejects a
-  rule for an operation the machine cannot perform as a usage error.
+  rule for an operation the machine cannot perform as a usage error;
+- MP-S1: runs both CLIs with ``--capability-model-file`` on the synthetic default mirror (the RM10 lead
+  time and the RM11 makespan are unchanged; the trace / shop line says "not independently verified")
+  and refuses an invalid declaration with exit 2.
 
 Run from the repository root inside the Docker verifier (Python 3.11). Needs network access for
 the isolated build backend and the runtime dependency. Exit code 0 = every check passed.
@@ -288,6 +291,45 @@ def main() -> int:
         )
         check(invalid14.returncode == 2 and "mill01 cannot perform turn" in invalid14.stderr,
               "invalid setup rules are a usage error from the installed package")
+
+        shop = FIXTURES / "shop_models"
+        declared = run(
+            [python, "-m", "mini_prometheus.orchestration.runner",
+             str(FIXTURES / "engineer_request_with_durations.json"),
+             "--capability-model-file", str(shop / "default_1.0.0.json")],
+            cwd=neutral,
+            env=env,
+        )
+        check(
+            declared.returncode == 0
+            and declared.stdout.startswith("MANUFACTURABLE [] plan sha256:")
+            and "(synthetic, declared by" in declared.stdout
+            and "not independently verified" in declared.stdout
+            and " trace sha256:" in declared.stdout
+            and "lead time: 108 min (single-job serialized timeline)" in declared.stdout,
+            "MP-S1 declared shop runs from the installed package (trace line, RM10 lead time kept)",
+        )
+        declared11 = run(
+            [python, "-m", "mini_prometheus.orchestration.schedule_runner", *map(str, JOBS),
+             "--capability-model-file", str(shop / "default_1.0.0.json")],
+            cwd=neutral,
+            env=env,
+        )
+        check(
+            declared11.returncode == 0
+            and "makespan: 68 min" in declared11.stdout
+            and declared11.stdout.rstrip().endswith("not independently verified)"),
+            "MP-S1 declared shop schedules from the installed package (RM11 makespan kept)",
+        )
+        refused = run(
+            [python, "-m", "mini_prometheus.orchestration.runner",
+             str(FIXTURES / "engineer_request_with_durations.json"),
+             "--capability-model-file", str(shop / "invalid" / "PRECEDENCE_CYCLE.json")],
+            cwd=neutral,
+            env=env,
+        )
+        check(refused.returncode == 2 and "PRECEDENCE_CYCLE /ordering_constraints" in refused.stderr,
+              "an invalid shop declaration is refused from the installed package (exit 2)")
         check(list(neutral.iterdir()) == [], "nothing is written to the working directory")
 
     print(f"{len(failures)} failure(s)")

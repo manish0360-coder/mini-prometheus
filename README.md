@@ -11,16 +11,20 @@ mechanisms (Laws 3/6).
 > Mini Prometheus is **not** a research project. The research is complete and frozen. This
 > repository engineers the frozen theory into a working manufacturing intelligence.
 
-**Status:** RM14 complete (`rm14-complete`, runtime `0.12.0`); RM15 measured and recorded (mixed result,
-ADR-0019); Stage 0 record reconciliation 2026-11-06 (ADR-0021). RM1–RM5 and RM8–RM14 deliver the manufacturing
-pipeline on **engineer-declared** requests (RM6/RM7, the real Velith/Noetica integrations, are not built):
+**Status:** MP-S1 complete (runtime `0.13.0`, contracts `0.5.0`, ADR-0022); RM14 complete (`rm14-complete`); RM15
+measured and recorded (mixed result, ADR-0019); Stage 0 record reconciliation 2026-11-06 (ADR-0021). RM1–RM5,
+RM8–RM14 and MP-S1 deliver the manufacturing pipeline on **engineer-declared** requests (RM6/RM7, the real
+Velith/Noetica integrations, are not built):
 - `plan → verify → log` and verified experience reuse;
 - precedent reasoning and engineering judgment;
 - constraint reasoning and resource availability;
 - declared operation times;
 - deterministic, independently checked multi-job scheduling with downtime, an opt-in tie-break rule and
   sequence-dependent changeover;
-- byte-identity intake of a real STEP file, carried opaque and never parsed (RDAI-1, ADR-0020).
+- byte-identity intake of a real STEP file, carried opaque and never parsed (RDAI-1, ADR-0020);
+- a **declared shop capability model**: `--capability-model-file shop.json`. Every plan is bound to the shop's
+  content and evidence basis, so a changed shop never reuses a stale verdict (MP-S1, ADR-0022). The evidence class
+  is the declarer's assertion and is **not independently verified**. All acceptance is on synthetic declarations.
 
 Consuming a real Velith engineering result (RM6) is not started. Velith work is paused by the owner, and no
 physical-design result contract is pinned. See [`docs/ROADMAP.md`](docs/ROADMAP.md).

@@ -21,7 +21,8 @@
     },
     "capability_model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
     "content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
-    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" }
+    "provenance": { "$ref": "../common.schema.json#/$defs/Provenance" },
+    "capability_model_ref": { "$ref": "#/$defs/CapabilityModelRef" }
   },
   "$defs": {
     "ProcessStep": {
@@ -47,6 +48,18 @@
         "step_index": { "type": "integer", "minimum": 0 },
         "resource_id": { "type": "string", "minLength": 1 },
         "capability_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "CapabilityModelRef": {
+      "title": "CapabilityModelRef",
+      "description": "MP-S1 (ADR-0022, contracts 0.5.0, additive). OPTIONAL: present only when the plan was made under a loaded ShopCapabilityModel declaration (then the plan schema_version is 1.1.0); absent for the built-in code models. Part of the plan identity. shop_content_hash identifies the capability basis; shop_declaration_hash identifies that basis together with its evidence class and declaration provenance; evidence_class is the declarer's assertion, never independent verification.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shop_content_hash", "shop_declaration_hash", "evidence_class"],
+      "properties": {
+        "shop_content_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
+        "shop_declaration_hash": { "$ref": "../common.schema.json#/$defs/ContentHash" },
+        "evidence_class": { "$ref": "shop_capability_model.schema.json#/$defs/EvidenceClass" }
       }
     }
   }

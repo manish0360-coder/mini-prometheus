@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.mini-prometheus.dev/v1/manufacturing/shop_capability_model.schema.json",
+  "title": "ShopCapabilityModel",
+  "description": "MP-S1 (ADR-0022) data contract: an engineer's DECLARATION of one shop's manufacturing capability. schema_version 1.0.0. MP-owned input. Every ProcessOp must be either mapped in op_capability or listed in unsupported_ops; every mapped capability must be provided by a resource or listed in unsupported_capabilities; every resource capability must be mapped (declared intent, checked by the loader). supported_materials is SHOP-WIDE: it is not machine-specific (documented MP-S1 limitation). Identity: shop_content_hash covers only the semantic capability fields; shop_declaration_hash adds evidence_class and declaration. model_version (the contracted capability_model_version label), display_name and notes are in neither hash. evidence_class records WHO asserted the declaration and on what basis. It is NEVER independent verification; Mini Prometheus cannot check a declaration against a physical shop. Bump model_version only for a real revision; use display_name for naming.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "model_version", "evidence_class", "declaration", "resources", "op_capability", "supported_materials"],
+  "properties": {
+    "schema_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "model_version": { "$ref": "../common.schema.json#/$defs/SemVer" },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "evidence_class": { "$ref": "#/$defs/EvidenceClass" },
+    "declaration": { "$ref": "#/$defs/ShopDeclaration" },
+    "notes": { "type": "string" },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ShopResource" }
+    },
+    "op_capability": {
+      "type": "object",
+      "propertyNames": { "$ref": "manufacturing_request.schema.json#/$defs/ProcessOp" },
+      "additionalProperties": { "$ref": "#/$defs/CapabilityId" }
+    },
+    "unsupported_ops": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "manufacturing_request.schema.json#/$defs/ProcessOp" }
+    },
+    "unsupported_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/CapabilityId" }
+    },
+    "supported_materials": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1, "pattern": "^\\S(.*\\S)?$" }
+    },
+    "capability_tolerance_mm": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/CapabilityId" },
+      "additionalProperties": { "type": "number" }
+    },
+    "ordering_constraints": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "$ref": "manufacturing_request.schema.json#/$defs/ProcessOp" }
+      }
+    }
+  },
+  "$defs": {
+    "EvidenceClass": {
+      "title": "EvidenceClass",
+      "description": "synthetic: invented to exercise software, describes no real shop. public_specification: derived from published machine/material data, describes no specific shop (declaration.sources required). shop_declared: asserted by a person on behalf of a real shop, UNVERIFIED by Mini Prometheus or any independent party.",
+      "type": "string",
+      "enum": ["synthetic", "public_specification", "shop_declared"]
+    },
+    "CapabilityId": {
+      "title": "CapabilityId",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]*$"
+    },
+    "ShopDeclaration": {
+      "title": "ShopDeclaration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared_by", "declared_on"],
+      "properties": {
+        "declared_by": { "type": "string", "minLength": 1 },
+        "declared_on": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "sources": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "ShopResource": {
+      "title": "ShopResource",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "capabilities"],
+      "properties": {
+        "resource_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$" },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/CapabilityId" }
+        }
+      }
+    }
+  }
+}

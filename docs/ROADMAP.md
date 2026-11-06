@@ -26,6 +26,10 @@ v1.1.0); all ownership traces to Handbook §2.4.
 > - Velith work is **paused by the owner**.
 > - The next candidate is **MP-S1**, proceeding on synthetic shop models. Real-world evaluation (**MP-E1**) is
 >   blocked until real shop data exists.
+>
+> **MP-S1 complete (2026-11-06, ADR-0022).** Declared shop capability files with two identities, which closes the
+> reproduced stale-verdict reuse bug. Contracts `0.5.0` (additive), runtime `0.13.0`. All acceptance is on
+> synthetic declarations: it is **not** real-shop validation, and MP-E1 stays blocked.
 
 | Milestone | Capability | Status | Tag | Notes |
 |---|---|---|---|---|
@@ -48,7 +52,7 @@ v1.1.0); all ownership traces to Handbook §2.4.
 | **RM14** | **Sequence-Dependent Resource Changeover Scheduling** — explicitly declared cross-job changeover per machine (transition rules + a machine default; an undeclared transition the schedule needs is refused, never zero); changeover + operation one uninterrupted block after the job's predecessor, around downtime; `_setup` rule ids only under relevant rules; independent checker extended; CLI `--setup` / `--setup-default` | ✅ **Complete** (2026-09-27) | `rm14-complete` | runtime `0.12.0`; **no contract** (suite `0.4.0`); without relevant rules byte-identical to RM11/RM12/RM13 (frozen golden, corpus); ADR-0017 |
 | **RM15** | **Enriched-Oracle Compounding Re-Measurement**: the frozen RM5 protocol re-run on a 960-episode synthetic corpus whose verdicts come from RM8 `constrained_model()`. **Not Velith integration.** | ✅ **Measured, reproduced** (run 2026-10-16; reproduced 2026-11-06) | `rm15-corpus-frozen` | **Mixed result.** H1 met (67/70, against a structurally abstaining baseline); **H2 not met** (3/70 false alarms); H3 met; **H4 not met** (0 → 65 → 63 → 67). No contract. Retrospective ADR-0019; report + evidence JSON. |
 | *RDAI-1* | **Real STEP design-artifact intake**: raw bytes → container check → sha256 identity, carried opaque into the episode. No geometry. | ✅ **Implemented, tested** (2026-10-17/23) | — | Leaf `artifact_intake/`; no contract change; synthetic 196-byte fixture only; no independent review. Retrospective ADR-0020. |
-| **MP-S1** *(proposed name)* | **Declared Shop Capability Model**: an external, schema-validated, content-hashed shop description; plans, verdicts, reuse and schedules bind to its content hash | 🔎 **Next candidate**, not yet authorised for implementation | — | Synthetic shop models only. Public machine specs allowed but labelled non-real evidence (ADR-0021 Q5). Needs spec + owner authorisation; would be an additive contract MINOR bump. |
+| **MP-S1** | **Declared Shop Capability Model**: an external, schema-validated shop declaration (`--capability-model-file`). A semantic `shop_content_hash` and an evidence-basis `shop_declaration_hash`. Plans carry `capability_model_ref`, and episodes, reuse (G4) and schedules (G5) bind to it. Verdict trace; cross-shop precedent labelled non-authoritative. | ✅ **Complete** (2026-11-06) | — | Runtime `0.13.0`; contracts `0.5.0` (additive; every other 0.4.0 file byte-identical); ADR-0022 (three ratified gate evolutions); spec revision 3.1. **Synthetic evidence only.** |
 | **MP-E1** *(proposed name)* | First real-world evaluation: verdict agreement on historical jobs from a participating shop | ⛔ **Blocked** | — | No participating shop and no historical jobs with known outcomes (ADR-0021 Q5) |
 | **Later** | To be chosen from evidence (earlier candidates: a declared per-run initial machine state; calendars compiled into downtime outside the core; an active-schedule method only after independent review; promotion of a rule to default only on broader evidence; model-based planner seam; analysis of the RM5/RM15 H2 false alarms) | ⏳ Future | — | No premature abstraction; no further scheduling depth without demand |
 

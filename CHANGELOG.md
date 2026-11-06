@@ -5,7 +5,53 @@ All notable changes to Mini Prometheus are recorded here. The runtime and the co
 
 Format: [Keep a Changelog](https://keepachangelog.com/). Versioning: SemVer.
 
-## [Unreleased] — 2026-11-06 — Stage 0 record reconciliation (documentation only)
+## [0.13.0] — 2026-11-06 — MP-S1 Declared Shop Capability Model
+
+Runtime `0.12.0 → 0.13.0`; contract suite `0.4.0 → 0.5.0` (**additive**: every other 0.4.0 file is byte-identical).
+See `specs/milestones/MP-S1-declared-shop-capability-model.md` (revision 3.1, frozen), ADR-0022,
+`docs/milestones/MP-S1-completion-report.md`. **All acceptance is on synthetic declarations. This is not
+real-shop validation, and MP-E1 stays blocked.**
+
+### Added — MP-S1
+- `ShopCapabilityModel` schema 1.0.0 and the optional `ProductionPlan.capability_model_ref` (plan schema 1.1.0 only
+  when present).
+- `mini_prometheus.shop_declaration.shop_model`: the loader, with closed `ShopModelIssueCode`s, complete sorted
+  issues, declared-intent rules, cycle refusal and no fallback. Two identities: `shop_content_hash` (semantic) and
+  `shop_declaration_hash` (+ evidence class and declaration). `model_version`, `display_name` and `notes` are in
+  neither.
+- Guards:
+  - G1, planner: the plan carries the ref;
+  - G2, runner and job set: plan ref = model ref before verification;
+  - G3, episode reader: re-derive ref-carrying plans;
+  - G4: 3-part RM2 reuse key;
+  - G5: schedule `shop_model_ref`, refused by the independent checker on any mismatch.
+- `orchestration/verdict_trace.py` (`VerdictTrace`, `trace_run`, `trace_job`). The Noetica `Verdict` envelope is
+  unchanged.
+- `orchestration/precedent_basis.py` (five precedent bases; only `SAME_DECLARATION` counts as evidence), plus an
+  import-linter contract keeping precedent and judgment off every verdict path.
+- `--capability-model-file` on `runner` (prints a trace line) and `schedule_runner` (prints the shop line). An
+  invalid file exits 2.
+- Synthetic shop fixtures (mirrors, a three-cell shop, 10 variants, 15 invalid files) and 116 tests, including 11
+  true-source mutants. Three MP-S1 installed-wheel checks.
+
+### Fixed
+- **Stale verdict reuse.** A changed shop or evidence basis no longer reuses an incompatible verdict. This was
+  reproduced at `ee46767`: same label 1.0.0 with aluminium removed returned `MANUFACTURABLE` from reuse. Code
+  models keep RM2's label-only identity, unchanged and pinned.
+
+### Changed (ratified gate evolution, ADR-0022)
+- CI RM1/RM2 byte-diff: `orchestration/reuse_runner.py` left the set and is re-frozen at its ratified content by a
+  pinned digest.
+- RM8 zero-diff: the whole-tree `contracts_digest` equality is replaced by the file-by-file 0.4.0 manifest check
+  (manifest generated once from `rm14-complete`). The library and CLI pins are unchanged.
+- Five boundary tests: `VERSION == "0.4.0"` is replaced by the same manifest check. The CI suite-version step is
+  now `0.5.0`.
+
+### Unchanged
+- Every RM1–RM15 golden, corpus, tag and milestone record. The Noetica and Velith contracts. RM3/RM4 code. No new
+  dependency.
+
+## [0.12.0 + docs] — 2026-11-06 — Stage 0 record reconciliation (documentation only, `ee46767`)
 
 The runtime stays `0.12.0` and the contract suite stays **frozen at `0.4.0`**. No source, contract, schema, test,
 fixture, dependency or CI change. See ADR-0021.

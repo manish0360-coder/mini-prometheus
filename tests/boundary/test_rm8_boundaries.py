@@ -16,6 +16,7 @@ import sys
 from mini_prometheus._contracts import ManufacturabilityReasonCode, ManufacturabilityVerdictStatus
 from mini_prometheus._verifier import Verifier
 from mini_prometheus.manufacturing_constraints.oracle import ManufacturabilityOracle
+from contracts_manifest_check import assert_0_4_0_contracts_intact
 
 SRC = pathlib.Path(__file__).resolve().parents[2] / "src" / "mini_prometheus"
 ROOT = SRC.parents[1]
@@ -54,7 +55,9 @@ def test_closed_taxonomies_unchanged():
 
 
 def test_contract_suite_version_unchanged():
-    assert (ROOT / "contracts" / "VERSION").read_text(encoding="utf-8").strip() == "0.4.0"
+    # MP-S1 (ADR-0022): the suite moved to 0.5.0 additively. This milestone still added no contract,
+    # and the 0.4.0 contracts it relied on are intact, checked file by file against the frozen manifest.
+    assert_0_4_0_contracts_intact()
 
 
 def test_rm8_modules_add_no_dependency():

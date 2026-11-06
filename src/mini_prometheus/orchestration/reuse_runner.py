@@ -68,7 +68,8 @@ def run_with_reuse(
     resolved_store = store_path if store_path is not None else str(DEFAULT_STORE)
 
     design_input = intake(request, produced_at=produced_at)
-    key = design_input_key(design_input, model.version)
+    shop = model.source.shop_declaration_hash if model.source is not None else None  # MP-S1
+    key = design_input_key(design_input, model.version, shop_declaration_hash=shop)
     index = EpisodeIndex.build(load(resolved_store))
     hit = index.lookup(key)
 

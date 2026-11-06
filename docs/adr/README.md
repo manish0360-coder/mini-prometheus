@@ -28,6 +28,7 @@ See `docs/architecture/repository-architecture.md` for the full rationale and co
 | [0019](0019-rm15-retrospective-record.md) | RM15 (Enriched-Oracle Compounding Re-Measurement) retrospective record | Accepted (retrospective) |
 | [0020](0020-rdai1-retrospective-record.md) | RDAI-1 (Real STEP Design-Artifact Intake) retrospective record | Accepted (retrospective) |
 | [0021](0021-stage0-record-reconciliation.md) | Stage 0 record reconciliation and owner rulings | Accepted |
+| [0022](0022-mp-s1-acceptance.md) | MP-S1 (Declared Shop Capability Model) implementation, acceptance and gate evolution | Accepted |
 
 Governance instruments live in `docs/governance/` (CAP-0001, constitutional evolution report).
 Milestone reports live in `docs/milestones/`; the roadmap is `docs/ROADMAP.md`.
